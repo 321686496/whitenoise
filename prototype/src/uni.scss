@@ -1,0 +1,59 @@
+/* 莫兰迪配色 - 白噪音 App 主题 */
+$uni-color-primary: #7B8FA1;
+$uni-color-success: #8FAF8F;
+$uni-color-warning: #C4A882;
+$uni-color-error: #C48B8B;
+
+$uni-text-color: #4A5568;
+$uni-text-color-inverse: #fff;
+$uni-text-color-grey: #9CA3AF;
+$uni-text-color-placeholder: #B0B8C1;
+$uni-text-color-disable: #D1D5DB;
+
+$uni-bg-color: #F5F0EB;
+$uni-bg-color-grey: #EDE8E3;
+$uni-bg-color-hover: #E5DFD9;
+$uni-bg-color-mask: rgba(0, 0, 0, 0.35);
+
+$uni-border-color: #E2DCD5;
+
+$uni-font-size-sm: 12px;
+$uni-font-size-base: 14px;
+$uni-font-size-lg: 16px;
+
+$uni-img-size-sm: 20px;
+$uni-img-size-base: 26px;
+$uni-img-size-lg: 40px;
+
+$uni-border-radius-sm: 8rpx;
+$uni-border-radius-base: 12rpx;
+$uni-border-radius-lg: 20rpx;
+$uni-border-radius-circle: 50%;
+
+$uni-spacing-row-sm: 10rpx;
+$uni-spacing-row-base: 20rpx;
+$uni-spacing-row-lg: 30rpx;
+
+$uni-spacing-col-sm: 8rpx;
+$uni-spacing-col-base: 16rpx;
+$uni-spacing-col-lg: 24rpx;
+
+$uni-opacity-disabled: 0.35;
+
+/* App 专属变量 */
+$app-primary: #7B8FA1;
+$app-primary-light: #A8B5C0;
+$app-primary-dark: #5C6F80;
+$app-bg: #F5F0EB;
+$app-card-bg: #FFFFFF;
+$app-shadow: 0 2rpx 16rpx rgba(92, 111, 128, 0.08);
+$app-shadow-lg: 0 8rpx 32rpx rgba(92, 111, 128, 0.12);
+$app-radius: 20rpx;
+$app-radius-sm: 12rpx;
+$app-morandi-pink: #D4B5B0;
+$app-morandi-green: #B0BFA8;
+$app-morandi-blue: #A8B5C0;
+$app-morandi-purple: #B8B0C4;
+$app-morandi-sand: #D4C9B8;
+$app-tab-height: 100rpx;
+$app-playbar-height: 140rpx;

@@ -1,0 +1,83 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/scene/scene",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/mine/mine",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/theme/theme",
+			"style": {
+				"navigationBarTitleText": "主题设置",
+				"navigationBarBackgroundColor": "#F5F0EB",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/achievement/achievement",
+			"style": {
+				"navigationBarTitleText": "成就墙",
+				"navigationBarBackgroundColor": "#F5F0EB",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/invite/invite",
+			"style": {
+				"navigationBarTitleText": "邀请好友",
+				"navigationBarBackgroundColor": "#F5F0EB",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/settings/settings",
+			"style": {
+				"navigationBarTitleText": "设置",
+				"navigationBarBackgroundColor": "#F5F0EB",
+				"navigationBarTextStyle": "black"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "白噪音",
+		"navigationBarBackgroundColor": "#F5F0EB",
+		"backgroundColor": "#F5F0EB"
+	},
+	"tabBar": {
+		"color": "#9CA3AF",
+		"selectedColor": "#7B8FA1",
+		"backgroundColor": "#FFFFFF",
+		"borderStyle": "black",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "首页"
+			},
+			{
+				"pagePath": "pages/scene/scene",
+				"text": "场景"
+			},
+			{
+				"pagePath": "pages/mine/mine",
+				"text": "我的"
+			}
+		]
+	}
+}
