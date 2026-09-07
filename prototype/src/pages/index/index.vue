@@ -209,6 +209,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 import SceneCard from '@/components/SceneCard.vue'
 import PlayBar from '@/components/PlayBar.vue'
 import TabBar from '@/components/TabBar.vue'
@@ -299,6 +300,10 @@ const playScene = (scene: { id: string }) => {
 
 /* ⑥ 最近使用 */
 const recentItems = ref(getRecent())
+
+onShow(() => {
+  recentItems.value = getRecent()
+})
 
 const playRecent = (item: { sceneId: string }) => {
   const scene = findScene(item.sceneId)
