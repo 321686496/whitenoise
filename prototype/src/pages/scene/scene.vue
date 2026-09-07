@@ -31,10 +31,10 @@
         v-for="scene in presetScenes"
         :key="scene.id"
         :name="scene.name"
-        :sound-count="scene.soundCount"
-        :sound-icons="scene.soundIcons"
-        :bg-color="scene.bgColor"
-        :is-preset="true"
+        :sound-count="scene.soundIds.length"
+        :sound-icons="presetSoundIcons(scene)"
+        :bg-color="scene.gradient"
+        :is-preset="scene.isPreset"
         @play="applyScene(scene)"
       />
     </view>
@@ -59,7 +59,6 @@
         @tap="editScene(scene)"
         @share="shareScene(scene)"
         @play="applyScene(scene)"
-        @delete="confirmDelete(scene)"
       />
 
       <view class="empty-scene app-card" v-if="myScenes.length === 0">
@@ -74,14 +73,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import SceneCard from '@/components/SceneCard.vue'
 import Icon from '@/components/Icon.vue'
 import TabBar from '@/components/TabBar.vue'
 import { player } from '@/composables/usePlayer'
+import { homeScenes } from '@/data/scenes'
+import type { Scene } from '@/data/scenes'
+import { sounds } from '@/data/sounds'
 
-interface Scene {
+interface MyScene {
   id: string
   name: string
   soundCount: number
@@ -106,19 +108,20 @@ onShow(() => {
   }
 })
 
-const presetScenes = ref<Scene[]>([
-  { id: 'p1', name: '深度睡眠', soundCount: 3, soundIcons: ['rain', 'fan', 'forest'], bgColor: 'linear-gradient(135deg,#8296A8,#5F7A92)' },
-  { id: 'p2', name: '专注白噪', soundCount: 2, soundIcons: ['white-noise', 'pink-noise'], bgColor: 'linear-gradient(135deg,#C49A92,#A97E7A)' },
-  { id: 'p3', name: '自然放松', soundCount: 4, soundIcons: ['wave-ocean', 'forest', 'stream', 'fire'], bgColor: 'linear-gradient(135deg,#7E9A74,#5F7A52)' },
-  { id: 'p4', name: '城市午后', soundCount: 3, soundIcons: ['coffee', 'fan', 'rain'], bgColor: 'linear-gradient(135deg,#B9A98A,#9A886B)' },
-])
+const presetScenes = computed(() => {
+  if (activeTag.value === 'all') return homeScenes
+  return homeScenes.filter((s) => s.category === activeTag.value)
+})
 
-const myScenes = ref<Scene[]>([
+const presetSoundIcons = (scene: Scene) =>
+  scene.soundIds.map((id) => sounds.find((s) => s.id === id)?.iconName ?? 'wave')
+
+const myScenes = ref<MyScene[]>([
   { id: 'm1', name: '雨天阅读', soundCount: 3, soundIcons: ['rain', 'fire', 'coffee'], bgColor: 'linear-gradient(135deg,#8E82A6,#6E6290)' },
   { id: 'm2', name: '冥想时刻', soundCount: 2, soundIcons: ['stream', 'forest'], bgColor: 'linear-gradient(135deg,#7F9AA6,#5F7A86)' },
 ])
 
-const applyScene = (scene: Scene) => {
+const applyScene = (scene: { id: string; name: string }) => {
   uni.showToast({ title: `已应用「${scene.name}」`, icon: 'success' })
   setTimeout(() => {
     uni.switchTab({ url: '/pages/index/index' })
@@ -131,27 +134,12 @@ const createScene = () => {
 }
 
 // 编辑场景：进入编辑向导（原型：也可演示跳详情）
-const editScene = (scene: Scene) => {
+const editScene = (scene: { id: string; name: string }) => {
   uni.navigateTo({ url: `/pages/scene-edit/scene-edit?sceneId=${scene.id}` })
 }
 
-const shareScene = (scene: Scene) => {
+const shareScene = (scene: { id: string; name: string }) => {
   uni.showToast({ title: `已生成分享卡片`, icon: 'success' })
-}
-
-// 删除场景：二次确认（原型：仅从本地数组移除）
-const confirmDelete = (scene: Scene) => {
-  uni.showModal({
-    title: '删除场景',
-    content: `确定删除「${scene.name}」吗？删除后无法恢复`,
-    confirmColor: '#C4706B',
-    success: (res) => {
-      if (res.confirm) {
-        myScenes.value = myScenes.value.filter(s => s.id !== scene.id)
-        uni.showToast({ title: '已删除', icon: 'success' })
-      }
-    },
-  })
 }
 </script>
 

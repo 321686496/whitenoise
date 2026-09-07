@@ -89,7 +89,7 @@
     <view class="section">
       <view class="section-header">
         <text class="section-title">今日精选</text>
-        <text class="section-more" @click="randomPlay">换一批</text>
+        <text class="section-more" @click="randomPlay">随机播放</text>
       </view>
       <scroll-view scroll-x class="pick-scroll" :show-scrollbar="false">
         <view class="pick-list">
