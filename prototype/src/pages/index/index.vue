@@ -760,6 +760,7 @@ const goLibrary = () => uni.navigateTo({ url: '/pages/library/library' })
   .scene-card {
     width: calc(50% - 8rpx);
     margin-bottom: 0;
+    box-sizing: border-box;
   }
 }
 
