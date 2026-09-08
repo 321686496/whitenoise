@@ -169,7 +169,7 @@ const prefLabels = computed(() => {
   return SIMULATED_PREFS.map((c) => map[c] ?? c)
 })
 
-const recommended = computed(() => getRecommended(SIMULATED_PREFS, getRecent()))
+const recommended = ref(getRecommended(SIMULATED_PREFS, getRecent()))
 const recentItems = ref(getRecent())
 
 const featuredScenes = computed(() =>
@@ -179,6 +179,7 @@ const featuredScenes = computed(() =>
 // 首页金刚区快捷入口直达分类 + 重读最近播放
 onShow(() => {
   recentItems.value = getRecent()
+  recommended.value = getRecommended(SIMULATED_PREFS, recentItems.value)
   if (player.pendingSceneCategory && player.pendingSceneCategory !== 'all') {
     activeTag.value = player.pendingSceneCategory
     player.pendingSceneCategory = 'all'
