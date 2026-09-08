@@ -5,29 +5,44 @@
     <!-- 自定义悬浮 TabBar -->
     <TabBar current="scene" />
 
+    <!-- ① 品牌头部 + 问候（含偏好胶囊） -->
     <view class="header">
-      <text class="page-title">场景</text>
-      <text class="page-subtitle">管理你的专属声音场景</text>
+      <view class="header-top">
+        <view class="brand">
+          <view class="brand-logo-wrap">
+            <image class="brand-logo" src="/static/logo-v10-1.jpg" mode="aspectFit" />
+          </view>
+          <view class="brand-text">
+            <text class="app-title">声栖</text>
+            <view class="greeting-row">
+              <text class="greeting-text">今晚想听什么？</text>
+              <view class="pref-chip" v-for="p in prefLabels" :key="p">
+                <Icon name="flame" :size="12" color="var(--app-primary)" />
+                <text class="pref-chip-text">{{ p }}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view class="header-actions">
+          <view class="header-btn app-card" @click="createScene">
+            <Icon name="mixer" :size="22" color="var(--app-primary)" />
+          </view>
+          <view class="header-btn app-card" @click="goTheme">
+            <Icon name="palette" :size="22" color="var(--app-primary)" />
+          </view>
+        </view>
+      </view>
     </view>
 
-    <!-- ① 偏好胶囊 -->
-    <view class="pref-bar">
-      <Icon name="flame" :size="16" color="var(--app-primary)" />
-      <text class="pref-label">你的偏好：</text>
-      <text class="pref-tag" v-for="p in prefLabels" :key="p">{{ p }}</text>
-    </view>
-
-    <!-- ② 为你推荐 -->
-    <view class="section" v-if="recommended.length > 0">
-      <text class="section-title">为你推荐</text>
+    <!-- ② 卡片 A：为你推荐 + 最近播放 -->
+    <view class="group-card app-card">
+      <view class="card-head">
+        <Icon name="flame" :size="16" color="var(--app-primary)" />
+        <text class="card-title">为你推荐</text>
+      </view>
       <scroll-view scroll-x class="rec-scroll" :show-scrollbar="false">
         <view class="rec-row">
-          <view
-            class="rec-card app-card"
-            v-for="s in recommended"
-            :key="s.id"
-            @click="openDetail(s)"
-          >
+          <view class="rec-card" v-for="s in recommended" :key="s.id" @click="openDetail(s)">
             <view class="rec-cover" :style="{ background: s.gradient }">
               <Icon :name="s.iconName" :size="40" color="rgba(255,255,255,.95)" />
               <view class="rec-reason">
@@ -40,47 +55,46 @@
           </view>
         </view>
       </scroll-view>
-    </view>
 
-    <!-- ③ 最近播放 -->
-    <view class="section" v-if="recentItems.length > 0">
-      <text class="section-title">最近播放</text>
-      <scroll-view scroll-x class="recent-scroll" :show-scrollbar="false">
-        <view class="recent-row">
-          <view
-            class="recent-card app-card"
-            v-for="r in recentItems"
-            :key="r.sceneId"
-            @click="openDetail(r)"
-          >
-            <view class="recent-cover" :style="{ background: r.gradient }">
-              <Icon :name="r.iconName" :size="34" color="rgba(255,255,255,.95)" />
-            </view>
-            <text class="recent-name">{{ r.name }}</text>
-            <text class="recent-time">{{ recentTimeLabel(r.ts) }}</text>
-          </view>
+      <view class="recent-block" v-if="recentItems.length > 0">
+        <view class="divider"></view>
+        <view class="card-head">
+          <Icon name="clock" :size="16" color="var(--app-primary)" />
+          <text class="card-title">最近播放</text>
         </view>
-      </scroll-view>
-    </view>
-
-    <!-- ④ 分类 Tab -->
-    <view class="tag-filter">
-      <view
-        class="tag-item"
-        :class="{ active: activeTag === tag.id }"
-        v-for="tag in tags"
-        :key="tag.id"
-        @click="activeTag = tag.id"
-      >
-        <Icon :name="tag.icon" :size="14" :color="activeTag === tag.id ? 'var(--app-primary)' : 'var(--app-text-2)'" />
-        <text>{{ tag.label }}</text>
+        <scroll-view scroll-x class="recent-scroll" :show-scrollbar="false">
+          <view class="recent-row">
+            <view class="recent-card" v-for="r in recentItems" :key="r.sceneId" @click="openDetail(r)">
+              <view class="recent-cover" :style="{ background: r.gradient }">
+                <Icon :name="r.iconName" :size="34" color="rgba(255,255,255,.95)" />
+              </view>
+              <text class="recent-name">{{ r.name }}</text>
+              <text class="recent-time">{{ recentTimeLabel(r.ts) }}</text>
+            </view>
+          </view>
+        </scroll-view>
       </view>
     </view>
 
-    <!-- ⑤ 精选场景 -->
-    <view class="section">
+    <!-- ③ 卡片 B：分类分段 + 精选场景 -->
+    <view class="group-card app-card">
+      <view class="tag-filter">
+        <view
+          class="tag-item"
+          :class="{ active: activeTag === tag.id }"
+          v-for="tag in tags"
+          :key="tag.id"
+          @click="activeTag = tag.id"
+        >
+          <Icon :name="tag.icon" :size="14" :color="activeTag === tag.id ? 'var(--app-primary)' : 'var(--app-text-2)'" />
+          <text>{{ tag.label }}</text>
+        </view>
+      </view>
       <view class="section-head">
-        <text class="section-title">精选场景</text>
+        <view class="card-head">
+          <Icon name="mountain" :size="16" color="var(--app-primary)" />
+          <text class="card-title">精选场景</text>
+        </view>
         <view class="more-btn" @click="goAllScenes">
           <text class="more-text">查看全部</text>
           <Icon name="chevron-right" :size="14" color="var(--app-text-2)" />
@@ -103,10 +117,13 @@
       </view>
     </view>
 
-    <!-- ⑥ 我的场景 -->
-    <view class="section">
+    <!-- ④ 卡片 C：我的场景 -->
+    <view class="group-card app-card">
       <view class="section-head">
-        <text class="section-title">我的场景</text>
+        <view class="card-head">
+          <Icon name="mixer" :size="16" color="var(--app-primary)" />
+          <text class="card-title">我的场景</text>
+        </view>
         <view class="new-btn app-card" @click="createScene">
           <Icon name="mixer" :size="16" color="var(--app-primary)" />
           <text class="new-btn-text">新建</text>
@@ -124,8 +141,7 @@
         @share="shareScene(scene)"
         @play="playMyScene(scene)"
       />
-
-      <view class="empty-scene app-card" v-if="myScenes.length === 0">
+      <view class="empty-scene" v-if="myScenes.length === 0">
         <view class="empty-icon">
           <Icon name="mountain" :size="52" color="var(--app-primary)" />
         </view>
@@ -202,6 +218,8 @@ const playScene = (scene: Scene) => {
 
 const goAllScenes = () => uni.navigateTo({ url: '/pages/scene-all/scene-all' })
 
+const goTheme = () => uni.navigateTo({ url: '/pages/theme/theme' })
+
 const myScenes = ref<MyScene[]>([
   { id: 'm1', name: '雨天阅读', soundCount: 3, soundIcons: ['rain', 'fire', 'coffee'], bgColor: 'linear-gradient(135deg,#8E82A6,#6E6290)' },
   { id: 'm2', name: '冥想时刻', soundCount: 2, soundIcons: ['stream', 'forest'], bgColor: 'linear-gradient(135deg,#7F9AA6,#5F7A86)' },
@@ -227,51 +245,227 @@ const playMyScene = (scene: { name: string }) => {
 </script>
 
 <style lang="scss" scoped>
+/* ① 品牌头部（与首页 index.vue 同款） */
 .header {
-  padding: 16rpx 4rpx 8rpx;
+  padding: 16rpx 4rpx 20rpx;
 }
 
-.page-title {
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.brand-logo-wrap {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 22rpx color-mix(in srgb, var(--app-primary, $app-primary) 22%, transparent);
+}
+
+.brand-logo {
+  width: 100%;
+  height: 100%;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.app-title {
   font-size: 46rpx;
+  font-weight: 800;
+  color: var(--app-text, $uni-text-color);
+  letter-spacing: 4rpx;
+  line-height: 1.1;
 }
 
-.page-subtitle {
-  font-size: 24rpx;
+.greeting-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.greeting-text {
+  font-size: 22rpx;
   color: var(--app-text-2, $uni-text-color-grey);
-  margin-top: 10rpx;
+  letter-spacing: 1rpx;
+}
+
+.pref-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 18rpx;
+  background: var(--app-primary-soft, rgba($app-primary, 0.1));
+}
+
+.pref-chip-text {
+  font-size: 20rpx;
+  color: var(--app-primary, $app-primary);
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.header-btn {
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.16s cubic-bezier(.4, 0, .2, 1);
+
+  &:active {
+    transform: scale(0.9);
+  }
+}
+
+/* ② 分组卡片 */
+.group-card {
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 18rpx;
+}
+
+.card-title {
+  font-size: 25rpx;
+  font-weight: 600;
+  letter-spacing: 0.3rpx;
+  color: var(--app-text-2, $uni-text-color-grey);
+}
+
+.divider {
+  height: 1rpx;
+  background: var(--app-divider, rgba($app-primary, 0.08));
+  margin: 6rpx 0 20rpx;
+}
+
+.recent-block {
+  margin-top: 2rpx;
+}
+
+/* ③ 为你推荐横滑（卡片 A 内） */
+.rec-scroll,
+.recent-scroll {
+  white-space: nowrap;
+}
+
+.rec-row,
+.recent-row {
+  display: inline-flex;
+  gap: 20rpx;
+  padding: 4rpx 4rpx 8rpx;
+}
+
+.rec-card {
+  width: 240rpx;
+  flex-shrink: 0;
+  transition: transform .16s;
+
+  &:active {
+    transform: scale(.96);
+  }
+}
+
+.rec-cover {
+  height: 140rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 12rpx;
+}
+
+.rec-reason {
+  position: absolute;
+  left: 10rpx;
+  bottom: 10rpx;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, .9);
+}
+
+.rec-reason-text {
+  font-size: 20rpx;
+  color: var(--app-primary, $app-primary);
+  font-weight: 600;
+}
+
+.rec-name {
+  font-size: 27rpx;
+  font-weight: 600;
+  color: var(--app-text, $uni-text-color);
   display: block;
 }
 
-/* ① 偏好胶囊 */
-.pref-bar {
+.rec-desc {
+  font-size: 22rpx;
+  color: var(--app-text-2, $uni-text-color-grey);
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ④ 最近播放横滑（卡片 A 内） */
+.recent-card {
+  width: 180rpx;
+  flex-shrink: 0;
+  transition: transform .16s;
+
+  &:active {
+    transform: scale(.96);
+  }
+}
+
+.recent-cover {
+  height: 110rpx;
+  border-radius: 16rpx;
   display: flex;
   align-items: center;
-  gap: 8rpx;
-  padding: 14rpx 24rpx;
-  border-radius: 30rpx;
-  background: var(--app-primary-soft, rgba($app-primary, 0.1));
-  margin-bottom: 8rpx;
+  justify-content: center;
+  margin-bottom: 10rpx;
 }
-.pref-label { font-size: 24rpx; color: var(--app-text-2, $uni-text-color-grey); }
-.pref-tag { font-size: 24rpx; color: var(--app-primary, $app-primary); font-weight: 600; }
 
-/* ② 为你推荐 */
-.rec-scroll, .recent-scroll { white-space: nowrap; }
-.rec-row, .recent-row { display: inline-flex; gap: 20rpx; padding: 4rpx 4rpx 8rpx; }
-.rec-card { width: 260rpx; padding: 16rpx; flex-shrink: 0; transition: transform .16s; &:active { transform: scale(.96); } }
-.rec-cover { height: 150rpx; border-radius: 18rpx; display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 12rpx; }
-.rec-reason { position: absolute; left: 10rpx; bottom: 10rpx; display: flex; align-items: center; gap: 4rpx; padding: 4rpx 12rpx; border-radius: 18rpx; background: rgba(255,255,255,.9); }
-.rec-reason-text { font-size: 20rpx; color: var(--app-primary, $app-primary); font-weight: 600; }
-.rec-name { font-size: 27rpx; font-weight: 600; color: var(--app-text, $uni-text-color); display: block; }
-.rec-desc { font-size: 22rpx; color: var(--app-text-2, $uni-text-color-grey); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recent-name {
+  font-size: 25rpx;
+  font-weight: 600;
+  color: var(--app-text, $uni-text-color);
+  display: block;
+}
 
-/* ③ 最近播放 */
-.recent-card { width: 190rpx; flex-shrink: 0; padding: 16rpx; transition: transform .16s; &:active { transform: scale(.96); } }
-.recent-cover { height: 120rpx; border-radius: 18rpx; display: flex; align-items: center; justify-content: center; margin-bottom: 10rpx; }
-.recent-name { font-size: 25rpx; font-weight: 600; color: var(--app-text, $uni-text-color); display: block; }
-.recent-time { font-size: 21rpx; color: var(--app-text-2, $uni-text-color-grey); }
+.recent-time {
+  font-size: 21rpx;
+  color: var(--app-text-2, $uni-text-color-grey);
+}
 
-/* ④ 分类 Tab */
+/* ⑤ 分类分段（卡片 B 内） */
 .tag-filter {
   display: flex;
   gap: 12rpx;
@@ -304,11 +498,20 @@ const playMyScene = (scene: { name: string }) => {
   }
 }
 
-/* ⑤ 精选场景 */
+/* ⑥ 精选场景（卡片 B 内） */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18rpx;
+  padding-left: 2rpx;
+}
+
 .featured-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 16rpx;
+
   .scene-card {
     width: calc(50% - 8rpx);
     margin-bottom: 0;
@@ -316,32 +519,31 @@ const playMyScene = (scene: { name: string }) => {
   }
 }
 
-.more-btn { display: flex; align-items: center; gap: 2rpx; padding: 8rpx 12rpx; transition: transform .16s; &:active { transform: scale(.9); } }
-.more-text { font-size: 23rpx; color: var(--app-text-2, $uni-text-color-grey); }
-
-.section {
-  margin-top: 32rpx;
-}
-
-.section-head {
+.more-btn {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18rpx;
-  padding-left: 4rpx;
+  gap: 2rpx;
+  padding: 8rpx 12rpx;
+  transition: transform .16s;
+
+  &:active {
+    transform: scale(.9);
+  }
 }
 
-.section-head .section-title {
-  margin-bottom: 0;
+.more-text {
+  font-size: 23rpx;
+  color: var(--app-text-2, $uni-text-color-grey);
 }
 
+/* ⑦ 我的场景（卡片 C 内） */
 .new-btn {
   display: flex;
   align-items: center;
   gap: 8rpx;
   padding: 10rpx 24rpx;
   border-radius: 30rpx;
-  transition: all 0.16s cubic-bezier(.4,0,.2,1);
+  transition: all 0.16s cubic-bezier(.4, 0, .2, 1);
 
   &:active {
     transform: scale(0.9);
@@ -354,18 +556,8 @@ const playMyScene = (scene: { name: string }) => {
   font-weight: 600;
 }
 
-.section-title {
-  font-size: 24rpx;
-  font-weight: 600;
-  letter-spacing: 0.3rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
-  margin-bottom: 18rpx;
-  padding-left: 4rpx;
-  display: block;
-}
-
 .empty-scene {
-  padding: 60rpx 32rpx;
+  padding: 48rpx 24rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
