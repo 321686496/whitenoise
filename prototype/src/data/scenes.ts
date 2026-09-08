@@ -54,3 +54,87 @@ export const homeScenes: Scene[] = [
   { id: 'forest-stream', name: '林间溪流', category: 'nature', desc: '泉水淌过青石，清亮又安定', iconName: 'stream', gradient: 'linear-gradient(135deg, #7F9AA6, #66818D)', soundIds: ['stream', 'forest'], isPreset: true },
   { id: 'morning-forest', name: '山野清晨', category: 'nature', desc: '鸟鸣与风拂过林梢的清晨', iconName: 'bird', gradient: 'linear-gradient(135deg, #7E9A74, #547E54)', soundIds: ['forest', 'birdsong'], isPreset: true },
 ]
+
+/* ------------------------- 场景页个性化数据层 ------------------------- */
+
+export interface RecipeItem {
+  name: string
+  icon: string
+  percent: number
+  color: string
+}
+
+export interface PresetOption {
+  name: string
+  badgeColor: string
+  ratios: { name: string; value: number }[]
+}
+
+/** 模拟偏好标签（原型阶段写死：助眠 + 自然） */
+export const SIMULATED_PREFS: SceneCategory[] = ['sleep', 'nature']
+
+/** 按偏好推荐：优先 prefs 分类且 recent 未听过的，取 limit 个；不足按序补齐 */
+export function getRecommended(
+  prefs: SceneCategory[],
+  recent: { sceneId: string }[],
+  limit = 4,
+): Scene[] {
+  const heard = new Set(recent.map((r) => r.sceneId))
+  const preferred = homeScenes.filter((s) => prefs.includes(s.category) && !heard.has(s.id))
+  if (preferred.length >= limit) return preferred.slice(0, limit)
+  const rest = homeScenes.filter((s) => !preferred.includes(s))
+  return [...preferred, ...rest].slice(0, limit)
+}
+
+/** 分类精选：'all' 取前 limit，否则按分类过滤后取前 limit */
+export function getCategoryScenes(category: SceneCategory | 'all', limit: number): Scene[] {
+  const list = category === 'all' ? homeScenes : homeScenes.filter((s) => s.category === category)
+  return list.slice(0, limit)
+}
+
+/** 生成配方比例（原型模拟）：首音 40%，其余均分，末位补齐保证总和 100 */
+export function buildRecipe(scene: Scene): RecipeItem[] {
+  const first = 40
+  const n = scene.soundIds.length
+  return scene.soundIds.map((id, i) => {
+    const s = sounds.find((x) => x.id === id)
+    let percent: number
+    if (i === 0) percent = first
+    else if (i === n - 1) percent = 100 - first - Math.round((100 - first) / Math.max(n - 1, 1)) * (n - 2)
+    else percent = Math.round((100 - first) / Math.max(n - 1, 1))
+    return {
+      name: s?.name ?? id,
+      icon: s?.iconName ?? 'wave',
+      color: s?.color ?? '#8296A8',
+      percent,
+    }
+  })
+}
+
+/** 生成三档预设（原型模拟）：轻度首音 25% / 标准 40% / 深度 60%，末位补齐 */
+export function buildPresets(scene: Scene): PresetOption[] {
+  const names = scene.soundIds.map((id) => sounds.find((s) => s.id === id)?.name ?? id)
+  const spread = (first: number): { name: string; value: number }[] => {
+    const n = names.length
+    const out: { name: string; value: number }[] = []
+    let used = 0
+    names.forEach((name, i) => {
+      if (i === 0) {
+        out.push({ name, value: first })
+        used = first
+      } else if (i === n - 1) {
+        out.push({ name, value: 100 - used })
+      } else {
+        const v = Math.round((100 - first) / Math.max(n - 1, 1))
+        out.push({ name, value: v })
+        used += v
+      }
+    })
+    return out
+  }
+  return [
+    { name: '轻度', badgeColor: 'linear-gradient(135deg, #B0BFA8, #8FAF8F)', ratios: spread(25) },
+    { name: '标准', badgeColor: 'linear-gradient(135deg, #8296A8, #5F7A92)', ratios: spread(40) },
+    { name: '深度', badgeColor: 'linear-gradient(135deg, #6E6290, #8E82A6)', ratios: spread(60) },
+  ]
+}
