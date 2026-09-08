@@ -576,6 +576,7 @@ const goLibrary = () => uni.navigateTo({ url: '/pages/library/library' })
 .quick-item {
   width: calc(50% - 8rpx);
   padding: 22rpx;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 18rpx;
