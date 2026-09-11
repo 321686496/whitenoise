@@ -114,7 +114,7 @@ const _SchemeT _ocean = _SchemeT(
   divider: Color(0xFF244150),
   subtle: Color(0xFF1D3946),
   danger: Color(0xFFD98B7B),
-  glassCard: Color(0x940E2A3E),
+  glassCard: Color(0x9416303E),
   glassBorder: Color(0x24FFFFFF),
   neuTint: Color(0xFF14303E),
   neuA: Color(0x61000000),
@@ -257,12 +257,12 @@ AppColors appColorsFor(String schemeKey, String ui) {
       cardBorder = Colors.transparent;
       cardShadow = <BoxShadow>[
         BoxShadow(
-          color: base.neuA,
+          color: base.neuB,
           offset: _kNeuTopLeft,
           blurRadius: 16,
         ),
         BoxShadow(
-          color: base.neuB,
+          color: base.neuA,
           offset: _kNeuBottomRight,
           blurRadius: 18,
         ),
