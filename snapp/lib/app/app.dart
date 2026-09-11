@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../pages/index/index_page.dart';
 import '../pages/placeholder.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_notifier.dart';
@@ -20,7 +21,7 @@ class _ShellState extends State<_Shell> {
   int _index = 0;
 
   static const List<Widget> _pages = <Widget>[
-    PlaceholderPage('首页'),
+    IndexPage(),
     PlaceholderPage('场景'),
     PlaceholderPage('发现'),
     PlaceholderPage('我的'),

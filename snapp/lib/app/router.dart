@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../pages/index/index_page.dart';
 import '../pages/placeholder.dart';
 
 /// 命名路由表（对照原型 `pages.json`）。
@@ -7,7 +8,7 @@ import '../pages/placeholder.dart';
 /// 4 个 tab 页的真实切换由 Root 的 `_Shell`（IndexedStack + 悬浮 AppTabBar）管理，
 /// 此处路由主要用于命名跳转与还原，未实现页面统一落到 [PlaceholderPage]。
 Map<String, WidgetBuilder> buildRoutes() => <String, WidgetBuilder>{
-      '/index': (_) => const PlaceholderPage('首页'),
+      '/index': (_) => const IndexPage(),
       '/scene': (_) => const PlaceholderPage('场景'),
       '/discover': (_) => const PlaceholderPage('发现'),
       '/mine': (_) => const PlaceholderPage('我的'),
