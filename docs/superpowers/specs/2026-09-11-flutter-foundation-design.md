@@ -36,7 +36,7 @@ snapp/lib/
 │   └── theme_tokens.dart     # 6×3 token 数据（迁移 theme/index.ts）
 ├── widgets/
 │   ├── app_icon.dart         # AppIcon({name,size,color,stroke}) SVG 组件
-│   ├── app_svg_icons.dart    # 36 图标 SVG body 定义 + 未知回退圆点
+│   ├── app_svg_icons.dart    # 37 图标 SVG body 定义 + 未知回退圆点
 │   ├── app_card.dart         # 卡片容器（对应 .app-card）
 │   ├── app_buttons.dart      # .btn-primary / .btn-outline
 │   ├── app_section.dart      # .section-title / .divider / .safe-bottom / .page-title
@@ -84,7 +84,7 @@ snapp/lib/
 ## 四、图标体系
 
 - `AppIcon`：`AppIcon({required String name, double size = 24, Color? color, double stroke = 2.0})`，内部用 `SvgPicture.string`。
-- `app_svg_icons.dart` 存 36 个图标 body（自 `Icon.vue`）：`wave / white-noise / pink-noise / brown-noise / red-noise / rain / wave-ocean / forest / stream / fire / coffee / train / fan / play / pause / timer / save / palette / trophy / settings / share / user / edit / mute / volume / close / chevron-right / gift / moon / flame / mixer / clock / copy / lock / check / mountain / bird`。
+- `app_svg_icons.dart` 存 37 个图标 body（自 `Icon.vue`）：`wave / white-noise / pink-noise / brown-noise / red-noise / rain / wave-ocean / forest / stream / fire / coffee / train / fan / play / pause / timer / save / palette / trophy / settings / share / user / edit / mute / volume / close / chevron-right / gift / moon / flame / mixer / clock / copy / lock / check / mountain / bird`。
 - 构建时注入 `color` 与 `stroke`；图标内 `currentColor`（填充元素：play/pause/train 轮/wheel、palette 圆点、bird 眼睛等）同步替换为注入色。
 - 未知 `name` → 默认圆点回退。
 
