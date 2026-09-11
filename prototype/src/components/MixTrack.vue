@@ -1,8 +1,8 @@
 <template>
-  <view class="mix-track">
+  <view class="mix-track app-card">
     <view class="track-info">
       <view class="track-icon" :style="{ background: color }">
-        <text class="track-emoji">{{ emoji }}</text>
+        <Icon :name="iconName" :size="22" color="#fff" />
       </view>
       <view class="track-meta">
         <text class="track-name">{{ name }}</text>
@@ -13,15 +13,14 @@
       <view class="volume-slider" @touchmove="onSlide" @touchstart="onSlide" @click="onSlide">
         <view class="slider-track">
           <view class="slider-fill" :style="{ width: volume + '%' }"></view>
-          <view class="slider-thumb" :style="{ left: volume + '%' }"></view>
         </view>
       </view>
       <view class="track-actions">
-        <view class="action-btn mute-btn" :class="{ muted: isMuted }" @click="$emit('mute')">
-          <text>{{ isMuted ? '🔇' : '🔊' }}</text>
+        <view class="action-btn" :class="{ muted: isMuted }" @click="$emit('mute')">
+          <Icon :name="isMuted ? 'mute' : 'volume'" :size="17" :color="isMuted ? 'var(--app-danger)' : 'var(--app-primary)'" />
         </view>
-        <view class="action-btn remove-btn" @click="$emit('remove')">
-          <text>✕</text>
+        <view class="action-btn danger" @click="$emit('remove')">
+          <Icon name="close" :size="15" color="var(--app-text-3)" />
         </view>
       </view>
     </view>
@@ -29,9 +28,11 @@
 </template>
 
 <script setup lang="ts">
+import Icon from './Icon.vue'
+
 defineProps<{
   name: string
-  emoji: string
+  iconName: string
   color: string
   volume: number
   isMuted: boolean
@@ -50,32 +51,27 @@ const onSlide = (e: any) => {
 
 <style lang="scss" scoped>
 .mix-track {
-  background: $app-card-bg;
-  border-radius: $app-radius-sm;
-  padding: 20rpx 24rpx;
-  margin-bottom: 12rpx;
-  box-shadow: $app-shadow;
+  padding: 22rpx 24rpx;
+  margin-bottom: 14rpx;
 }
 
 .track-info {
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  margin-bottom: 16rpx;
+  gap: 18rpx;
+  margin-bottom: 18rpx;
 }
 
+/* iOS 磁贴图标 */
 .track-icon {
   width: 56rpx;
   height: 56rpx;
-  border-radius: 50%;
+  border-radius: 18rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-}
-
-.track-emoji {
-  font-size: 28rpx;
+  box-shadow: inset 0 -2rpx 0 rgba(0,0,0,.08), inset 0 2rpx 0 rgba(255,255,255,.25), 0 4rpx 10rpx rgba(0,0,0,.10);
 }
 
 .track-meta {
@@ -87,14 +83,15 @@ const onSlide = (e: any) => {
 
 .track-name {
   font-size: 28rpx;
-  color: $uni-text-color;
-  font-weight: 500;
+  color: var(--app-text, $uni-text-color);
+  font-weight: 600;
+  letter-spacing: -0.3rpx;
 }
 
 .track-volume-label {
   font-size: 24rpx;
-  color: $app-primary;
-  font-weight: 600;
+  color: var(--app-primary, $app-primary);
+  font-weight: 700;
 }
 
 .track-controls {
@@ -105,32 +102,23 @@ const onSlide = (e: any) => {
 
 .volume-slider {
   flex: 1;
-  padding: 12rpx 0;
+  padding: 10rpx 0;
 }
 
+/* iOS 滑块轨道 */
 .slider-track {
   height: 8rpx;
-  background: $uni-bg-color-grey;
+  background: var(--app-input-bg, $uni-bg-color-grey);
   border-radius: 4rpx;
   position: relative;
+  overflow: hidden;
 }
 
 .slider-fill {
   height: 100%;
-  background: $app-primary;
+  background: linear-gradient(90deg, var(--app-primary, $app-primary), var(--app-accent, $app-primary-light));
   border-radius: 4rpx;
   transition: width 0.15s;
-}
-
-.slider-thumb {
-  width: 28rpx;
-  height: 28rpx;
-  background: $app-primary;
-  border-radius: 50%;
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 2rpx 8rpx rgba($app-primary, 0.4);
 }
 
 .track-actions {
@@ -141,25 +129,19 @@ const onSlide = (e: any) => {
 .action-btn {
   width: 52rpx;
   height: 52rpx;
-  border-radius: 50%;
+  border-radius: 16rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22rpx;
-  background: $uni-bg-color-grey;
-  transition: all 0.2s;
+  background: var(--app-subtle, $uni-bg-color-grey);
+  transition: all 0.16s;
 
   &:active {
-    transform: scale(0.9);
+    transform: scale(0.88);
   }
-}
 
-.mute-btn.muted {
-  background: rgba($uni-color-error, 0.12);
-}
-
-.remove-btn {
-  background: rgba($uni-color-error, 0.08);
-  color: $uni-color-error;
+  &.muted {
+    background: color-mix(in srgb, var(--app-danger, #C4706B) 14%, transparent);
+  }
 }
 </style>

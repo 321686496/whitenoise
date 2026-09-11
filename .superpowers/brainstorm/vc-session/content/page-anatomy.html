@@ -1,0 +1,213 @@
+<h2>关键页面解剖 + 组件清单（第 3 节）</h2>
+<p class="subtitle">每个页面给出结构化骨架（正文按区块），组件全部 iOS 控制语义化，统一以 CCDS 设计令牌驱动。</p>
+
+<style>
+  .s3-wrap { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:16px; }
+  .s3-card { border-radius:16px; border:1px solid var(--border,#e5e5ea); background:var(--surface,#fff); padding:14px; }
+  .s3-card h3 { font-size:14.5px; font-weight:800; margin:0 0 2px; }
+  .s3-card .desc { font-size:12px; color:var(--muted,#8e8e93); margin-bottom:12px; line-height:1.55; }
+  .anat { display:flex; gap:12px; }
+  .anna { width:154px; border-radius:22px; padding:6px 7px 5px; box-sizing:border-box; box-shadow:0 16px 36px rgba(0,0,0,.3), inset 0 0 0 1px rgba(255,255,255,.18); height:330px; overflow:hidden; position:relative; display:flex; flex-direction:column; flex:none; }
+  .al { background:linear-gradient(160deg,#dfe7ef,#d3dfe2 55%,#d8e4dc); color:#1c2632; }
+  .ad { background:linear-gradient(160deg,#22262e,#1d2629 55%,#232822); color:#eef2f4; }
+  .al .blob { position:absolute; border-radius:50%; filter:blur(12px); opacity:.5; }
+  .al .b1 { width:70px; height:55px; background:#7fb8a8; top:32px; right:-20px; }
+  .al .b2 { width:60px; height:45px; background:#a8b7e8; top:150px; left:-24px; }
+  .ad .blob { position:absolute; border-radius:50%; filter:blur(12px); opacity:.3; }
+  .ad .b1 { width:70px; height:55px; background:#2f6b5c; top:32px; right:-20px; }
+  .ad .b2 { width:60px; height:45px; background:#38497e; top:150px; left:-24px; }
+  .anna .hbar { display:flex; justify-content:space-between; font-size:8px; font-weight:600; padding:2px 6px 0; opacity:.85; }
+  .block { border-radius:12px; padding:6px 8px; display:flex; flex-direction:column; gap:5px; flex:none; }
+  .al .block { background:rgba(255,255,255,.42); border:1px solid rgba(255,255,255,.75); box-shadow:inset 0 1px 1px rgba(255,255,255,.9), 0 4px 12px rgba(60,80,90,.15); }
+  .ad .block { background:rgba(42,50,58,.46); border:1px solid rgba(255,255,255,.14); box-shadow:inset 0 1px 1px rgba(255,255,255,.2), 0 4px 12px rgba(0,0,0,.4); }
+  .app-label { font-size:11px; font-weight:800; letter-spacing:-.3px; margin-bottom:6px; }
+  .block .bgline { font-size:9px; font-weight:700; display:flex; align-items:center; gap:5px; }
+  .block .bgline .tag { font-size:7px; font-weight:700; opacity:.55; border:1px solid; border-radius:4px; padding:1px 4px; margin-left:auto; }
+  .bgline .hm { width:6px; height:6px; border-radius:2px; flex:none; }
+  .al .hm { background:rgba(120,130,140,.35); }
+  .ad .hm { background:rgba(255,255,255,.18); }
+  .rrow { display:flex; gap:5px; }
+  .rrow > div { flex:1; height:32px; border-radius:9px; }
+  .al .rrow > div { background:rgba(255,255,255,.55); box-shadow:0 2px 6px rgba(60,80,90,.12); }
+  .ad .rrow > div { background:rgba(255,255,255,.08); box-shadow:0 2px 6px rgba(0,0,0,.3); }
+  .ul { display:flex; flex-direction:column; gap:6px; }
+  .ul .li { border-radius:9px; height:20px; display:flex; align-items:center; padding:0 7px; font-size:7.5px; font-weight:700; }
+  .al .ul .li { background:rgba(255,255,255,.5); box-shadow:0 2px 5px rgba(60,80,90,.1); }
+  .ad .ul .li { background:rgba(255,255,255,.07); box-shadow:0 2px 5px rgba(0,0,0,.3); }
+  .ul .li .tx { flex:1; opacity:.85; }
+  .ul .li .chev { opacity:.45; font-size:8px; }
+  .blank { flex:1; }
+  .tabbar5 { display:flex; justify-content:space-around; border-radius:14px; height:26px; align-items:center; font-size:6.5px; font-weight:700; margin-top:auto; flex:none; padding:0 3px; }
+  .al .tabbar5 { background:rgba(255,255,255,.5); border:1px solid rgba(255,255,255,.8); box-shadow:0 6px 18px rgba(60,80,90,.2); }
+  .ad .tabbar5 { background:rgba(42,50,58,.58); border:1px solid rgba(255,255,255,.15); box-shadow:0 6px 18px rgba(0,0,0,.5); }
+  .tabbar5 span { opacity:.5; }
+  .tabbar5 .on { opacity:1; }
+
+  .stack { display:flex; flex-direction:column; gap:7px; }
+  .seg3 { display:flex; gap:3px; border-radius:11px; padding:3px; border:1px solid rgba(127,127,127,.22); }
+  .seg3 span { flex:1; text-align:center; font-size:8px; font-weight:700; padding:4px 0; border-radius:8px; opacity:.6; }
+  .al .seg3 span.sel { background:rgba(255,255,255,.6); opacity:1; box-shadow:0 2px 5px rgba(60,80,90,.15); }
+  .ad .seg3 span.sel { background:rgba(255,255,255,.13); opacity:1; }
+  .chs { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+  .chs > div { height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:7.5px; font-weight:700; }
+  .al .chs > div { background:rgba(255,255,255,.55); box-shadow:0 2px 6px rgba(60,80,90,.12); }
+  .ad .chs > div { background:rgba(255,255,255,.08); box-shadow:0 2px 6px rgba(0,0,0,.3); }
+  .chs > div .pbtn { width:15px; height:15px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:6px; margin-left:4px; }
+  .al .chs > div .pbtn { background:rgba(0,168,142,.3); }
+  .ad .chs > div .pbtn { background:rgba(0,200,178,.35); }
+  .bnr { height:46px; border-radius:11px; display:flex; align-items:center; padding:0 9px; font-size:8px; font-weight:700; }
+  .al .bnr { background:linear-gradient(120deg, rgba(127,184,168,.4), rgba(168,183,232,.4)); border:1px solid rgba(255,255,255,.7); }
+  .ad .bnr { background:linear-gradient(120deg, rgba(47,107,92,.5), rgba(56,73,126,.5)); border:1px solid rgba(255,255,255,.12); }
+  .cv { font-size:7.5px; opacity:.6; margin-top:4px; }
+  .cv b { opacity:.95; }
+
+  table.mtl { width:100%; border-collapse:collapse; font-size:11.5px; }
+  table.mtl th { text-align:left; font-weight:800; padding:6px 8px; opacity:.6; font-size:10px; letter-spacing:.05em; text-transform:uppercase; border-bottom:1px solid; }
+  table.mtl td { padding:7px 8px; border-bottom:1px solid; vertical-align:top; line-height:1.45; }
+  .newn { font-weight:800; }
+  .ioslink { font-size:10px; opacity:.6; }
+  .chip-mini { display:inline-flex; font-size:9.5px; font-weight:700; border-radius:999px; padding:2px 8px; margin:1px 2px 1px 0; }
+  .chip-mini.on { background:rgba(0,168,142,.18); color:#00947e; }
+  .chip-mini { border:1px solid rgba(127,127,127,.3); }
+</style>
+
+<h3 style="font-size:15px; font-weight:800; margin-top:6px">关键页面解剖（骨架 × 区块 × 交互）</h3>
+<div class="s3-wrap">
+  <div class="s3-card">
+    <h3>Tab 1 · 首页「声栖」</h3>
+    <div class="desc">大标题 → 快捷场景横滑 → 今日推荐卡 → 悬浮 Mini Player → Tab Bar。Mini Player 点击向上划出播放面板 Sheet。</div>
+    <div class="anat">
+      <div class="anna al">
+        <div class="blob b1"></div><div class="blob b2"></div>
+        <div class="hbar"><span>9:41</span><span>▂▄▆ ▉</span></div>
+        <div class="app-label">声栖</div>
+        <div class="block"><div class="bgline"><span class="hm"></span>快捷场景<bradient></bradient></div><div class="rrow"><div></div><div></div><div></div><div></div></div></div>
+        <div class="block"><div class="bgline"><span class="hm"></span>今日推荐<span class="tag">横滑</span></div><div class="rrow"><div></div><div></div><div></div></div></div>
+        <div class="blank"></div>
+        <div style="position:absolute; left:9px; right:9px; bottom:34px; height:24px; border-radius:12px; display:flex; align-items:center; padding:0 8px; background:rgba(255,255,255,.5); border:1px solid rgba(255,255,255,.8); box-shadow:0 4px 12px rgba(60,80,90,.2)">▶ <span style="font-size:7.5px; font-weight:800; margin-left:5px; flex:1">深夜雨声</span><span style="font-size:6.5px; opacity:.6">02:41</span></div>
+        <div class="tabbar5"><span class="on">首页</span><span>场景</span><span>发现</span><span>我的</span></div>
+      </div>
+      <div class="cv" style="align-self:center">
+        <b>①</b> Large Title 大标题「声栖」，页面滚动时收拢<br>
+        <b>②</b> 快捷场景：横向滑动玻璃卡（图标+名）<br>
+        <b>③</b> 今日推荐：图文卡，点开进入沉浸详情<br>
+        <b>④</b> Mini Player：Liquid Glass 胶囊常驻<br>
+        <b>⑤</b> 点击 ④ 上滑展开全屏播放面板<br><br>
+        <b>⚠</b> 移除原「选择风格/配色」入口；声音库入口收进 ② 的「＋」或 Sheet
+      </div>
+    </div>
+  </div>
+
+  <div class="s3-card">
+    <h3>Tab 2 · 场景</h3>
+    <div class="desc">大标题 → 分类分段（助眠/专注/氛围/更多）→ 场景卡片双列网格（图 + 悬浮播放钮 + 时长）。点击卡片进入沉浸详情。</div>
+    <div class="anat">
+      <div class="anna al">
+        <div class="blob b1"></div><div class="blob b2"></div>
+        <div class="hbar"><span>9:41</span><span>▂▄▆ ▉</span></div>
+        <div class="app-label">场景</div>
+        <div class="block"><div class="seg3"><span class="sel">助眠</span><span>专注</span><span>氛围</span></div></div>
+        <div class="block"><div class="chs"><div>深夜雨<i class="pbtn">▶</i></div><div>白噪音<i class="pbtn">▶</i></div><div>森林<i class="pbtn">▶</i></div><div>壁炉<i class="pbtn">▶</i></div><div>海浪<i class="pbtn">▶</i></div><div>书店<i class="pbtn">▶</i></div></div></div>
+        <div class="blank"></div>
+        <div class="tabbar5"><span>首页</span><span class="on">场景</span><span>发现</span><span>我的</span></div>
+      </div>
+      <div class="anna ad">
+        <div class="blob b1"></div><div class="blob b2"></div>
+        <div class="hbar"><span>9:41</span><span>▂▄▆ ▉</span></div>
+        <div class="app-label">场景</div>
+        <div class="block"><div class="seg3 seg3-da"><span class="sel">助眠</span><span>专注</span><span>氛围</span></div></div>
+        <div class="block"><div class="chs" style="grid-template-columns:1fr 1fr"><div>雨打屋檐<i class="pbtn">▶</i></div><div>溪流<i class="pbtn">▶</i></div></div></div>
+        <div class="cv"><b>分类</b>= 分段控件 Segmented<br><b>卡片</b>= 2 列网格 + 播放浮钮<br><b>推荐</b>= 首图大卡（横滑）</div>
+        <div class="blank"></div>
+        <div class="tabbar5"><span>首页</span><span class="on">场景</span><span>发现</span><span>我的</span></div>
+      </div>
+    </div>
+    <div class="cv" style="min-height:42px"><b>交互</b>：双击卡片直接播放并弹出 Mini Player；上滑网格可整屏浏览；分类切换用分段控件保持 iOS 习惯。</div>
+  </div>
+
+  <div class="s3-card">
+    <h3>Tab 3 · 发现</h3>
+    <div class="desc">大标题 → 横滑推荐 Banner → 混音玩法/编辑精选卡 → 内容瀑布列表（声音卡/用户卡）。</div>
+    <div class="anat">
+      <div class="anna al">
+        <div class="blob b1"></div><div class="blob b2"></div>
+        <div class="hbar"><span>9:41</span><span>▂▄▆ ▉</span></div>
+        <div class="app-label">发现</div>
+        <div class="block"><div class="bnr">推荐位 · 雨夜共眠企划 →</div></div>
+        <div class="block"><div class="bgline"><span class="hm"></span>编辑精选</div><div class="rrow"><div></div><div></div><div></div></div></div>
+        <div class="block"><div class="ul"><div class="li"><span class="tx">新人声境 · 海边日落</span><span class="chev">›</span></div><div class="li"><span class="tx">编辑部 · 高效专注歌单</span><span class="chev">›</span></div><div class="li"><span class="tx"># 白噪音混音挑战</span><span class="chev">›</span></div></div></div>
+        <div class="blank"></div>
+        <div class="tabbar5"><span>首页</span><span>场景</span><span class="on">发现</span><span>我的</span></div>
+      </div>
+      <div class="cv" style="align-self:center">
+        <b>①</b> Banner 横滑：运营位/活动/季节企划<br>
+        <b>②</b> 编辑精选卡：三卡横滑<br>
+        <b>③</b> 内容列表（inset 分组列表样式）<br><br>
+        <b>⚠</b> 保持内容规模轻量，删除多余「分类页」；<br>点赞/收藏按钮做按压反馈，不跳页
+      </div>
+    </div>
+  </div>
+
+  <div class="s3-card">
+    <h3>Tab 4 · 我的（含外观设置）</h3>
+    <div class="desc">大标题 → 用户卡（头像+昵称+签到）→ inset 分组列表：收藏/历史/数据/成就/邀请/设置。主题页正式改为「外观」分组。</div>
+    <div class="anat">
+      <div class="anna al">
+        <div class="blob b1"></div><div class="blob b2"></div>
+        <div class="hbar"><span>9:41</span><span>▂▄▆ ▉</span></div>
+        <div class="app-label">我的</div>
+        <div class="block">
+          <div style="display:flex; align-items:center; gap:6px"><div style="width:26px;height:26px;border-radius:50%;background:rgba(0,168,142,.35);box-shadow:0 2px 8px rgba(0,168,142,.3)"></div><div><div style="font-size:9.5px;font-weight:800">小栖</div><div style="font-size:7px;opacity:.6">专属声境顾问</div></div></div>
+          <div style="font-size:7.5px; font-weight:800; text-align:center; border-radius:8px; padding:3px; background:rgba(0,168,142,.18)">签到领取今日声石 ›</div>
+        </div>
+        <div class="block"><div class="ul">
+          <div class="li"><span class="tx">我的收藏</span><span class="chev">›</span></div>
+          <div class="li"><span class="tx">播放历史</span><span class="chev">›</span></div>
+          <div class="li"><span class="tx">使用数据</span><span class="chev">›</span></div>
+          <div class="li"><span class="tx">成就墙</span><span class="chev">›</span></div>
+          <div class="li"><span class="tx">邀请好友</span><span class="chev">›</span></div>
+          <div class="li"><span class="tx">设置（含外观）</span><span class="chev">›</span></div>
+        </div></div>
+        <div class="blank"></div>
+        <div class="tabbar5"><span>首页</span><span>场景</span><span>发现</span><span class="on">我的</span></div>
+      </div>
+      <div class="anna ad">
+        <div class="blob b1"></div><div class="blob b2"></div>
+        <div class="hbar"><span>9:41</span><span>▂▄▆ ▉</span></div>
+        <div style="display:flex"><span style="font-size:8px; font-weight:700; opacity:.75">‹ 返回</span><span style="flex:1; text-align:center; font-size:9px; font-weight:800">外观</span><span style="width:16px"></span></div>
+        <div class="block" style="flex:1">
+          <div class="bgline"><span class="hm"></span>外观模式</div>
+          <div class="seg3"><span class="sel">浅色</span><span>深色</span><span>跟随系统</span></div>
+          <div style="height:6px"></div>
+          <div class="bgline"><span class="hm"></span>主色调 <span class="tag">品牌</span></div>
+          <div style="display:flex; gap:5px; padding:2px 0">
+            <div style="width:22px;height:22px;border-radius:50%;background:#00a88e;box-shadow:0 0 0 2px rgba(0,168,142,.35)"></div>
+            <div style="width:22px;height:22px;border-radius:50%;background:#5e7ce6"></div>
+            <div style="width:22px;height:22px;border-radius:50%;background:#9b7bd8"></div>
+          </div>
+          <div style="height:6px"></div>
+          <div class="bgline"><span class="hm"></span>定时关闭默认</div>
+          <div style="display:flex"><span style="flex:1"></span><div style="width:32px;height:18px;border-radius:999px;background:rgba(0,200,178,.8);position:relative"><div style="position:absolute; top:2px; left:16px; width:14px; height:14px; border-radius:50%; background:#fff"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="cv" style="min-height:42px"><b>外观设置</b>：浅色/深色/跟随系统（默认），主色调三选（青绿=品牌/靛蓝/紫），与系统设置页「外观」分组一致。原「theme」页并入此处。</div>
+  </div>
+</div>
+
+<h3 style="font-size:15px; font-weight:800; margin-top:22px">组件清单 · iOS 控制语义化映射</h3>
+<table class="mtl">
+  <tr><th>新组件（components/）</th><th>对应 iOS 语义</th><th>用途</th></tr>
+  <tr><td class="newn">NeGlass</td><td class="ioslink">Material / Vibrancy</td><td>玻璃卡片容器：半透明 + backdrop-blur + edge highlight + 新拟态双影（含无 blur 回退）</td></tr>
+  <tr><td class="newn">NeChip</td><td class="ioslink">Filter Chip</td><td>场景分类、快捷场景、声音库筛选；选中态用 accent 填充</td></tr>
+  <tr><td class="newn">NeSlider</td><td class="ioslink">Slider</td><td>音量、播放进度、混音配比；轨道高亮 + 圆形滑块</td></tr>
+  <tr><td class="newn">NeSwitch</td><td class="ioslink">Switch</td><td>定时关闭、循环、设置项开关</td></tr>
+  <tr><td class="newn">NeSegmented</td><td class="ioslink">Segmented Control</td><td>场景分类 / 发现内容类型切换</td></tr>
+  <tr><td class="newn">NeSheet</td><td class="ioslink">Card Sheet</td><td>声音库/定时/播放设置：grabber + 上滑入场 + 下滑关闭 + 遮罩</td></tr>
+  <tr><td class="newn">NavBar / LargeTitle</td><td class="ioslink">Navigation Bar + Large Title</td><td>大标题收拢滚动、二级页返回 chevron + 标题</td></tr>
+  <tr><td class="newn">MiniPlayer / PlayerPanel</td><td class="ioslink">Now Playing</td><td>悬浮胶囊常驻条 → 上滑展开全屏播放面板</td></tr>
+  <tr><td class="newn">ActionSheet / Alert / Toast</td><td class="ioslink">Action Sheet / Alert / Toast</td><td>长按卡片菜单、确认弹窗（uni.showModal/showToast 封装）</td></tr>
+  <tr><td class="newn">EmptyState / ListRow</td><td class="ioslink">Empty State / Table Row</td><td>空数据占位；ios inset 分组列表行（含 chevron）</td></tr>
+</table>
+
+<p class="cv" style="margin-top:10px">所有组件由统一设计令牌驱动：背景渐变、glass 材质、双影、圆角、accent、文字三级。`backdrop-filter` 不支持的环境自动回退为更高不透明度纯色玻璃，保证 H5/安卓一致观感。</p>

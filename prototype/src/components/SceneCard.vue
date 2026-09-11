@@ -4,7 +4,7 @@
     :class="[`scene-card--${layout}`, { 'scene-card--active': active }]"
     @click="$emit('tap')"
   >
-    <view class="scene-cover" :style="{ background: bgColor }">
+    <view class="scene-cover" :style="coverStyle">
       <!-- 横排布局：封面内叠声音图标 -->
       <view class="scene-sounds" v-if="layout === 'row'">
         <view class="sound-chip" v-for="(s, i) in soundIcons" :key="i">
@@ -45,13 +45,15 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import Icon from './Icon.vue'
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   name: string
   soundCount: number
   soundIcons: string[]
   bgColor: string
+  cover?: string
   isPreset: boolean
   layout?: 'row' | 'grid'
   active?: boolean
@@ -60,7 +62,15 @@ withDefaults(defineProps<{
   layout: 'row',
   active: false,
   soundLabel: '',
+  cover: '',
 })
+
+const coverStyle = computed(() => ({
+  background: props.bgColor,
+  backgroundImage: props.cover ? `url(${props.cover})` : undefined,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+}))
 
 defineEmits<{
   tap: []

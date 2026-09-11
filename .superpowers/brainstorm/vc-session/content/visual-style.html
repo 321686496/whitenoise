@@ -1,0 +1,242 @@
+<h2>视觉主风格，选哪个方向？</h2>
+<p class="subtitle">共同前提：都遵循 iOS 设计哲学（Large Title 大标题、inset 分组列表、iOS 控件语义、Tab Bar、深浅色自动跟随、SF 字体栈）。区别在质感语言本身 —— 这也是你指定的「新拟态」如何与「iOS 26 Liquid Glass」结合的尺度问题。点击卡片选择。</p>
+
+<style>
+  .vc-grid { display:flex; gap:22px; flex-wrap:wrap; margin-top:14px; }
+  .vc-opt {
+    flex:1 1 300px; min-width:280px; max-width:460px; cursor:pointer;
+    background:var(--surface,#fff); border:1px solid var(--border,#e5e5ea);
+    border-radius:16px; padding:14px 14px 10px; transition:.18s;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .vc-opt:hover { transform:translateY(-3px); box-shadow:0 12px 32px rgba(0,0,0,.14); }
+  .vc-opt.head { opacity:.96; }
+  .vc-opt .head-row { display:flex; align-items:center; gap:10px; padding:2px 6px; }
+  .vc-opt .badge { font-size:13px; font-weight:700; color:#fff; background:#007aff; border-radius:8px; padding:3px 9px; }
+  .vc-opt .opt-title { font-size:16px; font-weight:700; }
+  .vc-opt .opt-desc { font-size:13px; color:var(--muted,#8e8e93); line-height:1.55; padding:0 6px; min-height:62px; }
+  .vc-opt .tags { display:flex; gap:6px; flex-wrap:wrap; padding:0 6px; }
+  .vc-opt .tag { font-size:11px; color:#007aff; background:rgba(0,122,255,.1); border-radius:999px; padding:3px 9px; font-weight:600; }
+  .vc-opt.selected { outline:3px solid #007aff; outline-offset:2px; }
+
+  .ps { display:flex; gap:12px; justify-content:center; }
+  .phone {
+    width:170px; height:352px; border-radius:26px; padding:8px 8px 6px;
+    box-shadow:0 18px 40px rgba(0,0,0,.32), inset 0 0 0 1px rgba(255,255,255,.18);
+    overflow:hidden; position:relative; box-sizing:border-box; flex:none;
+  }
+  .phone .st { display:flex; justify-content:space-between; align-items:center; padding:3px 10px 0; font-size:9.5px; font-weight:600; }
+  .phone .title { font-weight:800; letter-spacing:-.5px; margin:7px 4px 0; }
+  .phone .sub { font-size:8.5px; opacity:.65; margin:2px 4px 0; }
+  .chip-row { display:flex; gap:5px; padding:8px 4px 0; }
+  .chip { width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; flex:none; }
+  .m-slider { margin:10px 6px 0; border-radius:10px; height:34px; display:flex; align-items:center; padding:0 8px; }
+  .m-slider .track { flex:1; height:4px; border-radius:2px; background:rgba(128,128,128,.35); position:relative; overflow:visible; }
+  .m-slider .fill { position:absolute; left:0; top:0; bottom:0; width:62%; border-radius:2px; }
+  .m-slider .knob { position:absolute; right:-6px; top:50%; transform:translateY(-50%); width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); }
+  .m-playbar { position:absolute; left:10px; right:10px; bottom:14px; height:44px; border-radius:16px; display:flex; align-items:center; padding:0 10px; box-sizing:border-box; }
+  .m-playbar .pb-icon { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:9px; flex:none; }
+  .m-playbar .pb-label { font-size:9px; font-weight:700; margin-left:8px; }
+  .m-playbar .pb-stop { margin-left:auto; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:9px; }
+  .phone-label { text-align:center; font-size:11px; color:var(--muted,#8e8e93); margin-top:6px; width:170px; }
+
+  /* ---------- Style A: neu × liquid glass ---------- */
+  .phone-a-light {
+    background:linear-gradient(160deg,#dfe7ef 0%,#d3dfe2 55%,#d8e4dc 100%); color:#23303a;
+  }
+  .phone-a-light .blob { position:absolute; border-radius:50%; filter:blur(14px); opacity:.55; }
+  .phone-a-light .blob1 { width:90px; height:70px; background:#7fb8a8; top:40px; right:-24px; }
+  .phone-a-light .blob2 { width:80px; height:60px; background:#a8b7e8; top:150px; left:-30px; }
+  .phone-a-light .blob3 { width:100px; height:70px; background:#e8b8a8; bottom:70px; right:-30px; }
+  .card-a-li, .chip-a-li, .sbar-a-li, .bar-a-li {
+    background:rgba(255,255,255,.42); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.75);
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.9), 0 4px 14px rgba(60,80,90,.18), 0 2px 4px rgba(60,80,90,.10);
+  }
+  .phone-a-dark {
+    background:linear-gradient(160deg,#22262e 0%,#1d2629 55%,#232822 100%); color:#eef2f4;
+  }
+  .phone-a-dark .blob { position:absolute; border-radius:50%; filter:blur(14px); opacity:.32; }
+  .phone-a-dark .blob1 { width:90px; height:70px; background:#3f8f7b; top:40px; right:-24px; }
+  .phone-a-dark .blob2 { width:80px; height:60px; background:#4a5f9e; top:150px; left:-30px; }
+  .phone-a-dark .blob3 { width:100px; height:70px; background:#9e5f4a; bottom:70px; right:-30px; }
+  .card-a-da, .chip-a-da, .sbar-a-da, .bar-a-da {
+    background:rgba(42,50,58,.46); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.16);
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.22), 0 4px 14px rgba(0,0,0,.42), 0 2px 4px rgba(0,0,0,.30);
+  }
+
+  /* ---------- Style B: classic neumorphism ---------- */
+  .phone-b-light { background:#e3e8ec; color:#323b41; }
+  .card-b-li, .chip-b-li, .sbar-b-li { background:#e3e8ec; border-radius:16px; }
+  .card-b-li { box-shadow: 7px 7px 15px rgba(163,177,188,.68), -7px -7px 15px rgba(255,255,255,.92); }
+  .chip-b-li { box-shadow: 5px 5px 10px rgba(163,177,188,.68), -5px -5px 10px rgba(255,255,255,.92); }
+  .sbar-b-li { box-shadow: inset 5px 5px 10px rgba(163,177,188,.66), inset -5px -5px 10px rgba(255,255,255,.92); }
+  .bar-b-li { background:#e3e8ec; border-radius:16px; box-shadow: 6px 6px 14px rgba(163,177,188,.68), -6px -6px 14px rgba(255,255,255,.92); }
+  .phone-b-dark { background:#26292e; color:#e8ebee; }
+  .card-b-da, .chip-b-da, .sbar-b-da { background:#26292e; border-radius:16px; }
+  .card-b-da { box-shadow: 7px 7px 15px rgba(12,14,17,.72), -7px -7px 15px rgba(58,64,72,.55); }
+  .chip-b-da { box-shadow: 5px 5px 10px rgba(12,14,17,.72), -5px -5px 10px rgba(58,64,72,.55); }
+  .sbar-b-da { box-shadow: inset 5px 5px 10px rgba(12,14,17,.70), inset -5px -5px 10px rgba(58,64,72,.55); }
+  .bar-b-da { background:#26292e; border-radius:16px; box-shadow: 6px 6px 14px rgba(12,14,17,.72), -6px -6px 14px rgba(58,64,72,.55); }
+
+  /* ---------- Style C: system material + neu accents ---------- */
+  .phone-c-light { background:linear-gradient(160deg,#cfe3f0 0%,#e6dcf0 60%,#cfe9dc 100%); color:#25313c; }
+  .phone-c-light .blob { position:absolute; border-radius:50%; filter:blur(16px); opacity:.6; }
+  .phone-c-light .blob1 { width:110px; height:80px; background:#8fc4e8; top:60px; right:-30px; }
+  .phone-c-light .blob2 { width:90px; height:70px; background:#c4a8e8; bottom:90px; left:-30px; }
+  .card-c-li, .sbar-c-li, .bar-c-li { background:rgba(255,255,255,.38); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.7); box-shadow:0 8px 24px rgba(40,60,80,.14); }
+  .phone-c-dark { background:linear-gradient(160deg,#1c2730 0%,#241f2e 60%,#1d2b24 100%); color:#edf1f5; }
+  .phone-c-dark .blob { position:absolute; border-radius:50%; filter:blur(16px); opacity:.4; }
+  .phone-c-dark .blob1 { width:110px; height:80px; background:#2d6b96; top:60px; right:-30px; }
+  .phone-c-dark .blob2 { width:90px; height:70px; background:#6b3f96; bottom:90px; left:-30px; }
+  .card-c-da, .sbar-c-da, .bar-c-da { background:rgba(34,44,52,.55); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.14); box-shadow:0 8px 24px rgba(0,0,0,.36); }
+  .chip-c-li { background:#e3e8ec; box-shadow:4px 4px 9px rgba(120,140,155,.5), -4px -4px 9px rgba(255,255,255,.95); color:#232b31; }
+  .chip-c-da { background:#2a3038; box-shadow:4px 4px 9px rgba(10,12,16,.7), -4px -4px 9px rgba(70,80,92,.5); }
+</style>
+
+<div class="vc-grid">
+
+  <div class="vc-opt head" onclick="toggleSelect(this)" data-choice="a">
+    <div class="head-row"><span class="badge">A</span><span class="opt-title">新拟态 × Liquid Glass 融合质感（推荐）</span></div>
+    <div class="ps">
+      <div>
+        <div class="phone phone-a-light">
+          <div class="blob blob1"></div><div class="blob blob2"></div><div class="blob blob3"></div>
+          <div class="st"><span>9:41</span><span>▂▄▆ ▉</span></div>
+          <div class="title" style="font-size:19px">声栖</div>
+          <div class="sub">声而栖息 · 安心入眠</div>
+          <div class="chip-row">
+            <div class="chip chip-a-li">雨声</div>
+            <div class="chip chip-a-li">白噪音</div>
+            <div class="chip chip-a-li">森林</div>
+            <div class="chip chip-a-li">溪流</div>
+          </div>
+          <div class="m-slider sbar-a-li"><div class="track"><div class="fill" style="background:rgba(0,122,255,.55)"></div><div class="knob"></div></div></div>
+          <div class="m-playbar bar-a-li">
+            <div class="pb-icon">▶</div><div class="pb-label">深夜雨声</div>
+            <div class="pb-stop card-a-li">⏱</div>
+          </div>
+        </div>
+        <div class="phone-label">浅色</div>
+      </div>
+      <div>
+        <div class="phone phone-a-dark">
+          <div class="blob blob1"></div><div class="blob blob2"></div><div class="blob blob3"></div>
+          <div class="st"><span>9:41</span><span>▂▄▆ ▉</span></div>
+          <div class="title" style="font-size:19px">声栖</div>
+          <div class="sub">声而栖息 · 安心入眠</div>
+          <div class="chip-row">
+            <div class="chip chip-a-da">雨声</div>
+            <div class="chip chip-a-da">白噪音</div>
+            <div class="chip chip-a-da">森林</div>
+            <div class="chip chip-a-da">溪流</div>
+          </div>
+          <div class="m-slider sbar-a-da"><div class="track"><div class="fill" style="background:rgba(0,200,180,.6)"></div><div class="knob"></div></div></div>
+          <div class="m-playbar bar-a-da">
+            <div class="pb-icon">▶</div><div class="pb-label">深夜雨声</div>
+            <div class="pb-stop card-a-da">⏱</div>
+          </div>
+        </div>
+        <div class="phone-label">深色</div>
+      </div>
+    </div>
+    <div class="opt-desc">新拟态的双重柔和投影为「结构」，Liquid Glass 的半透明磨砂材质、边缘高光和绚丽渐变背景为「氛围」。卡片在浅/深色下都通透有呼吸感，沉浸但不刺眼 —— 声境 App 的最佳质感。</div>
+    <div class="tags"><span class="tag">半透明材质</span><span class="tag">边缘高光</span><span class="tag">深度投影</span><span class="tag">深浅色通透</span></div>
+  </div>
+
+  <div class="vc-opt" onclick="toggleSelect(this)" data-choice="b">
+    <div class="head-row"><span class="badge">B</span><span class="opt-title">经典纯新拟态</span></div>
+    <div class="ps">
+      <div>
+        <div class="phone phone-b-light">
+          <div class="st"><span>9:41</span><span>▂▄▆ ▉</span></div>
+          <div class="title" style="font-size:19px">声栖</div>
+          <div class="sub">声而栖息 · 安心入眠</div>
+          <div class="chip-row">
+            <div class="chip chip-b-li">雨声</div>
+            <div class="chip chip-b-li">白噪音</div>
+            <div class="chip chip-b-li">森林</div>
+            <div class="chip chip-b-li">溪流</div>
+          </div>
+          <div class="m-slider sbar-b-li"><div class="track"><div class="fill" style="background:rgba(0,122,255,.55)"></div><div class="knob"></div></div></div>
+          <div class="m-playbar bar-b-li">
+            <div class="pb-icon">▶</div><div class="pb-label">深夜雨声</div>
+            <div class="pb-stop chip-b-li">⏱</div>
+          </div>
+        </div>
+        <div class="phone-label">浅色</div>
+      </div>
+      <div>
+        <div class="phone phone-b-dark">
+          <div class="st"><span>9:41</span><span>▂▄▆ ▉</span></div>
+          <div class="title" style="font-size:19px">声栖</div>
+          <div class="sub">声而栖息 · 安心入眠</div>
+          <div class="chip-row">
+            <div class="chip chip-b-da">雨声</div>
+            <div class="chip chip-b-da">白噪音</div>
+            <div class="chip chip-b-da">森林</div>
+            <div class="chip chip-b-da">溪流</div>
+          </div>
+          <div class="m-slider sbar-b-da"><div class="track"><div class="fill" style="background:rgba(0,200,180,.6)"></div><div class="knob"></div></div></div>
+          <div class="m-playbar bar-b-da">
+            <div class="pb-icon">▶</div><div class="pb-label">深夜雨声</div>
+            <div class="pb-stop chip-b-da">⏱</div>
+          </div>
+        </div>
+        <div class="phone-label">深色</div>
+      </div>
+    </div>
+    <div class="opt-desc">纯正的经典新拟态：背景为纯色，卡片为同色凸起（无磨砂、无渐变、无内容图像）。最「新手拟态」但容易显得单调灰沉，无法体现 iOS 26 的材质感。</div>
+    <div class="tags"><span class="tag">纯色背景</span><span class="tag">双重投影</span><span class="tag">无磨砂</span><span class="tag">简约克制</span></div>
+  </div>
+
+  <div class="vc-opt" onclick="toggleSelect(this)" data-choice="c">
+    <div class="head-row"><span class="badge">C</span><span class="opt-title">iOS 原生材质为主 + 新拟态控件点缀</span></div>
+    <div class="ps">
+      <div>
+        <div class="phone phone-c-light">
+          <div class="blob blob1"></div><div class="blob blob2"></div>
+          <div class="st"><span>9:41</span><span>▂▄▆ ▉</span></div>
+          <div class="title" style="font-size:19px">声栖</div>
+          <div class="sub">声而栖息 · 安心入眠</div>
+          <div class="chip-row">
+            <div class="chip chip-c-li">雨声</div>
+            <div class="chip chip-c-li">白噪音</div>
+            <div class="chip chip-c-li">森林</div>
+            <div class="chip chip-c-li">溪流</div>
+          </div>
+          <div class="m-slider sbar-c-li"><div class="track"><div class="fill" style="background:rgba(0,122,255,.55)"></div><div class="knob"></div></div></div>
+          <div class="m-playbar bar-c-li">
+            <div class="pb-icon chip-c-li">▶</div><div class="pb-label">深夜雨声</div>
+            <div class="pb-stop chip-c-li">⏱</div>
+          </div>
+        </div>
+        <div class="phone-label">浅色</div>
+      </div>
+      <div>
+        <div class="phone phone-c-dark">
+          <div class="blob blob1"></div><div class="blob blob2"></div>
+          <div class="st"><span>9:41</span><span>▂▄▆ ▉</span></div>
+          <div class="title" style="font-size:19px">声栖</div>
+          <div class="sub">声而栖息 · 安心入眠</div>
+          <div class="chip-row">
+            <div class="chip chip-c-da">雨声</div>
+            <div class="chip chip-c-da">白噪音</div>
+            <div class="chip chip-c-da">森林</div>
+            <div class="chip chip-c-da">溪流</div>
+          </div>
+          <div class="m-slider sbar-c-da"><div class="track"><div class="fill" style="background:rgba(0,200,180,.6)"></div><div class="knob"></div></div></div>
+          <div class="m-playbar bar-c-da">
+            <div class="pb-icon chip-c-da">▶</div><div class="pb-label">深夜雨声</div>
+            <div class="pb-stop chip-c-da">⏱</div>
+          </div>
+        </div>
+        <div class="phone-label">深色</div>
+      </div>
+    </div>
+    <div class="opt-desc">大面积的 iOS 系统毛玻璃材质（分栏、面板、Tab Bar）承担质感，新拟态只出现在播放键、滑杆等核心交互控件上。最「iOS 原生」，但新拟态元素会被弱化为点缀。</div>
+    <div class="tags"><span class="tag">系统毛玻璃主导</span><span class="tag">新拟态控件</span><span class="tag">最接近 iOS 原生</span></div>
+  </div>
+
+</div>

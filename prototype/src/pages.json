@@ -15,7 +15,21 @@
 			}
 		},
 		{
+			"path": "pages/discover/discover",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
+			}
+		},
+		{
 			"path": "pages/mine/mine",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/library/library",
 			"style": {
 				"navigationStyle": "custom",
 				"navigationBarTitleText": ""
@@ -25,7 +39,7 @@
 			"path": "pages/theme/theme",
 			"style": {
 				"navigationBarTitleText": "主题设置",
-				"navigationBarBackgroundColor": "#F5F0EB",
+				"navigationBarBackgroundColor": "#F5F2ED",
 				"navigationBarTextStyle": "black"
 			}
 		},
@@ -33,7 +47,7 @@
 			"path": "pages/achievement/achievement",
 			"style": {
 				"navigationBarTitleText": "成就墙",
-				"navigationBarBackgroundColor": "#F5F0EB",
+				"navigationBarBackgroundColor": "#F5F2ED",
 				"navigationBarTextStyle": "black"
 			}
 		},
@@ -41,7 +55,7 @@
 			"path": "pages/invite/invite",
 			"style": {
 				"navigationBarTitleText": "邀请好友",
-				"navigationBarBackgroundColor": "#F5F0EB",
+				"navigationBarBackgroundColor": "#F5F2ED",
 				"navigationBarTextStyle": "black"
 			}
 		},
@@ -49,34 +63,110 @@
 			"path": "pages/settings/settings",
 			"style": {
 				"navigationBarTitleText": "设置",
-				"navigationBarBackgroundColor": "#F5F0EB",
+				"navigationBarBackgroundColor": "#F5F2ED",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/checkin/checkin",
+			"style": {
+				"navigationBarTitleText": "每日签到",
+				"navigationBarBackgroundColor": "#F5F2ED",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/stats/stats",
+			"style": {
+				"navigationBarTitleText": "使用数据",
+				"navigationBarBackgroundColor": "#F5F2ED",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/favorites/favorites",
+			"style": {
+				"navigationBarTitleText": "我的收藏",
+				"navigationBarBackgroundColor": "#F5F2ED",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/history/history",
+			"style": {
+				"navigationBarTitleText": "播放历史",
+				"navigationBarBackgroundColor": "#F5F2ED",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/onboarding/onboarding",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/scene-detail/scene-detail",
+			"style": {
+				"navigationBarTitleText": "场景详情",
+				"navigationBarBackgroundColor": "#F5F2ED",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/scene-edit/scene-edit",
+			"style": {
+				"navigationBarTitleText": "新建场景",
+				"navigationBarBackgroundColor": "#F5F2ED",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/scene-all/scene-all",
+			"style": {
+				"navigationBarTitleText": "全部场景",
+				"navigationBarBackgroundColor": "#F5F2ED",
 				"navigationBarTextStyle": "black"
 			}
 		}
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "白噪音",
-		"navigationBarBackgroundColor": "#F5F0EB",
-		"backgroundColor": "#F5F0EB"
+		"navigationBarTitleText": "声栖",
+		"navigationBarBackgroundColor": "#F5F2ED",
+		"backgroundColor": "#F5F2ED"
 	},
 	"tabBar": {
-		"color": "#9CA3AF",
-		"selectedColor": "#7B8FA1",
+		"custom": true,
+		"color": "#8E9E96",
+		"selectedColor": "#3D6B5E",
 		"backgroundColor": "#FFFFFF",
 		"borderStyle": "black",
 		"list": [
 			{
 				"pagePath": "pages/index/index",
-				"text": "首页"
+				"text": "首页",
+				"iconPath": "static/tab-home.jpg",
+				"selectedIconPath": "static/tab-home-active.jpg"
 			},
 			{
 				"pagePath": "pages/scene/scene",
-				"text": "场景"
+				"text": "场景",
+				"iconPath": "static/tab-scene.jpg",
+				"selectedIconPath": "static/tab-scene-active.jpg"
+			},
+			{
+				"pagePath": "pages/discover/discover",
+				"text": "发现",
+				"iconPath": "static/tab-discover.svg",
+				"selectedIconPath": "static/tab-discover-active.svg"
 			},
 			{
 				"pagePath": "pages/mine/mine",
-				"text": "我的"
+				"text": "我的",
+				"iconPath": "static/tab-mine.jpg",
+				"selectedIconPath": "static/tab-mine-active.jpg"
 			}
 		]
 	}

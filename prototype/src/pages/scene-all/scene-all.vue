@@ -26,6 +26,7 @@
         :sound-count="scene.soundIds.length"
         :sound-icons="soundIconsOf(scene)"
         :bg-color="scene.gradient"
+        :cover="scene.image"
         :is-preset="scene.isPreset"
         layout="grid"
         :active="player.currentScene?.id === scene.id"

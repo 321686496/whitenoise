@@ -43,7 +43,7 @@
       <scroll-view scroll-x class="rec-scroll" :show-scrollbar="false">
         <view class="rec-row">
           <view class="rec-card" v-for="s in recommended" :key="s.id" @click="openDetail(s)">
-            <view class="rec-cover" :style="{ background: s.gradient }">
+            <view class="rec-cover" :style="coverOf(s)">
               <Icon :name="s.iconName" :size="40" color="rgba(255,255,255,.95)" />
               <view class="rec-reason">
                 <Icon name="flame" :size="12" color="var(--app-primary)" />
@@ -65,7 +65,7 @@
         <scroll-view scroll-x class="recent-scroll" :show-scrollbar="false">
           <view class="recent-row">
             <view class="recent-card" v-for="r in recentItems" :key="r.sceneId" @click="openDetail(r)">
-              <view class="recent-cover" :style="{ background: r.gradient }">
+              <view class="recent-cover" :style="coverOfSceneId(r.sceneId)">
                 <Icon :name="r.iconName" :size="34" color="rgba(255,255,255,.95)" />
               </view>
               <text class="recent-name">{{ r.name }}</text>
@@ -108,6 +108,7 @@
           :sound-count="scene.soundIds.length"
           :sound-icons="presetSoundIcons(scene)"
           :bg-color="scene.gradient"
+          :cover="scene.image"
           :is-preset="scene.isPreset"
           layout="grid"
           :active="player.currentScene?.id === scene.id"
@@ -159,7 +160,7 @@ import SceneCard from '@/components/SceneCard.vue'
 import Icon from '@/components/Icon.vue'
 import TabBar from '@/components/TabBar.vue'
 import { player, applyScene, getRecent, recentTimeLabel } from '@/composables/usePlayer'
-import { SIMULATED_PREFS, getRecommended, getCategoryScenes } from '@/data/scenes'
+import { SIMULATED_PREFS, getRecommended, getCategoryScenes, findScene } from '@/data/scenes'
 import type { Scene } from '@/data/scenes'
 import { sounds } from '@/data/sounds'
 
@@ -204,6 +205,23 @@ onShow(() => {
 
 const presetSoundIcons = (scene: Scene) =>
   scene.soundIds.map((id) => sounds.find((s) => s.id === id)?.iconName ?? 'wave')
+
+// 封面样式：优先素材图，回退渐变占位
+const coverStyle = (bg: string, img?: string) => ({
+  background: bg,
+  backgroundImage: img ? `url(${img})` : undefined,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+})
+
+const coverOf = (s: Scene) => coverStyle(s.gradient, s.image)
+
+// 最近播放项只有 sceneId，回查场景取素材；取不到则退回记录的渐变
+const coverOfSceneId = (sceneId: string) => {
+  const s = findScene(sceneId)
+  const r = recentItems.value.find((x) => x.sceneId === sceneId)
+  return coverStyle(s?.gradient ?? r?.gradient ?? 'var(--app-subtle)', s?.image)
+}
 
 // 支持 Scene（id）与 RecentItem（sceneId）两种来源
 const openDetail = (scene: { id?: string; sceneId?: string }) => {
