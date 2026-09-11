@@ -6,7 +6,7 @@ import 'theme/theme_notifier.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final notifier = ThemeNotifier();
+  final notifier = ThemeNotifier(persist: ThemePrefs.write);
   await notifier.loadFrom(ThemePrefs.read);
   runApp(Root(notifier: notifier));
 }
