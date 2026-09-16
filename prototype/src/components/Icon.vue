@@ -74,20 +74,18 @@
         <path d="M12 14c2 4 2 7 0 8s-2-4 0-8" />
         <path d="M10 12c-4 2-7 2-8 0s4-2 8 0" />
       </template>
-      <!-- 播放 -->
+      <!-- 播放（实心，沿用文件 fill=currentColor stroke=none 惯例） -->
       <template v-else-if="name === 'play'">
-        <polygon points="6,3 20,12 6,21" fill="currentColor" stroke="none" />
+        <path d="M7 4.5v15l13-7.5L7 4.5z" fill="currentColor" stroke="none" />
       </template>
       <!-- 暂停 -->
       <template v-else-if="name === 'pause'">
-        <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none" />
-        <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none" />
+        <path d="M8 4v16M16 4v16" />
       </template>
       <!-- 定时器 -->
       <template v-else-if="name === 'timer'">
         <circle cx="12" cy="13" r="8" />
-        <path d="M12 9v4l2 2" />
-        <path d="M9 2h6" />
+        <path d="M12 9.5v3.5l2.5 2.5M9.5 2h5" />
       </template>
       <!-- 保存 -->
       <template v-else-if="name === 'save'">
@@ -97,11 +95,11 @@
       </template>
       <!-- 主题/调色板 -->
       <template v-else-if="name === 'palette'">
-        <circle cx="12" cy="12" r="10" />
-        <circle cx="12" cy="8" r="1.5" fill="currentColor" stroke="none" />
-        <circle cx="8.5" cy="12" r="1.5" fill="currentColor" stroke="none" />
-        <circle cx="15.5" cy="12" r="1.5" fill="currentColor" stroke="none" />
-        <circle cx="10" cy="15.5" r="1.5" fill="currentColor" stroke="none" />
+        <path d="M12 3a9 9 0 1 0 .5 18c1.2 0 1.8-.9 1.8-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z" />
+        <circle cx="7.5" cy="11" r="0.6" />
+        <circle cx="10" cy="7.5" r="0.6" />
+        <circle cx="14" cy="7" r="0.6" />
+        <circle cx="16.8" cy="10" r="0.6" />
       </template>
       <!-- 成就/奖杯 -->
       <template v-else-if="name === 'trophy'">
@@ -213,6 +211,33 @@
         <path d="M16 7c1-3 4-4 6-3" />
         <circle cx="13" cy="9" r="1" fill="currentColor" stroke="none" />
       </template>
+      <!-- 混音/随机 -->
+      <template v-else-if="name === 'shuffle'">
+        <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
+      </template>
+      <!-- 收藏 -->
+      <template v-else-if="name === 'heart'">
+        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.2l7.8-7.7 1-1.1a5.5 5.5 0 0 0 0-7.8z" />
+      </template>
+      <!-- 箭头左 -->
+      <template v-else-if="name === 'chevron-left'">
+        <path d="M15 18l-6-6 6-6" />
+      </template>
+      <!-- 成就/奖章 -->
+      <template v-else-if="name === 'award'">
+        <circle cx="12" cy="9" r="6" />
+        <path d="M8.6 14.2L7.5 22l4.5-2.5L16.5 22l-1.1-7.8" />
+      </template>
+      <!-- 明亮模式 -->
+      <template v-else-if="name === 'sun'">
+        <circle cx="12" cy="12" r="4.5" />
+        <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8" />
+      </template>
+      <!-- 对比度/明暗 -->
+      <template v-else-if="name === 'contrast'">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 3v18" />
+      </template>
       <!-- 默认圆点 -->
       <template v-else>
         <circle cx="12" cy="12" r="8" />
@@ -224,6 +249,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+/**
+ * 图标名清单（name 取值）：
+ * wave white-noise pink-noise brown-noise red-noise rain wave-ocean forest stream
+ * fire coffee train fan play pause timer save palette trophy settings share user
+ * edit mute volume close chevron-right chevron-left gift moon flame mixer clock copy
+ * lock check mountain bird shuffle heart award sun contrast
+ */
 const props = withDefaults(defineProps<{
   name: string
   size?: number | string
