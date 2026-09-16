@@ -1,6 +1,6 @@
 <template>
   <view class="brand-bar">
-    <image class="brand-logo" src="/static/logo-v10-1.jpg" mode="aspectFill" />
+    <image class="brand-logo" src="/static/logo-v10-1.jpg" mode="aspectFit" />
     <view class="brand-text">
       <text class="brand-name">声栖</text>
       <text class="brand-greet">{{ greeting }}</text>

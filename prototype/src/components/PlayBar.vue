@@ -139,7 +139,7 @@ const onMainPlay = () => {
 <style lang="scss" scoped>
 .play-bar {
   position: fixed;
-  bottom: var(--app-tab-height, 100rpx);
+  bottom: var(--app-tab-height);
   left: 26rpx;
   right: 26rpx;
   z-index: 100;
@@ -153,6 +153,8 @@ const onMainPlay = () => {
   align-items: center;
   justify-content: space-between;
   padding: 0 20rpx;
+  /* v2：悬浮主控胶囊（.app-card 已给 44rpx 全圆角），此处仅提升至 shadow-3 */
+  box-shadow: var(--app-shadow-3), var(--app-inset);
 }
 
 .play-info {
@@ -167,9 +169,8 @@ const onMainPlay = () => {
   height: 72rpx;
   border-radius: 20rpx;
   overflow: hidden;
-  background: var(--app-subtle, $uni-bg-color-grey);
+  background: var(--app-sunken);
   flex-shrink: 0;
-  box-shadow: inset 0 -1rpx 0 rgba(0, 0, 0, .08);
 }
 
 .mini-logo {
@@ -198,7 +199,7 @@ const onMainPlay = () => {
 
   .bar {
     width: 5rpx;
-    background: var(--app-text-3, $uni-border-color);
+    background: var(--app-text-3);
     border-radius: 3rpx;
 
     &:nth-child(1) { height: 10rpx; }
@@ -208,8 +209,8 @@ const onMainPlay = () => {
   }
 
   &.playing .bar {
-    background: var(--app-primary, $app-primary);
-    animation: wave 1.2s ease-in-out infinite;
+    background: var(--app-primary);
+    animation: wave 1.2s var(--ease-std) infinite;
 
     &:nth-child(1) { animation-delay: 0s; }
     &:nth-child(2) { animation-delay: 0.2s; }
@@ -229,9 +230,10 @@ const onMainPlay = () => {
   gap: 10rpx;
 }
 
+/* v2 字排：主文案 Title-3（16px=32rpx） */
 .play-scene {
-  font-size: 26rpx;
-  color: var(--app-text, $uni-text-color);
+  font-size: 32rpx;
+  color: var(--app-text);
   font-weight: 600;
   letter-spacing: -0.3rpx;
   overflow: hidden;
@@ -240,12 +242,12 @@ const onMainPlay = () => {
 }
 
 .timer-badge {
-  font-size: 18rpx;
-  color: var(--app-primary, $app-primary);
+  font-size: 22rpx;
+  color: var(--app-primary);
   font-weight: 700;
-  background: var(--app-primary-soft, rgba($app-primary, 0.1));
-  padding: 2rpx 12rpx;
-  border-radius: 12rpx;
+  background: var(--app-primary-soft);
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
   letter-spacing: 0.5rpx;
   flex-shrink: 0;
 }
@@ -253,20 +255,21 @@ const onMainPlay = () => {
 .play-actions {
   display: flex;
   align-items: center;
-  gap: 18rpx;
+  gap: 4rpx;
 }
 
 .play-btn {
-  width: 56rpx;
-  height: 56rpx;
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 999rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.16s;
+  transition: transform var(--dur-fast) var(--ease-std), background var(--dur-fast) var(--ease-std);
 
   &:active {
-    transform: scale(0.85);
-    opacity: 0.6;
+    transform: scale(0.96);
+    background: var(--app-press);
   }
 }
 
@@ -274,21 +277,20 @@ const onMainPlay = () => {
   width: 88rpx;
   height: 88rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--app-primary, $app-primary), var(--app-primary-dark, $app-primary-dark));
+  background: linear-gradient(135deg, var(--app-primary), var(--app-primary-strong));
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 12rpx 26rpx color-mix(in srgb, var(--app-primary, $app-primary) 36%, transparent);
-  transition: all 0.16s cubic-bezier(.4, 0, .2, 1);
+  box-shadow: var(--app-shadow-2);
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
-    transform: scale(0.9);
+    transform: scale(0.96);
   }
 }
 
 .play-btn.active {
-  background: var(--app-primary-soft, rgba($app-primary, 0.1));
-  border-radius: 16rpx;
+  background: var(--app-primary-soft);
 }
 
 /* 面板（定时 / 混音）共用浮层样式 */
@@ -299,7 +301,7 @@ const onMainPlay = () => {
   left: 0;
   right: 0;
   padding: 24rpx;
-  animation: panelIn 0.2s cubic-bezier(.4, 0, .2, 1) both;
+  animation: panelIn var(--dur-base) var(--ease-std) both;
 }
 
 @keyframes panelIn {
@@ -325,31 +327,31 @@ const onMainPlay = () => {
 .mix-panel-title {
   font-size: 28rpx;
   font-weight: 700;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
   flex: 1;
 }
 
 .mix-panel-count {
   padding: 6rpx 20rpx;
-  border-radius: 26rpx;
-  background: var(--app-primary-soft, rgba($app-primary, 0.12));
+  border-radius: 999rpx;
+  background: var(--app-primary-soft);
   font-size: 21rpx;
   font-weight: 600;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
 }
 
 .timer-close {
-  width: 44rpx;
-  height: 44rpx;
+  width: 88rpx;
+  height: 88rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14rpx;
-  background: var(--app-subtle, $uni-bg-color-grey);
-  transition: all 0.16s;
+  border-radius: 999rpx;
+  transition: transform var(--dur-fast) var(--ease-std), background var(--dur-fast) var(--ease-std);
 
   &:active {
-    transform: scale(0.9);
+    transform: scale(0.96);
+    background: var(--app-press);
   }
 }
 
@@ -361,31 +363,31 @@ const onMainPlay = () => {
 
 .timer-option {
   flex: 1;
-  height: 64rpx;
+  height: 88rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 18rpx;
-  background: var(--app-subtle, $uni-bg-color-grey);
-  transition: all 0.16s cubic-bezier(.4, 0, .2, 1);
+  border-radius: 999rpx;
+  background: var(--app-surface-2);
+  transition: transform var(--dur-fast) var(--ease-std), background var(--dur-fast) var(--ease-std);
 
   &.active {
-    background: var(--app-primary, $app-primary);
-    box-shadow: 0 6rpx 16rpx color-mix(in srgb, var(--app-primary, $app-primary) 30%, transparent);
+    background: var(--app-primary);
+    box-shadow: var(--app-shadow-1);
   }
 
   &:active {
-    transform: scale(0.94);
+    transform: scale(0.96);
   }
 }
 
 .timer-option-label {
-  font-size: 22rpx;
+  font-size: 24rpx;
   font-weight: 600;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
 
   .timer-option.active & {
-    color: #fff;
+    color: var(--app-on-primary);
   }
 }
 
@@ -396,8 +398,8 @@ const onMainPlay = () => {
 }
 
 .timer-fade-label {
-  font-size: 22rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  font-size: 24rpx;
+  color: var(--app-text-2);
   flex-shrink: 0;
 }
 
@@ -409,25 +411,25 @@ const onMainPlay = () => {
 
 .timer-fade-opt {
   flex: 1;
-  height: 48rpx;
+  height: 64rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14rpx;
-  background: var(--app-subtle, $uni-bg-color-grey);
+  border-radius: 999rpx;
+  background: var(--app-surface-2);
   font-size: 20rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
   font-weight: 500;
-  transition: all 0.16s;
+  transition: transform var(--dur-fast) var(--ease-std), background var(--dur-fast) var(--ease-std);
 
   &.active {
-    background: var(--app-primary-soft, rgba($app-primary, 0.12));
-    color: var(--app-primary, $app-primary);
+    background: var(--app-primary-soft);
+    color: var(--app-primary);
     font-weight: 600;
   }
 
   &:active {
-    transform: scale(0.94);
+    transform: scale(0.96);
   }
 }
 
@@ -440,6 +442,6 @@ const onMainPlay = () => {
   padding: 40rpx 0;
   text-align: center;
   font-size: 24rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
 }
 </style>

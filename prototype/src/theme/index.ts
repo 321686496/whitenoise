@@ -253,6 +253,10 @@ export function buildTokens(scheme: SchemeKey, ui: UiMode, resolved: ResolvedMod
     '--app-primary-soft': 'color-mix(in srgb, var(--p-primary) 14%, transparent)',
     '--app-primary-soft-2': 'color-mix(in srgb, var(--p-primary) 24%, transparent)',
     '--app-overlay': 'var(--p-overlay)', '--app-sunken': 'var(--p-sunken)',
+    /* 封面/图片等深色内容之上的前景与浮层（v2 语义 token，替代散落 rgba 白字面） */
+    '--app-on-cover': '#FFFFFF',
+    '--app-on-cover-soft': 'color-mix(in srgb, #FFFFFF 78%, transparent)',
+    '--app-cover-scrim': 'linear-gradient(180deg, transparent 40%, rgba(var(--p-scrim), .55) 100%)',
     '--app-danger': 'var(--p-danger)', '--app-success': 'var(--p-success)', '--app-warning': 'var(--p-warning)',
     '--app-danger-soft': 'color-mix(in srgb, var(--p-danger) 13%, transparent)',
     '--app-rank-1': 'linear-gradient(135deg,#F0C27F,#E8A849)',

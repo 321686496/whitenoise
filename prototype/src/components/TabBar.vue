@@ -20,6 +20,7 @@
           v-html="t.path"
         ></svg>
         <text class="tabbar-text">{{ t.text }}</text>
+        <view class="tabbar-dot" :class="{ 'tabbar-dot--on': t.key === current }"></view>
       </view>
     </view>
   </view>
@@ -59,37 +60,38 @@ function go(key: string) {
 
 .tabbar-pill {
   width: 100%;
-  height: 104rpx;
+  height: 112rpx;
   border-radius: 34rpx;
   display: flex;
   align-items: center;
   padding: 6rpx 10rpx;
   pointer-events: auto;
-  background: var(--app-card-bg);
-  border: 1rpx solid var(--app-card-border);
-  box-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.16), 0 6rpx 16rpx rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(var(--app-card-blur, 0px));
-  -webkit-backdrop-filter: blur(var(--app-card-blur, 0px));
+  background: var(--app-surface);
+  border: 1rpx solid var(--app-line);
+  box-shadow: var(--app-shadow-3), var(--app-inset);
+  backdrop-filter: blur(var(--app-blur, 0px));
+  -webkit-backdrop-filter: blur(var(--app-blur, 0px));
 }
 
 .tabbar-item {
+  position: relative;
   flex: 1;
-  height: 92rpx;
+  height: 88rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4rpx;
-  border-radius: 26rpx;
-  transition: background 0.2s cubic-bezier(.4, 0, .2, 1), transform 0.16s cubic-bezier(.4, 0, .2, 1);
+  gap: 2rpx;
+  border-radius: 999rpx;
+  transition: background var(--dur-fast) var(--ease-std), transform var(--dur-fast) var(--ease-std);
 
   &:active {
-    transform: scale(0.92);
+    transform: scale(0.96);
   }
 
+  /* v2 选中态：整项底色药丸（不再上浮），靠主色 + 指示点区分 */
   &--on {
     background: var(--app-primary-soft);
-    transform: translateY(-2rpx);
   }
 }
 
@@ -108,6 +110,19 @@ function go(key: string) {
   .tabbar-item--on & {
     color: var(--app-primary);
     font-weight: 700;
+  }
+}
+
+/* 6rpx×24rpx 横条指示点：未选中占位透明，选中显主色 */
+.tabbar-dot {
+  width: 24rpx;
+  height: 6rpx;
+  border-radius: 999rpx;
+  background: transparent;
+  transition: background var(--dur-fast) var(--ease-std);
+
+  &--on {
+    background: var(--app-primary);
   }
 }
 </style>

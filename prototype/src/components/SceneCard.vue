@@ -8,12 +8,12 @@
       <!-- 横排布局：封面内叠声音图标 -->
       <view class="scene-sounds" v-if="layout === 'row'">
         <view class="sound-chip" v-for="(s, i) in soundIcons" :key="i">
-          <Icon :name="s" :size="20" color="rgba(255,255,255,.95)" />
+          <Icon :name="s" :size="20" color="var(--app-on-cover)" />
         </view>
       </view>
       <!-- 网格布局：封面主图标 -->
       <view class="cover-icon" v-else>
-        <Icon :name="soundIcons[0] || 'wave'" :size="44" color="rgba(255,255,255,.95)" />
+        <Icon :name="soundIcons[0] || 'wave'" :size="44" color="var(--app-on-cover)" />
       </view>
       <!-- 网格布局：播放按钮悬浮封面右上 -->
       <view class="scene-cover-actions" v-if="layout === 'grid'" @click.stop>
@@ -81,18 +81,17 @@ defineEmits<{
 
 <style lang="scss" scoped>
 .scene-card {
-  border-radius: 26rpx;
   overflow: hidden;
   margin-bottom: 20rpx;
-  transition: all 0.2s;
+  transition: transform var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std), box-shadow var(--dur-fast) var(--ease-std);
 
   &:active {
-    transform: scale(0.985);
+    transform: scale(0.96);
   }
 
   &--active {
-    border-color: color-mix(in srgb, var(--app-primary, $app-primary) 70%, transparent);
-    box-shadow: 0 10rpx 24rpx color-mix(in srgb, var(--app-primary, $app-primary) 16%, transparent);
+    border-color: color-mix(in srgb, var(--app-primary) 70%, transparent);
+    box-shadow: var(--app-shadow-2), var(--app-inset), 0 0 0 2rpx color-mix(in srgb, var(--app-primary) 24%, transparent);
   }
 
   /* 横排（场景页） */
@@ -104,35 +103,35 @@ defineEmits<{
 .scene-cover {
   position: relative;
   flex-shrink: 0;
-  box-shadow: inset -1rpx 0 0 rgba(255, 255, 255, .08);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
+/* list（row）形态：封面 160×120（4:3），贴左缘由卡片裁圆角 */
 .scene-card--row .scene-cover {
-  width: 150rpx;
-  min-height: 150rpx;
+  width: 160rpx;
+  min-height: 120rpx;
+  align-self: stretch;
+  box-shadow: inset -1rpx 0 0 var(--app-line);
 }
 
-/* 网格：封面置顶全宽 */
+/* 网格形态：封面全宽 4:3、圆角 32rpx，内嵌于卡片留白中 */
 .scene-card--grid {
   display: flex;
   flex-direction: column;
+  padding: 12rpx;
 
   .scene-cover {
     width: 100%;
-    height: 150rpx;
-    box-shadow: inset 0 -1rpx 0 rgba(0, 0, 0, .06);
+    aspect-ratio: 4 / 3;
+    border-radius: 32rpx;
   }
 
   .scene-body {
-    padding: 20rpx;
+    padding: 16rpx 12rpx 12rpx;
     gap: 6rpx;
-  }
-
-  .scene-name {
-    font-size: 27rpx;
   }
 
   .scene-desc {
@@ -149,9 +148,10 @@ defineEmits<{
   width: 44rpx;
   height: 44rpx;
   border-radius: 14rpx;
-  background: rgba(255, 255, 255, .22);
+  background: color-mix(in srgb, var(--app-on-cover) 22%, transparent);
   backdrop-filter: blur(6rpx);
-  box-shadow: inset 0 -1rpx 0 rgba(0, 0, 0, .06);
+  -webkit-backdrop-filter: blur(6rpx);
+  box-shadow: inset 0 -1rpx 0 var(--app-press);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -161,18 +161,18 @@ defineEmits<{
   width: 88rpx;
   height: 88rpx;
   border-radius: 26rpx;
-  background: rgba(255, 255, 255, .18);
+  background: color-mix(in srgb, var(--app-on-cover) 18%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, .35);
+  box-shadow: inset 0 1rpx 0 color-mix(in srgb, var(--app-on-cover) 35%, transparent);
 }
 
 /* 网格下播放按钮悬浮封面右上 */
 .scene-cover-actions {
   position: absolute;
-  top: 14rpx;
-  right: 14rpx;
+  top: 12rpx;
+  right: 12rpx;
 }
 
 .scene-body {
@@ -182,36 +182,42 @@ defineEmits<{
   flex-direction: column;
   justify-content: center;
   gap: 8rpx;
+  min-width: 0;
 }
 
 .scene-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12rpx;
 }
 
+/* v2 标题规格：30rpx/600/1.3，两行截断 */
 .scene-name {
   font-size: 30rpx;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
   font-weight: 600;
+  line-height: 1.3;
   letter-spacing: -0.4rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .scene-tag {
   font-size: 20rpx;
   padding: 4rpx 14rpx;
-  border-radius: 20rpx;
-  background: var(--app-primary-soft, rgba($app-morandi-green, 0.2));
-  color: var(--app-primary, $app-primary);
+  border-radius: 999rpx;
+  background: var(--app-primary-soft);
+  color: var(--app-primary);
   flex-shrink: 0;
 }
 
 .scene-desc {
   font-size: 24rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -220,32 +226,40 @@ defineEmits<{
 .scene-actions {
   display: flex;
   flex-direction: column;
-  gap: 14rpx;
-  padding: 24rpx 24rpx 24rpx 0;
+  gap: 20rpx;
+  padding: 0 16rpx 0 0;
   justify-content: center;
 }
 
+/* 视觉 64rpx，::after 外扩热区至 88rpx 触控达标 */
 .scene-action-btn {
-  width: 58rpx;
-  height: 58rpx;
-  border-radius: 18rpx;
-  background: var(--app-subtle, $uni-bg-color-grey);
+  position: relative;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 999rpx;
+  background: var(--app-surface-2);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.16s;
+  transition: transform var(--dur-fast) var(--ease-std);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -12rpx;
+  }
 
   &:active {
-    transform: scale(0.88);
+    transform: scale(0.96);
   }
 
   &.play {
-    background: linear-gradient(135deg, var(--app-primary, $app-primary), var(--app-primary-dark, $app-primary-dark));
-    box-shadow: 0 8rpx 18rpx color-mix(in srgb, var(--app-primary, $app-primary) 32%, transparent);
+    background: linear-gradient(135deg, var(--app-primary), var(--app-primary-strong));
+    box-shadow: var(--app-shadow-2);
   }
 
   &.playing {
-    box-shadow: inset 0 3rpx 8rpx rgba(0, 0, 0, .18);
+    box-shadow: inset 0 3rpx 8rpx color-mix(in srgb, var(--app-text) 22%, transparent);
   }
 }
 </style>

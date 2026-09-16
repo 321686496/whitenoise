@@ -1,13 +1,13 @@
 <template>
   <view class="sound-card app-card" :class="{ active: isActive }" @click="$emit('tap')">
-    <view class="sound-icon" :style="{ background: color }">
-      <Icon :name="iconName" :size="30" color="#fff" />
+    <view class="sound-icon" :style="{ '--sound-color': color }">
+      <Icon :name="iconName" :size="30" color="var(--sound-color)" />
     </view>
     <view class="sound-name-wrap">
       <text class="sound-name">{{ name }}</text>
       <!-- 选中角标 -->
       <view class="sound-check" v-if="isActive">
-        <Icon name="check" :size="14" color="#fff" />
+        <Icon name="check" :size="14" color="var(--app-on-primary)" />
       </view>
     </view>
     <text class="sound-type">{{ type }}</text>
@@ -38,32 +38,34 @@ defineEmits<{
   flex-direction: column;
   align-items: center;
   gap: 14rpx;
-  transition: transform 0.16s cubic-bezier(.4,0,.2,1), background 0.2s;
-  border: 1rpx solid var(--app-card-border, $uni-border-color);
+  transition: transform var(--dur-fast) var(--ease-std), background var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std);
+  border: 1rpx solid var(--app-line);
   position: relative;
   border-radius: 26rpx;
   transform: translateZ(0);
 
   &.active {
-    border-color: color-mix(in srgb, var(--app-primary, $app-primary) 70%, transparent);
-    background: var(--app-primary-soft, rgba($app-primary, 0.08));
-    box-shadow: 0 10rpx 24rpx color-mix(in srgb, var(--app-primary, $app-primary) 16%, transparent);
+    border-color: color-mix(in srgb, var(--app-primary) 70%, transparent);
+    background: var(--app-primary-soft);
+    box-shadow: var(--app-shadow-2), var(--app-inset);
   }
 
   &:active {
-    transform: scale(0.94);
+    transform: scale(0.96);
   }
 }
 
-/* iOS 拟物方形图标磁贴 */
+/* v2：圆形色底，声音资产色经 --sound-color 注入，color-mix 与表面色融合 */
 .sound-icon {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: 22rpx;
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 999rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 -2rpx 0 rgba(0,0,0,.08), inset 0 2rpx 0 rgba(255,255,255,.25), 0 6rpx 14rpx rgba(0,0,0,.10);
+  background: color-mix(in srgb, var(--sound-color) 16%, var(--app-surface));
+  color: var(--sound-color);
+  box-shadow: var(--app-shadow-1), var(--app-inset);
 }
 
 .sound-name-wrap {
@@ -75,7 +77,7 @@ defineEmits<{
 
 .sound-name {
   font-size: 25rpx;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
   font-weight: 600;
   letter-spacing: -0.3rpx;
   overflow: hidden;
@@ -88,7 +90,7 @@ defineEmits<{
   width: 26rpx;
   height: 26rpx;
   border-radius: 50%;
-  background: var(--app-primary, $app-primary);
+  background: var(--app-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -97,6 +99,13 @@ defineEmits<{
 
 .sound-type {
   font-size: 21rpx;
-  color: var(--app-text-3, $uni-text-color-grey);
+  color: var(--app-text-3);
+}
+</style>
+
+<style lang="scss">
+/* 深色模式提亮色底，避免暗底发灰（非 scoped：`--sound-color` 由内联样式注入在同一元素上） */
+:root[data-mode='dark'] .sound-card .sound-icon {
+  background: color-mix(in srgb, var(--sound-color) 22%, var(--app-surface));
 }
 </style>

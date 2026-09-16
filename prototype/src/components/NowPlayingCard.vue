@@ -98,7 +98,8 @@ function toggleFav() { fav.value = !fav.value }
 }
 .npc-actions { display: flex; justify-content: space-around; }
 .npc-act {
-  display: flex; align-items: center; gap: 10rpx; padding: 16rpx 24rpx;
+  display: flex; align-items: center; justify-content: center; gap: 10rpx; padding: 16rpx 24rpx;
+  min-height: 88rpx; /* v2 触控达标（44px） */
   border-radius: 999rpx; font-size: 24rpx; color: var(--app-text-2);
   background: var(--app-surface-2); border: 1rpx solid var(--app-line);
   transition: transform var(--dur-fast) var(--ease-std), color var(--dur-fast), background var(--dur-fast);
