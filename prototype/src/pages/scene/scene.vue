@@ -44,7 +44,7 @@
         <view class="rec-row">
           <view class="rec-card" v-for="s in recommended" :key="s.id" @click="openDetail(s)">
             <view class="rec-cover" :style="coverOf(s)">
-              <Icon :name="s.iconName" :size="40" color="rgba(255,255,255,.95)" />
+              <Icon :name="s.iconName" :size="40" color="var(--app-on-cover-soft)" />
               <view class="rec-reason">
                 <Icon name="flame" :size="12" color="var(--app-primary)" />
                 <text class="rec-reason-text">常听偏好</text>
@@ -66,7 +66,7 @@
           <view class="recent-row">
             <view class="recent-card" v-for="r in recentItems" :key="r.sceneId" @click="openDetail(r)">
               <view class="recent-cover" :style="coverOfSceneId(r.sceneId)">
-                <Icon :name="r.iconName" :size="34" color="rgba(255,255,255,.95)" />
+                <Icon :name="r.iconName" :size="34" color="var(--app-on-cover-soft)" />
               </view>
               <text class="recent-name">{{ r.name }}</text>
               <text class="recent-time">{{ recentTimeLabel(r.ts) }}</text>
@@ -81,12 +81,12 @@
       <view class="tag-filter">
         <view
           class="tag-item"
-          :class="{ active: activeTag === tag.id }"
-          v-for="tag in tags"
-          :key="tag.id"
-          @click="activeTag = tag.id"
+          :class="{ active: activeTag === tag.key }"
+          v-for="tag in sceneCategories"
+          :key="tag.key"
+          @click="activeTag = tag.key"
         >
-          <Icon :name="tag.icon" :size="14" :color="activeTag === tag.id ? 'var(--app-primary)' : 'var(--app-text-2)'" />
+          <Icon :name="tag.icon" :size="14" :color="activeTag === tag.key ? 'var(--app-primary)' : 'var(--app-text-2)'" />
           <text>{{ tag.label }}</text>
         </view>
       </view>
@@ -160,7 +160,7 @@ import SceneCard from '@/components/SceneCard.vue'
 import Icon from '@/components/Icon.vue'
 import TabBar from '@/components/TabBar.vue'
 import { player, applyScene, getRecent, recentTimeLabel } from '@/composables/usePlayer'
-import { SIMULATED_PREFS, getRecommended, getCategoryScenes, findScene } from '@/data/scenes'
+import { SIMULATED_PREFS, getRecommended, getCategoryScenes, findScene, sceneCategories } from '@/data/scenes'
 import type { Scene } from '@/data/scenes'
 import { sounds } from '@/data/sounds'
 
@@ -172,14 +172,8 @@ interface MyScene {
   bgColor: string
 }
 
-const activeTag = ref('all')
-const tags = [
-  { id: 'all', label: '全部', icon: 'wave' },
-  { id: 'sleep', label: '助眠', icon: 'moon' },
-  { id: 'focus', label: '专注', icon: 'flame' },
-  { id: 'relax', label: '放松', icon: 'forest' },
-  { id: 'nature', label: '自然', icon: 'mountain' },
-]
+/* 分类单一来源：data/scenes.ts 的 sceneCategories（v2 收敛，页内不再重复定义） */
+const activeTag = ref<string>('all')
 
 const prefLabels = computed(() => {
   const map: Record<string, string> = { sleep: '助眠', focus: '专注', relax: '放松', nature: '自然' }
@@ -220,7 +214,7 @@ const coverOf = (s: Scene) => coverStyle(s.gradient, s.image)
 const coverOfSceneId = (sceneId: string) => {
   const s = findScene(sceneId)
   const r = recentItems.value.find((x) => x.sceneId === sceneId)
-  return coverStyle(s?.gradient ?? r?.gradient ?? 'var(--app-subtle)', s?.image)
+  return coverStyle(s?.gradient ?? r?.gradient ?? 'var(--app-surface-2)', s?.image)
 }
 
 // 支持 Scene（id）与 RecentItem（sceneId）两种来源
@@ -285,7 +279,7 @@ const playMyScene = (scene: { name: string }) => {
   height: 84rpx;
   border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: 0 8rpx 22rpx color-mix(in srgb, var(--app-primary, $app-primary) 22%, transparent);
+  box-shadow: 0 8rpx 22rpx color-mix(in srgb, var(--app-primary) 22%, transparent);
 }
 
 .brand-logo {
@@ -302,7 +296,7 @@ const playMyScene = (scene: { name: string }) => {
 .app-title {
   font-size: 46rpx;
   font-weight: 800;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
   letter-spacing: 4rpx;
   line-height: 1.1;
 }
@@ -316,7 +310,7 @@ const playMyScene = (scene: { name: string }) => {
 
 .greeting-text {
   font-size: 22rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
   letter-spacing: 1rpx;
 }
 
@@ -326,12 +320,12 @@ const playMyScene = (scene: { name: string }) => {
   gap: 4rpx;
   padding: 4rpx 14rpx;
   border-radius: 18rpx;
-  background: var(--app-primary-soft, rgba($app-primary, 0.1));
+  background: var(--app-primary-soft);
 }
 
 .pref-chip-text {
   font-size: 20rpx;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
   font-weight: 600;
 }
 
@@ -340,17 +334,18 @@ const playMyScene = (scene: { name: string }) => {
   gap: 16rpx;
 }
 
+/* v2：触控 88rpx 达标，按压缩放统一 scale(.96) */
 .header-btn {
-  width: 68rpx;
-  height: 68rpx;
-  border-radius: 22rpx;
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 28rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.16s cubic-bezier(.4, 0, .2, 1);
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
-    transform: scale(0.9);
+    transform: scale(0.96);
   }
 }
 
@@ -371,12 +366,12 @@ const playMyScene = (scene: { name: string }) => {
   font-size: 25rpx;
   font-weight: 600;
   letter-spacing: 0.3rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
 }
 
 .divider {
   height: 1rpx;
-  background: var(--app-divider, rgba($app-primary, 0.08));
+  background: var(--app-line);
   margin: 6rpx 0 20rpx;
 }
 
@@ -400,7 +395,7 @@ const playMyScene = (scene: { name: string }) => {
 .rec-card {
   width: 240rpx;
   flex-shrink: 0;
-  transition: transform .16s;
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
     transform: scale(.96);
@@ -417,6 +412,7 @@ const playMyScene = (scene: { name: string }) => {
   margin-bottom: 12rpx;
 }
 
+/* 图上浮层徽章：on-cover 白经 color-mix 半透明 + 毛玻璃（glass 取向） */
 .rec-reason {
   position: absolute;
   left: 10rpx;
@@ -426,25 +422,27 @@ const playMyScene = (scene: { name: string }) => {
   gap: 4rpx;
   padding: 4rpx 12rpx;
   border-radius: 18rpx;
-  background: rgba(255, 255, 255, .9);
+  background: color-mix(in srgb, var(--app-on-cover) 90%, transparent);
+  backdrop-filter: blur(6rpx);
+  -webkit-backdrop-filter: blur(6rpx);
 }
 
 .rec-reason-text {
   font-size: 20rpx;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
   font-weight: 600;
 }
 
 .rec-name {
   font-size: 27rpx;
   font-weight: 600;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
   display: block;
 }
 
 .rec-desc {
   font-size: 22rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -455,7 +453,7 @@ const playMyScene = (scene: { name: string }) => {
 .recent-card {
   width: 180rpx;
   flex-shrink: 0;
-  transition: transform .16s;
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
     transform: scale(.96);
@@ -474,13 +472,13 @@ const playMyScene = (scene: { name: string }) => {
 .recent-name {
   font-size: 25rpx;
   font-weight: 600;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
   display: block;
 }
 
 .recent-time {
   font-size: 21rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
 }
 
 /* ⑤ 分类分段（卡片 B 内） */
@@ -492,27 +490,32 @@ const playMyScene = (scene: { name: string }) => {
   overflow-x: auto;
 }
 
+/* v2 chip：surface 底 + 发丝描边 + 选中主色软底；触控高度 ≥88rpx */
 .tag-item {
   display: flex;
   align-items: center;
   gap: 8rpx;
-  padding: 12rpx 24rpx;
-  border-radius: 28rpx;
+  min-height: 88rpx;
+  padding: 0 28rpx;
+  border-radius: 999rpx;
   font-size: 24rpx;
   font-weight: 500;
-  color: var(--app-text-2, $uni-text-color-grey);
-  background: var(--app-subtle, $uni-bg-color-grey);
-  transition: all 0.16s cubic-bezier(.4, 0, .2, 1);
+  color: var(--app-text-2);
+  background: var(--app-surface);
+  border: 1rpx solid var(--app-line);
+  box-shadow: var(--app-shadow-1), var(--app-inset);
+  transition: all var(--dur-fast) var(--ease-std);
   flex-shrink: 0;
 
   &.active {
-    background: var(--app-primary-soft, rgba($app-primary, 0.1));
-    color: var(--app-primary, $app-primary);
+    background: var(--app-primary-soft);
+    border-color: color-mix(in srgb, var(--app-primary) 30%, transparent);
+    color: var(--app-primary);
     font-weight: 600;
   }
 
   &:active {
-    transform: scale(0.94);
+    transform: scale(0.96);
   }
 }
 
@@ -542,16 +545,16 @@ const playMyScene = (scene: { name: string }) => {
   align-items: center;
   gap: 2rpx;
   padding: 8rpx 12rpx;
-  transition: transform .16s;
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
-    transform: scale(.9);
+    transform: scale(.96);
   }
 }
 
 .more-text {
   font-size: 23rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
 }
 
 /* ⑦ 我的场景（卡片 C 内） */
@@ -561,16 +564,16 @@ const playMyScene = (scene: { name: string }) => {
   gap: 8rpx;
   padding: 10rpx 24rpx;
   border-radius: 30rpx;
-  transition: all 0.16s cubic-bezier(.4, 0, .2, 1);
+  transition: all var(--dur-fast) var(--ease-std);
 
   &:active {
-    transform: scale(0.9);
+    transform: scale(0.96);
   }
 }
 
 .new-btn-text {
   font-size: 23rpx;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
   font-weight: 600;
 }
 
@@ -586,7 +589,7 @@ const playMyScene = (scene: { name: string }) => {
   width: 104rpx;
   height: 104rpx;
   border-radius: 32rpx;
-  background: var(--app-primary-soft, rgba($app-primary, 0.1));
+  background: var(--app-primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -595,12 +598,12 @@ const playMyScene = (scene: { name: string }) => {
 
 .empty-text {
   font-size: 28rpx;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
   font-weight: 600;
 }
 
 .empty-hint {
   font-size: 23rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
 }
 </style>

@@ -22,12 +22,13 @@ export interface Scene {
   isPreset: boolean
 }
 
-export const sceneCategories: { key: string; label: string }[] = [
-  { key: 'all', label: '全部' },
-  { key: 'sleep', label: '助眠' },
-  { key: 'focus', label: '专注' },
-  { key: 'relax', label: '放松' },
-  { key: 'nature', label: '自然' },
+/** 分类单一来源（icon 名与 Icon.vue 已定义图标一致），场景页 / 全部场景页共用 */
+export const sceneCategories: { key: string; label: string; icon: string }[] = [
+  { key: 'all', label: '全部', icon: 'wave' },
+  { key: 'sleep', label: '助眠', icon: 'moon' },
+  { key: 'focus', label: '专注', icon: 'flame' },
+  { key: 'relax', label: '放松', icon: 'forest' },
+  { key: 'nature', label: '自然', icon: 'mountain' },
 ]
 
 /** 由 soundIds 拼出如「雨声 + 白噪音」的组合文案 */

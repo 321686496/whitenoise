@@ -125,9 +125,8 @@
 		{
 			"path": "pages/scene-all/scene-all",
 			"style": {
-				"navigationBarTitleText": "全部场景",
-				"navigationBarBackgroundColor": "#F5F2ED",
-				"navigationBarTextStyle": "black"
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
 			}
 		}
 	],

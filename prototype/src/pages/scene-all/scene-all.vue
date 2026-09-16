@@ -1,21 +1,12 @@
 <template>
-  <view class="page-container">
+  <!-- v2：自定义导航（pages.json 已改 custom），NavBar 自带安全区，容器顶距归零 -->
+  <view class="page-container scene-all-page">
     <view class="page-bg"></view>
-    <view class="header">
-      <text class="page-title">全部场景</text>
-      <text class="page-subtitle">浏览全部官方预设场景</text>
-    </view>
 
-    <view class="tag-filter">
-      <view
-        class="tag-item"
-        :class="{ active: activeTag === tag.key }"
-        v-for="tag in sceneCategories"
-        :key="tag.key"
-        @click="activeTag = tag.key"
-      >
-        <text>{{ tag.label }}</text>
-      </view>
+    <NavBar title="全部场景" />
+
+    <view class="filter-head">
+      <Segmented :options="catOptions" v-model="activeTag" />
     </view>
 
     <view class="scene-grid">
@@ -39,17 +30,21 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import NavBar from '@/components/NavBar.vue'
+import Segmented from '@/components/Segmented.vue'
 import SceneCard from '@/components/SceneCard.vue'
 import { sceneCategories, homeScenes } from '@/data/scenes'
-import type { Scene } from '@/data/scenes'
+import type { Scene, SceneCategory } from '@/data/scenes'
 import { sounds } from '@/data/sounds'
 import { player, applyScene } from '@/composables/usePlayer'
 
+/* 分类单一来源：data/scenes.ts 的 sceneCategories（与首页场景流一致） */
+const catOptions = computed(() => sceneCategories.map((c) => ({ key: c.key, label: c.label })))
 const activeTag = ref('all')
 
 const filteredScenes = computed(() => {
   if (activeTag.value === 'all') return homeScenes
-  return homeScenes.filter((s) => s.category === activeTag.value)
+  return homeScenes.filter((s) => s.category === (activeTag.value as SceneCategory))
 })
 
 const soundIconsOf = (scene: Scene) =>
@@ -67,61 +62,23 @@ const playScene = (scene: Scene) => {
 </script>
 
 <style lang="scss" scoped>
-.header {
-  padding: 16rpx 4rpx 8rpx;
+/* NavBar 自带 env(safe-area-inset-top)，去掉容器重复的安全区顶距，仅留少量余白 */
+.scene-all-page {
+  padding-top: 12rpx;
 }
 
-.page-title {
-  font-size: 46rpx;
+.filter-head {
+  margin-bottom: 24rpx;
 }
 
-.page-subtitle {
-  font-size: 24rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
-  margin-top: 10rpx;
-  display: block;
-}
-
-/* 分类 Tab */
-.tag-filter {
-  display: flex;
-  gap: 12rpx;
-  padding: 8rpx 0;
-  margin-bottom: 8rpx;
-  overflow-x: auto;
-}
-
-.tag-item {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  padding: 12rpx 24rpx;
-  border-radius: 28rpx;
-  font-size: 24rpx;
-  font-weight: 500;
-  color: var(--app-text-2, $uni-text-color-grey);
-  background: var(--app-subtle, $uni-bg-color-grey);
-  transition: all 0.16s cubic-bezier(.4, 0, .2, 1);
-  flex-shrink: 0;
-
-  &.active {
-    background: var(--app-primary-soft, rgba($app-primary, 0.1));
-    color: var(--app-primary, $app-primary);
-    font-weight: 600;
-  }
-
-  &:active {
-    transform: scale(0.94);
-  }
-}
-
-/* 全部场景双列网格 */
+/* v2 双列网格：grid + box-sizing 兜底，避免 H5 双列变单列 */
 .scene-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16rpx;
-  .scene-card {
-    width: calc(50% - 8rpx);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24rpx;
+  box-sizing: border-box;
+
+  :deep(.scene-card) {
     margin-bottom: 0;
     box-sizing: border-box;
   }
