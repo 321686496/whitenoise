@@ -40,7 +40,7 @@
           <view class="scheme-swatch">
             <view
               class="swatch-dot"
-              v-for="(c, i) in s.swatch"
+              v-for="(c, i) in s.swatchLight"
               :key="i"
               :style="{ background: c, zIndex: 3 - i }"
             ></view>
