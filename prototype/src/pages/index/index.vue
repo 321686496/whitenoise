@@ -58,7 +58,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { onShow } from '@dcloudio/uni-app'
+import { onShow, onHide } from '@dcloudio/uni-app'
 import BrandBar from '@/components/BrandBar.vue'
 import NowPlayingCard from '@/components/NowPlayingCard.vue'
 import Segmented from '@/components/Segmented.vue'
@@ -105,6 +105,9 @@ function refreshGrid() {
 
 watch(activeCat, refreshGrid)
 onShow(refreshGrid)
+/* 状态防泄漏：离开首页（含 tab 切换 / navigateTo）时收起主控卡混音 Sheet，
+   避免 player.showMixPanel 残留导致 PlayBar 页面（发现页等）面板无端弹出 */
+onHide(() => { player.showMixPanel = false })
 
 /* 卡片交互：tap 进详情，play 按钮播放/暂停当前 */
 const openDetail = (scene: Scene) => {
