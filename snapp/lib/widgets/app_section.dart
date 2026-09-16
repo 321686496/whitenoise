@@ -34,7 +34,7 @@ class AppDivider extends StatelessWidget {
     return Divider(
       height: 1,
       thickness: 1,
-      color: Theme.of(context).appColors.divider,
+      color: Theme.of(context).appColors.line,
     );
   }
 }

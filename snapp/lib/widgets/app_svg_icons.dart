@@ -23,14 +23,13 @@ const Map<String, String> appIconBodies = {
   'train':
       '<rect x="4" y="3" width="16" height="14" rx="3" /><path d="M4 11h16M8 21l-2-4M16 21l2-4" /><circle cx="8" cy="15" r="1" fill="currentColor" stroke="none" /><circle cx="16" cy="15" r="1" fill="currentColor" stroke="none" />',
   'fan': '<circle cx="12" cy="12" r="2" /><path d="M12 10c-2-4-2-7 0-8s2 4 0 8" /><path d="M14 12c4-2 7-2 8 0s-4 2-8 0" /><path d="M12 14c2 4 2 7 0 8s-2-4 0-8" /><path d="M10 12c-4 2-7 2-8 0s4-2 8 0" />',
-  'play': '<polygon points="6,3 20,12 6,21" fill="currentColor" stroke="none" />',
-  'pause':
-      '<rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none" /><rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none" />',
-  'timer': '<circle cx="12" cy="13" r="8" /><path d="M12 9v4l2 2" /><path d="M9 2h6" />',
+  'play': '<path d="M7 4.5v15l13-7.5L7 4.5z" fill="currentColor" stroke="none" />',
+  'pause': '<path d="M8 4v16M16 4v16" />',
+  'timer': '<circle cx="12" cy="13" r="8" /><path d="M12 9.5v3.5l2.5 2.5M9.5 2h5" />',
   'save':
       '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17,21 17,13 7,13 7,21" /><polyline points="7,3 7,8 15,8" />',
   'palette':
-      '<circle cx="12" cy="12" r="10" /><circle cx="12" cy="8" r="1.5" fill="currentColor" stroke="none" /><circle cx="8.5" cy="12" r="1.5" fill="currentColor" stroke="none" /><circle cx="15.5" cy="12" r="1.5" fill="currentColor" stroke="none" /><circle cx="10" cy="15.5" r="1.5" fill="currentColor" stroke="none" />',
+      '<path d="M12 3a9 9 0 1 0 .5 18c1.2 0 1.8-.9 1.8-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z" /><circle cx="7.5" cy="11" r="0.6" /><circle cx="10" cy="7.5" r="0.6" /><circle cx="14" cy="7" r="0.6" /><circle cx="16.8" cy="10" r="0.6" />',
   'trophy':
       '<path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2" /><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2" /><path d="M6 3h12v6a6 6 0 0 1-12 0V3z" /><path d="M9 21h6M12 15v6" />',
   'settings':
@@ -53,48 +52,25 @@ const Map<String, String> appIconBodies = {
   'check': '<polyline points="20,6 9,17 4,12" />',
   'mountain': '<path d="M8 21l4-11 4 11" /><path d="M2 21l6-14 4 8" /><path d="M14 21l4-8 4 8" />',
   'bird': '<path d="M16 7c-2-2-5-2-7 0-3 3-3 7 0 10 2 2 5 3 8 2" /><path d="M16 7c1-3 4-4 6-3" /><circle cx="13" cy="9" r="1" fill="currentColor" stroke="none" />',
+  'shuffle': '<path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />',
+  'heart': '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.2l7.8-7.7 1-1.1a5.5 5.5 0 0 0 0-7.8z" />',
+  'chevron-left': '<path d="M15 18l-6-6 6-6" />',
+  'chevron-down': '<path d="M6 9l6 6 6-6" />',
+  'award': '<circle cx="12" cy="9" r="6" /><path d="M8.6 14.2L7.5 22l4.5-2.5L16.5 22l-1.1-7.8" />',
+  'sun': '<circle cx="12" cy="12" r="4.5" /><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8" />',
+  'contrast': '<circle cx="12" cy="12" r="9" /><path d="M12 3v18" />',
   '__default__': '<circle cx="12" cy="12" r="8" />',
 };
 
-/// 已注册的非默认图标名集合。
+/// 已注册的非默认图标名集合（与原型 Icon.vue 的 name 清单一致）。
 const Set<String> _known = {
-  'wave',
-  'white-noise',
-  'pink-noise',
-  'brown-noise',
-  'red-noise',
-  'rain',
-  'wave-ocean',
-  'forest',
-  'stream',
-  'fire',
-  'coffee',
-  'train',
-  'fan',
-  'play',
-  'pause',
-  'timer',
-  'save',
-  'palette',
-  'trophy',
-  'settings',
-  'share',
-  'user',
-  'edit',
-  'mute',
-  'volume',
-  'close',
-  'chevron-right',
-  'gift',
-  'moon',
-  'flame',
-  'mixer',
-  'clock',
-  'copy',
-  'lock',
-  'check',
-  'mountain',
-  'bird',
+  'wave', 'white-noise', 'pink-noise', 'brown-noise', 'red-noise',
+  'rain', 'wave-ocean', 'forest', 'stream', 'fire', 'coffee', 'train',
+  'fan', 'play', 'pause', 'timer', 'save', 'palette', 'trophy', 'settings',
+  'share', 'user', 'edit', 'mute', 'volume', 'close', 'chevron-right',
+  'chevron-left', 'gift', 'moon', 'flame', 'mixer', 'clock', 'copy', 'lock',
+  'check', 'mountain', 'bird', 'shuffle', 'heart', 'award', 'sun', 'contrast',
+  'chevron-down',
 };
 
 /// 该图标名是否已注册。

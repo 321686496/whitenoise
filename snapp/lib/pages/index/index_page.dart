@@ -1,129 +1,265 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../app/shell_tabs.dart';
+import '../../data/scene_models.dart';
 import '../../data/seed_data.dart';
-import '../../theme/app_theme.dart';
+import '../../services/player_service.dart';
+import '../../services/scene_service.dart';
 import '../../theme/theme_extension.dart';
-import '../../theme/theme_notifier.dart';
-import '../../theme/theme_tokens.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_icon.dart';
 import '../../widgets/app_page.dart';
-import '../../widgets/app_section.dart';
+import '../../widgets/brand_bar.dart';
+import '../../widgets/now_playing_card.dart';
+import '../../widgets/pressable.dart';
+import '../../widgets/scene_card.dart';
+import '../../widgets/segmented.dart';
 
-/// 首页骨架页：用于验证主题即时切换。
-///
-/// 内容：品牌头（主色圆角块占位 +「声栖」标题，logo 图片资源留待后续轮次迁移）、
-/// 一张 [AppCard] 演示卡片、图标预览网格（遍历 [homeScenes] 的 iconName）、
-/// 6 套配色 + 3 种 UI 风格的切换入口（经 [ThemeNotifier] 驱动全局刷新）。
-///
-/// 所有颜色 / 圆角 / 阴影一律走主题扩展（[AppColors] / [AppShapes]），禁止硬编码。
-class IndexPage extends StatelessWidget {
+/// 一键播 chip 定义（id, 回退分类, 图标）。
+class _QuickChipDef {
+  final String id;
+  final String fallback;
+  final String icon;
+  const _QuickChipDef(this.id, this.fallback, this.icon);
+}
+
+/// 首页（对照原型 `pages/index/index.vue`）：
+/// 品牌行 → 主控卡 → 一键播 chips → 分类分段 + 场景网格。
+/// 首页不渲染 PlayBar（与主控卡互斥）。
+class IndexPage extends StatefulWidget {
   const IndexPage({super.key});
+
+  @override
+  State<IndexPage> createState() => _IndexPageState();
+}
+
+class _IndexPageState extends State<IndexPage> {
+  String _activeCat = 'all';
+  List<Scene> _gridScenes = <Scene>[];
+
+  /// 一键播 chip：优先按场景 id 解析（findScene 找不到回退首条）。
+  static const List<_QuickChipDef> _quickChipDefs = <_QuickChipDef>[
+    _QuickChipDef('deep-sleep', 'sleep', 'moon'),
+    _QuickChipDef('focus-white-noise', 'focus', 'white-noise'),
+    _QuickChipDef('forest-stream', 'nature', 'stream'),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _gridScenes = getCategoryScenes(_activeCat, 20);
+  }
+
+  void _refreshGrid() {
+    setState(() => _gridScenes = getCategoryScenes(_activeCat, 20));
+  }
+
+  void _openDetail(Scene scene) {
+    Navigator.pushNamed(
+      context,
+      '/scene-detail',
+      arguments: <String, dynamic>{'sceneId': scene.id},
+    );
+  }
+
+  void _playScene(Scene scene, PlayerService player) {
+    if (player.currentScene?.id == scene.id) {
+      player.togglePlay();
+    } else {
+      player.applyScene(scene);
+    }
+  }
+
+  void _goSceneFlow(PlayerService player) {
+    player.pendingSceneCategory = _activeCat;
+    context.read<ShellTabNotifier>().go(1);
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
-    final shapes = Theme.of(context).appShapes;
-    final n = context.watch<ThemeNotifier>();
+    final player = context.watch<PlayerService>();
 
     return AppPage(
+      bottomBarSpace: true,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 品牌头：logo 图资源留待后续轮次，本轮用主色圆角块占位。
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: c.primary,
-                    borderRadius: BorderRadius.circular(shapes.cardRadius),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  '声栖',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: c.text,
-                  ),
-                ),
-              ],
-            ),
+            const BrandBar(),
             const SizedBox(height: 16),
-            AppCard(
+            const NowPlayingCard(),
+
+            // ③ 场景流
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '今日精选',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: c.text,
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _quickChipDefs.map((_QuickChipDef d) {
+                      final Scene scene = findScene(d.id);
+                      return PressableScale(
+                        onTap: () => player.applyScene(scene),
+                        child: Container(
+                          constraints: const BoxConstraints(minHeight: 44),
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          decoration: BoxDecoration(
+                            color: c.surface,
+                            borderRadius: BorderRadius.circular(999),
+                            border: c.line.opacity > 0.01
+                                ? Border.all(color: c.line, width: 0.5)
+                                : null,
+                            boxShadow: c.shadow1,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AppIcon(name: d.icon, size: 18, color: c.primary),
+                              const SizedBox(width: 5),
+                              Text(
+                                scene.name,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: -0.1,
+                                  color: c.text,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 18, bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text('场景',
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.3,
+                                color: c.text2)),
+                        const Spacer(),
+                        GestureDetector(
+                          onTap: () => _goSceneFlow(player),
+                          behavior: HitTestBehavior.opaque,
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: Text('更多',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: c.primary)),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '主色 ${c.primary} · 背景 ${c.bg}',
-                    style: TextStyle(color: c.text2, fontSize: 12),
+                  Segmented(
+                    options: sceneCategories
+                        .map((SceneCategoryItem s) =>
+                            SegmentOption(s.key, s.label))
+                        .toList(),
+                    value: _activeCat,
+                    onChanged: (String k) {
+                      setState(() => _activeCat = k);
+                      _refreshGrid();
+                    },
                   ),
+                  const SizedBox(height: 14),
+                  if (_gridScenes.isNotEmpty)
+                    _SceneGrid(
+                      scenes: _gridScenes,
+                      player: player,
+                      onTap: _openDetail,
+                      onPlay: _playScene,
+                    )
+                  else
+                    AppCard(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 30),
+                      child: Center(
+                        child: Text('暂无此类场景',
+                            style: TextStyle(fontSize: 12.5, color: c.text2)),
+                      ),
+                    ),
                 ],
               ),
-            ),
-            const SizedBox(height: 24),
-            const AppSectionTitle('选择配色'),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: schemeKeys
-                  .map(
-                    (String k) => ChoiceChip(
-                      label: Text(k),
-                      selected: n.schemeKey == k,
-                      onSelected: (_) => context.read<ThemeNotifier>().setScheme(k),
-                    ),
-                  )
-                  .toList(),
-            ),
-            const SizedBox(height: 16),
-            const AppSectionTitle('选择 UI 风格'),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: UIStyle.values
-                  .map(
-                    (UIStyle u) => ChoiceChip(
-                      label: Text(u.label),
-                      selected: n.ui == u,
-                      onSelected: (_) => context.read<ThemeNotifier>().setUi(u),
-                    ),
-                  )
-                  .toList(),
-            ),
-            const SizedBox(height: 24),
-            const AppSectionTitle('图标预览'),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 6,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              children: homeScenes
-                  .map(
-                    (final s) => Center(
-                      child: AppIcon(name: s.iconName, size: 28, color: c.text),
-                    ),
-                  )
-                  .toList(),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+/// 双列网格（Row 成对布局，卡片高度自适应内容，避免 GridView 定高溢出）。
+class _SceneGrid extends StatelessWidget {
+  final List<Scene> scenes;
+  final PlayerService player;
+  final void Function(Scene) onTap;
+  final void Function(Scene, PlayerService) onPlay;
+
+  const _SceneGrid({
+    required this.scenes,
+    required this.player,
+    required this.onTap,
+    required this.onPlay,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <Widget>[];
+    for (var i = 0; i < scenes.length; i += 2) {
+      rows.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: SceneCard(
+                name: scenes[i].name,
+                soundCount: scenes[i].soundIds.length,
+                soundIcons: <String>[scenes[i].iconName],
+                bgColor: scenes[i].gradient,
+                cover: scenes[i].image,
+                isPreset: scenes[i].isPreset,
+                isGrid: true,
+                active: player.currentScene?.id == scenes[i].id,
+                onTap: () => onTap(scenes[i]),
+                onPlay: () => onPlay(scenes[i], player),
+              ),
+            ),
+            const SizedBox(width: 12),
+            if (i + 1 < scenes.length)
+              Expanded(
+                child: SceneCard(
+                  name: scenes[i + 1].name,
+                  soundCount: scenes[i + 1].soundIds.length,
+                  soundIcons: <String>[scenes[i + 1].iconName],
+                  bgColor: scenes[i + 1].gradient,
+                  cover: scenes[i + 1].image,
+                  isPreset: scenes[i + 1].isPreset,
+                  isGrid: true,
+                  active: player.currentScene?.id == scenes[i + 1].id,
+                  onTap: () => onTap(scenes[i + 1]),
+                  onPlay: () => onPlay(scenes[i + 1], player),
+                ),
+              )
+            else
+              const Expanded(child: SizedBox()),
+          ],
+        ),
+      );
+      rows.add(const SizedBox(height: 12));
+    }
+    return Column(children: rows);
   }
 }

@@ -1,3 +1,4 @@
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:snapp/services/player_service.dart';
 import 'package:snapp/services/scene_service.dart';
@@ -65,5 +66,75 @@ void main() {
     expect(PlayerService.recentTimeLabel(now - 2 * 3600000), '2小时前');
     expect(PlayerService.recentTimeLabel(now - 12 * 3600000), '昨晚');
     expect(PlayerService.recentTimeLabel(now - 3 * 24 * 3600000), '3天前');
+  });
+
+  test('setTimer countdown reaches zero stops playback and completes timer',
+      () {
+    final player = PlayerService();
+    player.applyScene(findScene('deep-sleep'));
+    fakeAsync((FakeAsync async) {
+      player.setTimer(1); // 60 秒
+      expect(player.timerMinutes, 1);
+      expect(player.remainingSeconds, 60);
+      expect(player.timerCompleted, isFalse);
+
+      async.elapse(const Duration(seconds: 30));
+      expect(player.remainingSeconds, 30);
+
+      async.elapse(const Duration(seconds: 30));
+      expect(player.remainingSeconds, 0);
+      expect(player.timerMinutes, 0);
+      expect(player.isPlaying, isFalse);
+      expect(player.timerCompleted, isTrue);
+    });
+  });
+
+  test('stopCountdown cancels and resets remaining seconds', () {
+    final player = PlayerService();
+    fakeAsync((FakeAsync async) {
+      player.setTimer(15);
+      expect(player.remainingSeconds, 900);
+      async.elapse(const Duration(seconds: 5));
+      player.stopCountdown();
+      expect(player.remainingSeconds, 0);
+      async.elapse(const Duration(minutes: 5));
+      expect(player.remainingSeconds, 0); // 计时器已取消，不再递减
+    });
+  });
+
+  test('setTimer toggles off on same duration and cancels countdown', () {
+    final player = PlayerService();
+    fakeAsync((FakeAsync async) {
+      player.setTimer(30);
+      expect(player.timerMinutes, 30);
+      expect(player.remainingSeconds, 1800);
+      player.setTimer(30);
+      expect(player.timerMinutes, 0);
+      expect(player.remainingSeconds, 0);
+      async.elapse(const Duration(minutes: 5));
+      expect(player.remainingSeconds, 0);
+    });
+  });
+
+  test('timerLabel formats countdown and minutes', () {
+    final player = PlayerService();
+    fakeAsync((FakeAsync async) {
+      player.setTimer(2);
+      expect(player.timerLabel, '2:00');
+      async.elapse(const Duration(seconds: 1));
+      expect(player.timerLabel, '1:59');
+      player.stopCountdown();
+      player.timerMinutes = 5;
+      expect(player.timerLabel, '5分钟');
+    });
+  });
+
+  test('toggleLock flips isLocked', () {
+    final player = PlayerService();
+    expect(player.isLocked, isFalse);
+    player.toggleLock();
+    expect(player.isLocked, isTrue);
+    player.toggleLock();
+    expect(player.isLocked, isFalse);
   });
 }

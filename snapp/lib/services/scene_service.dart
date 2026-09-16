@@ -31,8 +31,8 @@ class PresetOption {
   final List<PresetRatio> ratios;
 }
 
-/// 按 id 查找场景；找不到回退 homeScenes 首条。
-Scene? findScene(String id) {
+/// 按 id 查找场景；找不到回退 homeScenes 首条（与原型一致，非空返回）。
+Scene findScene(String id) {
   for (final s in homeScenes) {
     if (s.id == id) return s;
   }

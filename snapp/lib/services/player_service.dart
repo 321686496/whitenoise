@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../data/scene_models.dart';
@@ -77,6 +79,14 @@ class PlayerService extends ChangeNotifier {
   int fadeMinutes = 2;
   bool showTimerPanel = false;
   bool showMixPanel = false;
+
+  /// 睡眠定时剩余秒数（>0 表示倒计时进行中；0 表示未启用）。
+  int remainingSeconds = 0;
+
+  /// 播放锁（PlayBar / 播放页共享）：仅 UI 态 + toast，不改变播放行为。
+  bool isLocked = false;
+
+  Timer? _countdownTimer;
 
   /// 历史最高同时加载音轨数（成就「混音大师」数据源）。
   int maxTrackCount = 0;
@@ -167,10 +177,62 @@ class PlayerService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 定时：重复点击同一时长则取消。
+  /// 定时：重复点击同一时长则取消（启用/取消真实倒计时）。
   void setTimer(int minutes) {
-    timerMinutes = timerMinutes == minutes ? 0 : minutes;
+    if (timerMinutes == minutes) {
+      stopCountdown();
+      timerMinutes = 0;
+      notifyListeners();
+      return;
+    }
+    timerMinutes = minutes;
+    startCountdown(minutes);
+  }
+
+  /// 启动睡眠倒计时：每秒递减；到点停止播放并解锁「初次入眠」成就数据源。
+  void startCountdown(int minutes) {
+    _countdownTimer?.cancel();
+    if (minutes <= 0) {
+      remainingSeconds = 0;
+      return;
+    }
+    remainingSeconds = minutes * 60;
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      remainingSeconds--;
+      if (remainingSeconds <= 0) {
+        remainingSeconds = 0;
+        timerMinutes = 0;
+        _countdownTimer?.cancel();
+        _countdownTimer = null;
+        isPlaying = false;
+        timerCompleted = true;
+      }
+      notifyListeners();
+    });
+  }
+
+  /// 取消睡眠倒计时并清零剩余秒数。
+  void stopCountdown() {
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+    remainingSeconds = 0;
+  }
+
+  /// 播放锁切换（toast 由调用方展示）。
+  void toggleLock() {
+    isLocked = !isLocked;
     notifyListeners();
+  }
+
+  /// 定时显示标签：倒计时进行中显示 `mm:ss`，否则显示 `n分钟`。
+  String get timerLabel {
+    if (remainingSeconds > 0) {
+      final m = remainingSeconds ~/ 60;
+      final s = remainingSeconds % 60;
+      return '$m:${s.toString().padLeft(2, '0')}';
+    }
+    if (timerMinutes > 0) return '$timerMinutes分钟';
+    return '';
   }
 
   void setFadeMinutes(int minutes) {
@@ -231,5 +293,11 @@ class PlayerService extends ChangeNotifier {
     if (h < 24) return '昨晚';
     final d = (h / 24).floor();
     return '$d天前';
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
   }
 }

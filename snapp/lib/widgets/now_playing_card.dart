@@ -54,7 +54,8 @@ class NowPlayingCard extends StatelessWidget {
             PressableScale(
               onTap: () => Navigator.pushNamed(context, '/library'),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 9),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 26, vertical: 9),
                 decoration: BoxDecoration(
                   color: c.primary,
                   borderRadius: BorderRadius.circular(999),
@@ -75,91 +76,97 @@ class NowPlayingCard extends StatelessWidget {
 
     return AppCard(
       padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  player.currentScene!.name,
-                  style: TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.15,
-                      color: c.text),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: c.primarySoft,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  '${player.tracks.length}/${player.tracks.length} 路',
-                  style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: c.primary),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(child: _WaveBars(playing: player.isPlaying)),
-              PressableScale(
-                onTap: () {
-                  if (!player.togglePlay()) {
-                    showAppToast(context, '请先选择场景');
-                  }
-                },
-                child: Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: <Color>[c.primary, c.primaryStrong],
-                    ),
-                    boxShadow: c.shadow3,
+      child: GestureDetector(
+        // 点击卡片空白区 → 展开完整播放器页（内部按钮自吸收点击）
+        behavior: HitTestBehavior.translucent,
+        onTap: () => Navigator.pushNamed(context, '/player'),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    player.currentScene!.name,
+                    style: TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.15,
+                        color: c.text),
                   ),
-                  alignment: Alignment.center,
-                  child: AppIcon(
-                      name: player.isPlaying ? 'pause' : 'play',
-                      size: 34,
-                      color: c.onPrimary),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NpcAction(
-                icon: AppIcon(
-                    name: 'timer',
-                    size: 20,
-                    color: player.timerMinutes > 0 ? c.primary : c.text2),
-                label: player.timerMinutes > 0
-                    ? '${player.timerMinutes}分'
-                    : '定时',
-                on: player.timerMinutes > 0,
-                onTap: () => player.setTimer(30),
-              ),
-              _NpcAction(
-                icon: AppIcon(name: 'shuffle', size: 20, color: c.text2),
-                label: '混音',
-                onTap: () => _openMixSheet(context),
-              ),
-              const _FavAction(),
-            ],
-          ),
-        ],
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: c.primarySoft,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    '${player.tracks.length}/${player.tracks.length} 路',
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: c.primary),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(child: _WaveBars(playing: player.isPlaying)),
+                PressableScale(
+                  onTap: () {
+                    if (!player.togglePlay()) {
+                      showAppToast(context, '请先选择场景');
+                    }
+                  },
+                  child: Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: <Color>[c.primary, c.primaryStrong],
+                      ),
+                      boxShadow: c.shadow3,
+                    ),
+                    alignment: Alignment.center,
+                    child: AppIcon(
+                        name: player.isPlaying ? 'pause' : 'play',
+                        size: 34,
+                        color: c.onPrimary),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _NpcAction(
+                  icon: AppIcon(
+                      name: 'timer',
+                      size: 20,
+                      color: player.timerMinutes > 0 ? c.primary : c.text2),
+                  label: player.timerMinutes > 0
+                      ? '${player.timerMinutes}分'
+                      : '定时',
+                  on: player.timerMinutes > 0,
+                  onTap: () => player.setTimer(30),
+                ),
+                _NpcAction(
+                  icon: AppIcon(name: 'shuffle', size: 20, color: c.text2),
+                  label: '混音',
+                  onTap: () => _openMixSheet(context),
+                ),
+                const _FavAction(),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -180,8 +187,13 @@ class _WaveBarsState extends State<_WaveBars>
     vsync: this,
     duration: const Duration(milliseconds: 1600),
   );
-  static const List<double> _heights =
-      <double>[26, 48, 75, 48, 26]; // 88rpx 高容器内的百分比
+  static const List<double> _heights = <double>[
+    26,
+    48,
+    75,
+    48,
+    26
+  ]; // 88rpx 高容器内的百分比
 
   @override
   void initState() {
@@ -221,8 +233,9 @@ class _WaveBarsState extends State<_WaveBars>
             animation: _ctrl,
             builder: (BuildContext context, _) {
               final phase = (_ctrl.value * 2 - i * 0.12) % 1.0;
-              final scale =
-                  widget.playing ? 0.6 + 0.4 * (1 - (2 * phase - 1).abs()) : 0.6;
+              final scale = widget.playing
+                  ? 0.6 + 0.4 * (1 - (2 * phase - 1).abs())
+                  : 0.6;
               return Opacity(
                 opacity: widget.playing ? 1 : 0.4,
                 child: Container(
@@ -273,9 +286,7 @@ class _NpcAction extends StatelessWidget {
         decoration: BoxDecoration(
           color: on ? c.primarySoft : c.surface2,
           borderRadius: BorderRadius.circular(999),
-          border: on
-              ? null
-              : Border.all(color: c.line, width: 0.5),
+          border: on ? null : Border.all(color: c.line, width: 0.5),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -305,7 +316,8 @@ class _FavAction extends StatelessWidget {
     final scene = context.watch<PlayerService>().currentScene;
     final active = scene != null && fav.isFav(scene.id);
     return _NpcAction(
-      icon: AppIcon(name: 'heart', size: 20, color: active ? c.primary : c.text2),
+      icon:
+          AppIcon(name: 'heart', size: 20, color: active ? c.primary : c.text2),
       label: active ? '已收藏' : '收藏',
       on: active,
       onTap: () {
@@ -413,8 +425,7 @@ class _MixSheet extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 24),
                       child: Center(
                         child: Text('暂无音轨，添加一个声音开始混音',
-                            style:
-                                TextStyle(fontSize: 12.5, color: c.text2)),
+                            style: TextStyle(fontSize: 12.5, color: c.text2)),
                       ),
                     ),
             ),

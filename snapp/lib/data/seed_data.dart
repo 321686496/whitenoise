@@ -7,13 +7,13 @@
 import 'scene_models.dart';
 import 'sound_models.dart';
 
-/// 场景分类（key + label），对应原型 `sceneCategories`。
+/// 场景分类（key + label + icon），对应原型 `sceneCategories`。
 const List<SceneCategoryItem> sceneCategories = [
-  SceneCategoryItem('all', '全部'),
-  SceneCategoryItem('sleep', '助眠'),
-  SceneCategoryItem('focus', '专注'),
-  SceneCategoryItem('relax', '放松'),
-  SceneCategoryItem('nature', '自然'),
+  SceneCategoryItem('all', '全部', 'wave'),
+  SceneCategoryItem('sleep', '助眠', 'moon'),
+  SceneCategoryItem('focus', '专注', 'flame'),
+  SceneCategoryItem('relax', '放松', 'forest'),
+  SceneCategoryItem('nature', '自然', 'mountain'),
 ];
 
 /// 首页/场景列表全量场景（11 条），对应原型 `homeScenes`。

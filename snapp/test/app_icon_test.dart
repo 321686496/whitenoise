@@ -40,8 +40,8 @@ void main() {
     }
   });
 
-  test('appIconBodies contains 37 icons plus a default fallback', () {
-    expect(appIconBodies.length, 38);
+  test('appIconBodies contains 44 icons plus a default fallback', () {
+    expect(appIconBodies.length, 45);
     expect(appIconBodies.containsKey('__default__'), isTrue);
   });
 
