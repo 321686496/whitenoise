@@ -6,13 +6,18 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:snapp/app/app.dart';
+import 'package:snapp/services/favorites_service.dart';
+import 'package:snapp/services/player_service.dart';
 import 'package:snapp/theme/theme_notifier.dart';
 import 'package:snapp/widgets/tab_bar.dart';
 
 void main() {
   testWidgets('Root shell renders floating tab bar with four tabs',
       (WidgetTester tester) async {
-    await tester.pumpWidget(Root(notifier: ThemeNotifier()));
+    await tester.pumpWidget(Root(
+        notifier: ThemeNotifier(),
+        player: PlayerService(),
+        favorites: FavoritesService()));
     expect(tester.takeException(), isNull);
 
     expect(find.byType(AppTabBar), findsOneWidget);
@@ -35,7 +40,10 @@ void main() {
   });
 
   testWidgets('tapping a tab bar item does not throw', (WidgetTester tester) async {
-    await tester.pumpWidget(Root(notifier: ThemeNotifier()));
+    await tester.pumpWidget(Root(
+        notifier: ThemeNotifier(),
+        player: PlayerService(),
+        favorites: FavoritesService()));
 
     await tester.tap(
       find.descendant(of: find.byType(AppTabBar), matching: find.text('我的')),
