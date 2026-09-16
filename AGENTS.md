@@ -1,7 +1,7 @@
 # AGENT.md — 声栖（白噪音混音助眠应用）
 
 > 项目根目录智能体指令文件
-> 最后更新：2026-09-16
+> 最后更新：2026-09-17
 
 ---
 
@@ -13,7 +13,7 @@
 |---|---|---|
 | 目录 | `prototype/` | `snapp/` |
 | 技术栈 | uni-app（Vue 3 + TS）+ Vite | Flutter（Dart） |
-| 定位 | **参考实现**（已成熟、全功能） | **后续主开发技术栈**（当前为空骨架） |
+| 定位 | **参考实现**（已成熟、全功能；v2 已全量落地：明暗双模式 + 6 配色 × 3 UI 风格） | **后续主开发技术栈**（当前为空骨架） |
 | 状态 | 完整视觉体系 + 主题引擎 + 全组件/页面 | 仅有默认 demo `lib/main.dart`，待按 uni-app 迁移 |
 | 目标平台 | H5 / 多端小程序 | iOS / Android / **HarmonyOS**（含 `ohos/`） |
 
@@ -211,6 +211,10 @@ snapp/lib/
 - [ ] 路由表是否与 uni-app `pages.json` 保持一致（迁移阶段）？
 - [ ] 是否同步更新了相关设计文档与 AGENT.md？
 
+### 5.7 已知待办
+
+- **Harmony 三平台构建验证**：Flutter 全功能实现（T1-T9）已完成，`flutter analyze` 零错误、`flutter test` 62 项全绿；iOS / Android / HarmonyOS 三平台构建验证需本地 OH SDK，列为后续待办（`flutter build hap`）。just_audio 0.9.37 已通过三方库适配清单校验（OpenHarmony `fluttertpc_just_audio`），音频在 Harmony 端走原生适配。
+
 ---
 
 ## 六、UI / 页面设计约定（uni-app 与 Flutter 通用）
@@ -252,6 +256,8 @@ snapp/lib/
 | 场景页 iOS 改版 | `docs/superpowers/specs/2026-09-08-scene-page-ios-redesign-design.md` | 场景页 iOS 化改版 |
 | 设计系统 v2 | `docs/design-system/MASTER.md` | 全界面 redesign 单一事实来源（v2 token / 组件 / IA） |
 | 原型 v2 落地 | `docs/superpowers/specs/2026-09-16-prototype-v2-implementation-design.md` | 原型 v2 全量落地实施设计 |
+| Flutter 全功能实现（spec） | `docs/superpowers/specs/2026-09-17-flutter-app-features-design.md` | Flutter 工程全功能实现设计 |
+| Flutter 全功能实现（plan） | `docs/superpowers/plans/2026-09-17-flutter-app-features.md` | T1-T9 逐任务实施计划 |
 | 代码维基 | `docs/code-wiki/whitenoise-code-wiki.md` | 代码结构 / 约定速查 |
 | 项目规则 | `.trae/rules/project_rules.md` | TRAE IDE 行为规则 |
 
