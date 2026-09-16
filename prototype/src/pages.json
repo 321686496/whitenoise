@@ -109,17 +109,15 @@
 		{
 			"path": "pages/scene-detail/scene-detail",
 			"style": {
-				"navigationBarTitleText": "场景详情",
-				"navigationBarBackgroundColor": "#F5F2ED",
-				"navigationBarTextStyle": "black"
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
 			}
 		},
 		{
 			"path": "pages/scene-edit/scene-edit",
 			"style": {
-				"navigationBarTitleText": "新建场景",
-				"navigationBarBackgroundColor": "#F5F2ED",
-				"navigationBarTextStyle": "black"
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
 			}
 		},
 		{

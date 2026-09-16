@@ -1,16 +1,20 @@
 <template>
-  <view class="page-container">
+  <!-- v2：自定义导航（pages.json 已改 custom），NavBar 自带安全区 -->
+  <view class="page-container scene-edit-page">
     <view class="page-bg"></view>
+
+    <NavBar :title="isEdit ? '编辑场景' : '新建场景'" />
 
     <!-- 场景名称 -->
     <view class="section">
       <text class="section-title">场景名称</text>
-      <view class="name-card app-card">
+      <view class="field name-field">
         <Icon name="edit" :size="20" color="var(--app-primary)" />
         <input
           class="name-input"
           v-model="name"
           placeholder="给场景取个名字，如「雨天阅读」"
+          :placeholder-style="'color: var(--app-text-3); font-size: 28rpx;'"
           maxlength="20"
         />
       </view>
@@ -19,23 +23,23 @@
     <!-- 当前配方概览 -->
     <view class="section">
       <view class="section-header">
-        <text class="section-title">当前配方</text>
-        <text class="section-count" v-if="tracks.length">{{ tracks.length }} 路 / {{ maxTracks }} 路</text>
+        <text class="section-title section-title--inline">当前配方</text>
+        <text class="section-count num" v-if="tracks.length">{{ tracks.length }} 路 / {{ maxTracks }} 路</text>
       </view>
       <view class="recipe-chip-row" v-if="tracks.length">
         <view class="chip" v-for="t in tracks" :key="t.id" :style="{ background: t.color }">
-          <Icon :name="t.iconName" :size="18" color="#fff" />
+          <Icon :name="t.iconName" :size="18" color="var(--app-on-cover)" />
           <text class="chip-name">{{ t.name }}</text>
-          <text class="chip-vol">{{ t.volume }}%</text>
+          <text class="chip-vol num">{{ t.volume }}%</text>
         </view>
       </view>
       <view class="recipe-total app-card" v-if="tracks.length">
         <text class="total-label">总占比</text>
-        <text class="total-value">{{ totalPercent }}%</text>
+        <text class="total-value num">{{ totalPercent }}%</text>
         <text class="total-hint">下方滑动可调整各路音量</text>
       </view>
       <view class="empty-recipe app-card" v-else>
-        <Icon name="wave" :size="40" color="var(--app-primary-soft)" />
+        <Icon name="wave" :size="40" color="var(--app-text-3)" />
         <text class="empty-recipe-text">还没有添加声音，去下方挑选吧</text>
       </view>
     </view>
@@ -43,15 +47,7 @@
     <!-- 声音库选择 -->
     <view class="section">
       <text class="section-title">声音库</text>
-      <view class="cat-tabs">
-        <view
-          v-for="cat in cats"
-          :key="cat.key"
-          class="cat-tab app-card"
-          :class="{ active: activeCat === cat.key }"
-          @click="activeCat = cat.key"
-        >{{ cat.label }}</view>
-      </view>
+      <Segmented :options="catOptions" v-model="activeCat" />
       <scroll-view scroll-x class="sound-scroll" :show-scrollbar="false">
         <view class="sound-grid">
           <SoundCard
@@ -72,17 +68,17 @@
     <view class="section">
       <text class="section-title">调节音量比例</text>
       <view v-if="tracks.length">
-        <view class="mix-track-item" v-for="t in tracks" :key="t.id">
-          <MixTrack
-            :name="t.name"
-            :icon-name="t.iconName"
-            :color="t.color"
-            :volume="t.volume"
-            :is-muted="t.muted"
-            @mute="toggleMute(t.id)"
-            @remove="removeTrack(t.id)"
-          />
-        </view>
+        <MixTrack
+          v-for="t in tracks"
+          :key="t.id"
+          :name="t.name"
+          :icon-name="t.iconName"
+          :color="t.color"
+          :volume="t.volume"
+          :is-muted="t.muted"
+          @mute="toggleMute(t.id)"
+          @remove="removeTrack(t.id)"
+        />
         <text class="adjust-hint">* 原型演示：滑块仅做视觉示意，拖动不改变真实比例</text>
       </view>
       <view class="empty-mix app-card" v-else>
@@ -101,17 +97,20 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
+import NavBar from '@/components/NavBar.vue'
 import Icon from '@/components/Icon.vue'
+import Segmented from '@/components/Segmented.vue'
 import SoundCard from '@/components/SoundCard.vue'
 import MixTrack from '@/components/MixTrack.vue'
 import { sounds, soundCategories } from '@/data/sounds'
+import type { Sound } from '@/data/sounds'
 
 const name = ref('')
 const isEdit = ref(false)
 const maxTracks = 6
 
-// 声音分类 tab（复用全局分类）
-const cats = soundCategories
+// 声音分类 tab（复用全局分类，经 Segmented 统一渲染）
+const catOptions = soundCategories.map((c) => ({ key: c.key, label: c.label }))
 const activeCat = ref('all')
 
 const filteredSounds = computed(() => {
@@ -148,10 +147,9 @@ onLoad((query) => {
     isEdit.value = false
     name.value = ''
   }
-  uni.setNavigationBarTitle({ title: isEdit.value ? '编辑场景' : '新建场景' })
 })
 
-const toggleSound = (s: any) => {
+const toggleSound = (s: Sound) => {
   const idx = tracks.value.findIndex(t => t.id === s.id)
   if (idx >= 0) {
     tracks.value.splice(idx, 1)
@@ -186,7 +184,9 @@ const save = () => {
 </script>
 
 <style lang="scss" scoped>
-.page-container {
+/* NavBar 自带安全区，容器顶距收窄；底部为固定操作条预留空间 */
+.scene-edit-page {
+  padding-top: calc(env(safe-area-inset-top, 0rpx) + 12rpx);
   padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
 }
 
@@ -199,41 +199,49 @@ const save = () => {
   align-items: baseline;
   justify-content: space-between;
   margin-bottom: 18rpx;
-  padding-left: 4rpx;
+  padding-left: 8rpx;
 }
 
-.section-title {
-  font-size: 24rpx;
-  font-weight: 600;
-  letter-spacing: 0.3rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
-  display: block;
-  margin-bottom: 18rpx;
-  padding-left: 4rpx;
+.section-title--inline {
+  margin-bottom: 0;
 }
 
 .section-count {
   font-size: 21rpx;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
   font-weight: 600;
 }
 
-/* 名称输入 */
-.name-card {
-  padding: 0 26rpx;
-  height: 96rpx;
+/* ---------- 表单输入（v2：sunken 底 + 发丝描边，聚焦 line-strong，触控 ≥88rpx） ---------- */
+.field {
+  background: var(--app-sunken);
+  border: 1rpx solid var(--app-line);
+  border-radius: 24rpx;
+  min-height: 88rpx;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
+  transition: border-color var(--dur-fast) var(--ease-std);
+
+  &:focus-within {
+    border-color: var(--app-line-strong);
+  }
+}
+
+.name-field {
+  padding: 0 26rpx;
   gap: 18rpx;
 }
 
 .name-input {
   flex: 1;
   font-size: 28rpx;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
+  background: transparent;
+  min-height: 88rpx;
 }
 
-/* 配方概览 */
+/* ---------- 配方概览 ---------- */
 .recipe-chip-row {
   display: flex;
   flex-wrap: wrap;
@@ -241,23 +249,24 @@ const save = () => {
   margin-bottom: 18rpx;
 }
 
+/* 实底色 chip：色值为声音资产色（数据内联），文字走 on-cover token */
 .chip {
   display: flex;
   align-items: center;
   gap: 8rpx;
   padding: 10rpx 20rpx;
-  border-radius: 26rpx;
+  border-radius: 999rpx;
 }
 
 .chip-name {
   font-size: 23rpx;
-  color: #fff;
+  color: var(--app-on-cover);
   font-weight: 600;
 }
 
 .chip-vol {
   font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--app-on-cover-soft);
 }
 
 .recipe-total {
@@ -269,19 +278,19 @@ const save = () => {
 
 .total-label {
   font-size: 23rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
 }
 
 .total-value {
   font-size: 32rpx;
   font-weight: 800;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
 }
 
 .total-hint {
   margin-left: auto;
   font-size: 21rpx;
-  color: var(--app-text-3, $uni-text-color-grey);
+  color: var(--app-text-3);
 }
 
 .empty-recipe {
@@ -294,45 +303,14 @@ const save = () => {
 
 .empty-recipe-text {
   font-size: 25rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
 }
 
-/* 分类 tab */
-.cat-tabs {
-  display: flex;
-  gap: 8rpx;
-  margin-bottom: 26rpx;
-  padding: 8rpx;
-  background: var(--app-subtle, $uni-bg-color-grey);
-  border-radius: 30rpx;
-  overflow-x: auto;
-}
-
-.cat-tab {
-  flex-shrink: 0;
-  min-width: 96rpx;
-  height: 60rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 22rpx;
-  font-size: 24rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
-  font-weight: 500;
-  background: transparent;
-
-  &.active {
-    background: var(--app-card-bg, #fff);
-    color: var(--app-primary, $app-primary);
-    font-weight: 600;
-    box-shadow: 0 4rpx 12rpx color-mix(in srgb, var(--app-primary, $app-primary) 14%, transparent);
-  }
-}
-
-/* 声音选择网格 */
+/* ---------- 声音选择网格 ---------- */
 .sound-scroll {
   white-space: nowrap;
   width: 100%;
+  margin-top: 26rpx;
 }
 
 .sound-grid {
@@ -341,16 +319,12 @@ const save = () => {
   padding-bottom: 8rpx;
 }
 
-/* 音量轨道 */
-.mix-track-item {
-  margin-bottom: 14rpx;
-}
-
+/* ---------- 音量轨道 ---------- */
 .adjust-hint {
   display: block;
   margin: 16rpx 4rpx 0;
   font-size: 20rpx;
-  color: var(--app-text-3, $uni-text-color-grey);
+  color: var(--app-text-3);
 }
 
 .empty-mix {
@@ -361,10 +335,10 @@ const save = () => {
 
 .empty-mix-text {
   font-size: 24rpx;
-  color: var(--app-text-3, $uni-text-color-grey);
+  color: var(--app-text-3);
 }
 
-/* 底部固定操作 */
+/* ---------- 底部固定操作 ---------- */
 .footer-bar {
   position: fixed;
   left: 0;
@@ -375,7 +349,7 @@ const save = () => {
   display: flex;
   gap: 20rpx;
   z-index: 50;
-  box-shadow: 0 -6rpx 24rpx color-mix(in srgb, var(--app-text) 6%, transparent);
+  box-shadow: var(--app-shadow-2);
 }
 
 .footer-btn {
