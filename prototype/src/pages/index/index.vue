@@ -2,148 +2,50 @@
   <view class="page-container">
     <view class="page-bg"></view>
 
-    <!-- 自定义悬浮 TabBar -->
+    <!-- 自定义悬浮 TabBar（首页不渲染 PlayBar：与主控卡互斥） -->
     <TabBar current="index" />
 
-    <!-- ① 品牌头部 -->
-    <view class="header">
-      <view class="header-top">
-        <view class="brand">
-          <view class="brand-logo-wrap">
-            <image class="brand-logo" src="/static/logo-v10-1.jpg" mode="aspectFit" />
-          </view>
-          <view class="brand-text">
-            <text class="app-title">声栖</text>
-            <text class="app-slogan">{{ greetingText }}</text>
-          </view>
-        </view>
-        <view class="header-actions">
-          <view class="header-btn app-card" @click="goTheme">
-            <Icon name="palette" :size="22" color="var(--app-primary)" />
-          </view>
-          <view class="header-btn app-card" @click="goAchievement">
-            <Icon name="trophy" :size="22" color="var(--app-primary)" />
-          </view>
-        </view>
-      </view>
-    </view>
+    <!-- ① 品牌行 -->
+    <BrandBar />
 
-    <!-- ② 大播放卡（首屏黄金位） -->
-    <view class="hero app-card" :style="{ background: heroBg }" @click="onHeroTap">
-      <template v-if="player.tracks.length > 0">
-        <view class="hero-top">
-          <text class="hero-scene">{{ player.currentScene?.name || '即兴混音' }}</text>
-          <view class="hero-count">
-            <text>{{ player.tracks.length }}/6 路</text>
-          </view>
-        </view>
-        <view class="hero-main">
-          <view class="hero-bars" :class="{ playing: player.isPlaying }">
-            <view class="hero-bar" v-for="i in 5" :key="i"></view>
-          </view>
-          <view class="hero-play" @click.stop="onMainPlay">
-            <Icon :name="player.isPlaying ? 'pause' : 'play'" :size="36" color="var(--app-primary)" />
-          </view>
-        </view>
-        <view class="hero-actions">
-          <view class="hero-action" @click.stop="player.showTimerPanel = true">
-            <Icon name="timer" :size="26" color="rgba(255,255,255,.92)" />
-            <text class="hero-action-text">定时</text>
-          </view>
-          <view class="hero-action" @click.stop="showSaveDialog = true">
-            <Icon name="save" :size="26" color="rgba(255,255,255,.92)" />
-            <text class="hero-action-text">保存场景</text>
-          </view>
-        </view>
-      </template>
-      <template v-else>
-        <view class="hero-empty">
-          <view class="hero-empty-icon">
-            <Icon name="moon" :size="46" color="rgba(255,255,255,.95)" />
-          </view>
-          <text class="hero-empty-title">开始你的助眠之旅</text>
-          <text class="hero-empty-sub">点选下方场景，即刻开播</text>
-        </view>
-      </template>
-    </view>
+    <!-- ② 主控卡（黄金位） -->
+    <NowPlayingCard />
 
-    <!-- ③ 金刚区 2×2 -->
-    <view class="quick-grid">
-      <view
-        class="quick-item app-card"
-        v-for="q in quickActions"
-        :key="q.id"
-        @click="onQuick(q)"
-      >
-        <view class="quick-icon" :style="{ background: q.bg }">
-          <Icon :name="q.icon" :size="28" color="#fff" />
-        </view>
-        <view class="quick-meta">
-          <text class="quick-name">{{ q.name }}</text>
-          <text class="quick-desc">{{ q.desc }}</text>
-        </view>
-      </view>
-    </view>
-
-    <!-- ④ 今日精选 -->
-    <view class="section">
-      <view class="section-header">
-        <text class="section-title">今日精选</text>
-        <text class="section-more" @click="randomPlay">随机播放</text>
-      </view>
-      <scroll-view scroll-x class="pick-scroll" :show-scrollbar="false">
-        <view class="pick-list">
-          <view
-            class="pick-card"
-            v-for="scene in todayPicks"
-            :key="scene.id"
-            :style="{ background: scene.gradient }"
-            @click="playScene(scene)"
-          >
-            <view class="pick-tag"><text>今日精选</text></view>
-            <text class="pick-title">{{ scene.name }}</text>
-            <text class="pick-desc">{{ scene.desc }}</text>
-            <view class="pick-bottom">
-              <text class="pick-combo">{{ soundNames(scene.soundIds) }}</text>
-              <view class="pick-play">
-                <Icon name="play" :size="18" color="var(--app-on-primary)" />
-              </view>
-            </view>
-          </view>
-        </view>
-      </scroll-view>
-    </view>
-
-    <!-- ⑤ 场景推荐 -->
-    <view class="section">
-      <view class="section-header">
-        <text class="section-title">场景推荐</text>
-      </view>
-      <view class="category-tabs">
+    <!-- ③ 场景流 -->
+    <view class="flow">
+      <!-- 一键播快捷 chip -->
+      <view class="chip-row">
         <view
-          v-for="cat in sceneCategories"
-          :key="cat.key"
-          class="cat-tab"
-          :class="{ active: activeCategory === cat.key }"
-          @click="activeCategory = cat.key"
+          class="quick-chip"
+          v-for="chip in quickChips"
+          :key="chip.scene.id"
+          @click="quickPlay(chip.scene)"
         >
-          <text>{{ cat.label }}</text>
+          <Icon :name="chip.icon" :size="18" color="var(--app-primary)" />
+          <text class="quick-chip-label">{{ chip.scene.name }}</text>
         </view>
       </view>
 
-      <view class="scene-grid" v-if="filteredScenes.length > 0">
+      <!-- 分类 + 网格 -->
+      <view class="flow-head">
+        <text class="section-title">场景</text>
+        <text class="flow-more" @click="goSceneFlow">更多</text>
+      </view>
+      <Segmented :options="catOptions" v-model="activeCat" />
+
+      <view class="scene-grid" v-if="gridScenes.length > 0">
         <SceneCard
-          v-for="scene in filteredScenes"
+          v-for="scene in gridScenes"
           :key="scene.id"
           :name="scene.name"
           :sound-count="scene.soundIds.length"
           :sound-icons="[scene.iconName]"
           :bg-color="scene.gradient"
+          :cover="scene.image"
           :is-preset="scene.isPreset"
-          :sound-label="soundNames(scene.soundIds)"
           :active="player.currentScene?.id === scene.id"
           layout="grid"
-          @tap="playScene(scene)"
+          @tap="openDetail(scene)"
           @play="playScene(scene)"
         />
       </view>
@@ -151,763 +53,152 @@
         <text>暂无此类场景</text>
       </view>
     </view>
-
-    <!-- ⑥ 最近使用 -->
-    <view class="section" v-if="recentItems.length > 0">
-      <view class="section-header">
-        <text class="section-title">最近使用</text>
-        <text class="section-more" @click="goHistory">查看全部</text>
-      </view>
-      <scroll-view scroll-x class="recent-scroll" :show-scrollbar="false">
-        <view class="recent-list">
-          <view class="recent-item app-card" v-for="item in recentItems" :key="item.sceneId" @click="playRecent(item)">
-            <view class="recent-icon" :style="{ background: item.gradient }">
-              <Icon :name="item.iconName" :size="20" color="#fff" />
-            </view>
-            <text class="recent-name">{{ item.name }}</text>
-            <text class="recent-time">{{ recentTimeLabel(item.ts) }}</text>
-          </view>
-        </view>
-      </scroll-view>
-    </view>
-
-    <!-- ⑦ 声音库入口 -->
-    <view class="section">
-      <view class="library-entry app-card" @click="goLibrary">
-        <view class="library-icon">
-          <Icon name="mixer" :size="26" color="var(--app-primary)" />
-        </view>
-        <view class="library-meta">
-          <text class="library-name">声音库</text>
-          <text class="library-desc">{{ soundCountLabel }}种白噪音，自由混音</text>
-        </view>
-        <Icon name="chevron-right" :size="22" color="var(--app-text-3)" />
-      </view>
-    </view>
-
-    <!-- 底部播放栏 -->
-    <PlayBar @save-tap="showSaveDialog = true" />
-
-    <!-- 保存场景弹窗 -->
-    <view class="modal-overlay" v-if="showSaveDialog" @click="showSaveDialog = false">
-      <view class="modal-content app-card" @click.stop>
-        <text class="modal-title">保存为场景</text>
-        <input
-          class="modal-input"
-          v-model="saveName"
-          placeholder="输入场景名称"
-          maxlength="20"
-        />
-        <view class="modal-actions">
-          <view class="btn-outline" @click="showSaveDialog = false">取消</view>
-          <view class="btn-primary" @click="saveScene">保存</view>
-        </view>
-      </view>
-    </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
+import BrandBar from '@/components/BrandBar.vue'
+import NowPlayingCard from '@/components/NowPlayingCard.vue'
+import Segmented from '@/components/Segmented.vue'
 import SceneCard from '@/components/SceneCard.vue'
-import PlayBar from '@/components/PlayBar.vue'
 import TabBar from '@/components/TabBar.vue'
 import Icon from '@/components/Icon.vue'
-import { player, applyScene, togglePlay, getRecent, recentTimeLabel } from '@/composables/usePlayer'
-import { homeScenes, sceneCategories, findScene, soundNames } from '@/data/scenes'
-import { sounds } from '@/data/sounds'
+import { player, applyScene, togglePlay } from '@/composables/usePlayer'
+import { sceneCategories, getCategoryScenes, findScene } from '@/data/scenes'
+import type { Scene, SceneCategory } from '@/data/scenes'
 
-const greetingText = computed(() => {
-  const h = new Date().getHours()
-  if (h >= 6 && h < 10) return '早安，新的一天开始了'
-  if (h >= 10 && h < 14) return '午安，享受片刻宁静'
-  if (h >= 14 && h < 18) return '下午好，放松一下吧'
-  if (h >= 18 && h < 22) return '晚上好，让声音陪伴你'
-  return '夜深了，安心入眠吧'
-})
-
-/* ② 大播放卡 */
-const heroBg = computed(() => {
-  return player.currentScene?.gradient || 'linear-gradient(135deg, var(--app-primary), var(--app-primary-dark))'
-})
-
-const onHeroTap = () => {
-  if (player.tracks.length === 0) {
-    uni.showToast({ title: '请先选择场景', icon: 'none' })
-  } else {
-    player.showMixPanel = true
-  }
+/* ③ 场景流 —— 一键播 chip：优先按场景 id 解析，缺失时回退对应分类首条 */
+interface QuickChip {
+  scene: Scene
+  icon: string
 }
 
-const onMainPlay = () => {
-  if (!togglePlay()) {
-    uni.showToast({ title: '请先选择场景', icon: 'none' })
-  }
-}
-
-/* ③ 金刚区 */
-const quickActions = [
-  { id: 'sleep', name: '开始助眠', desc: '一键深度睡眠', icon: 'moon', bg: 'linear-gradient(135deg, #7E93A8, #4E7182)' },
-  { id: 'focus', name: '专注时刻', desc: '纯净白噪音', icon: 'flame', bg: 'linear-gradient(135deg, #8296A8, #C49A92)' },
-  { id: 'nature', name: '自然放松', desc: '林间溪流', icon: 'forest', bg: 'linear-gradient(135deg, #5F8296, #7E9A74)' },
-  { id: 'checkin', name: '每日签到', desc: '连续打卡领好礼', icon: 'gift', bg: 'linear-gradient(135deg, #B98A4E, #CFA878)' },
+const quickChipDefs: { id: string; fallback: SceneCategory; icon: string }[] = [
+  { id: 'deep-sleep', fallback: 'sleep', icon: 'moon' },
+  { id: 'focus-white-noise', fallback: 'focus', icon: 'white-noise' },
+  { id: 'forest-stream', fallback: 'nature', icon: 'stream' },
 ]
 
-const onQuick = (q: { id: string }) => {
-  if (q.id === 'sleep') {
-    const scene = findScene('deep-sleep')
-    if (scene) applyScene(scene)
-  } else if (q.id === 'focus') {
-    const scene = findScene('focus-white-noise')
-    if (scene) applyScene(scene)
-  } else if (q.id === 'nature') {
-    player.pendingSceneCategory = 'nature'
-    uni.switchTab({ url: '/pages/scene/scene' })
-  } else if (q.id === 'checkin') {
-    uni.navigateTo({ url: '/pages/checkin/checkin' })
-  }
-}
+const quickChips: QuickChip[] = quickChipDefs
+  .map((d) => {
+    const scene = findScene(d.id) ?? getCategoryScenes(d.fallback, 1)[0]
+    return scene ? { scene, icon: d.icon } : null
+  })
+  .filter((c): c is QuickChip => c !== null)
 
-/* ④ 今日精选 */
-const todayPicks = computed(() => {
-  return ['rainy-night', 'focus-white-noise']
-    .map((id) => findScene(id))
-    .filter((s): s is NonNullable<typeof s> => !!s)
-})
-
-const randomPlay = () => {
-  const scene = homeScenes[Math.floor(Math.random() * homeScenes.length)]
+const quickPlay = (scene: Scene) => {
   applyScene(scene)
-  uni.showToast({ title: `已为你播放「${scene.name}」`, icon: 'none' })
 }
 
-/* ⑤ 场景推荐 */
-const activeCategory = ref('all')
-const filteredScenes = computed(() => {
-  if (activeCategory.value === 'all') return homeScenes
-  return homeScenes.filter((s) => s.category === activeCategory.value)
-})
+/* 分类胶囊：数据源 sceneCategories 单一来源（Task 7 前无 icon 字段，仅用 label） */
+const catOptions = computed(() => sceneCategories.map((c) => ({ key: c.key, label: c.label })))
+const activeCat = ref('all')
 
-const playScene = (scene: { id: string }) => {
+/* 网格数据用 ref 承载（tab 缓存页不重跑 setup，v1 约定）：onShow + 分类切换时刷新 */
+const gridScenes = ref<Scene[]>(getCategoryScenes('all', 20))
+
+function refreshGrid() {
+  gridScenes.value = getCategoryScenes(activeCat.value as SceneCategory | 'all', 20)
+}
+
+watch(activeCat, refreshGrid)
+onShow(refreshGrid)
+
+/* 卡片交互：tap 进详情，play 按钮播放/暂停当前 */
+const openDetail = (scene: Scene) => {
+  uni.navigateTo({ url: `/pages/scene-detail/scene-detail?sceneId=${scene.id}` })
+}
+
+const playScene = (scene: Scene) => {
   if (player.currentScene?.id === scene.id) {
     togglePlay()
   } else {
-    const target = homeScenes.find((s) => s.id === scene.id)
-    if (target) applyScene(target)
+    applyScene(scene)
   }
 }
 
-/* ⑥ 最近使用 */
-const recentItems = ref(getRecent())
-
-onShow(() => {
-  recentItems.value = getRecent()
-})
-
-const playRecent = (item: { sceneId: string }) => {
-  const scene = findScene(item.sceneId)
-  if (scene) applyScene(scene)
+/* 「更多」：带当前分类跳场景页（保留 v1 pendingSceneCategory 交接流程） */
+const goSceneFlow = () => {
+  player.pendingSceneCategory = activeCat.value
+  uni.switchTab({ url: '/pages/scene/scene' })
 }
-
-/* ⑦ 声音库 */
-const soundCountLabel = computed(() => sounds.length)
-
-/* 保存场景 */
-const showSaveDialog = ref(false)
-const saveName = ref('')
-
-const saveScene = () => {
-  if (!saveName.value.trim()) {
-    uni.showToast({ title: '请输入场景名称', icon: 'none' })
-    return
-  }
-  showSaveDialog.value = false
-  saveName.value = ''
-  uni.showToast({ title: '场景已保存', icon: 'success' })
-}
-
-/* 导航 */
-const goTheme = () => {
-  uni.navigateTo({ url: '/pages/theme/theme' })
-}
-const goAchievement = () => {
-  uni.navigateTo({ url: '/pages/achievement/achievement' })
-}
-const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
-const goLibrary = () => uni.navigateTo({ url: '/pages/library/library' })
 </script>
 
 <style lang="scss" scoped>
-.header {
-  padding: 16rpx 4rpx 2rpx;
+/* ③ 场景流 */
+.flow {
+  margin-top: 40rpx;
 }
 
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-}
-
-.brand-logo-wrap {
-  width: 84rpx;
-  height: 84rpx;
-  border-radius: 24rpx;
-  overflow: hidden;
-  box-shadow: 0 8rpx 22rpx color-mix(in srgb, var(--app-primary, $app-primary) 22%, transparent);
-}
-
-.brand-logo {
-  width: 100%;
-  height: 100%;
-}
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
-}
-
-.app-title {
-  font-size: 46rpx;
-  font-weight: 800;
-  color: var(--app-text, $uni-text-color);
-  letter-spacing: 4rpx;
-}
-
-.app-slogan {
-  font-size: 22rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
-  letter-spacing: 1rpx;
-}
-
-.header-actions {
+.chip-row {
   display: flex;
   gap: 16rpx;
+  margin-bottom: 36rpx;
 }
 
-.header-btn {
-  width: 68rpx;
-  height: 68rpx;
-  border-radius: 22rpx;
+.quick-chip {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.16s cubic-bezier(.4, 0, .2, 1);
-
-  &:active {
-    transform: scale(0.9);
-  }
-}
-
-/* ② 大播放卡 */
-.hero {
-  margin-top: 20rpx;
-  border-radius: 32rpx;
-  padding: 30rpx;
-  min-height: 290rpx;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border: none;
-  box-shadow: 0 16rpx 36rpx rgba(30, 40, 36, .18);
-  overflow: hidden;
-}
-
-.hero-top {
-  display: flex;
-  align-items: center;
-  gap: 14rpx;
-}
-
-.hero-scene {
-  font-size: 32rpx;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 0.5rpx;
-}
-
-.hero-count {
-  padding: 4rpx 16rpx;
-  border-radius: 22rpx;
-  background: rgba(255, 255, 255, .22);
-
-  text {
-    font-size: 19rpx;
-    color: #fff;
-    font-weight: 600;
-  }
-}
-
-.hero-main {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 30rpx 0 22rpx;
-}
-
-.hero-bars {
-  display: flex;
-  align-items: flex-end;
   gap: 10rpx;
-  height: 64rpx;
-  flex: 1;
-
-  .hero-bar {
-    width: 8rpx;
-    border-radius: 4rpx;
-    background: rgba(255, 255, 255, .55);
-
-    &:nth-child(1) { height: 26rpx; }
-    &:nth-child(2) { height: 52rpx; }
-    &:nth-child(3) { height: 38rpx; }
-    &:nth-child(4) { height: 60rpx; }
-    &:nth-child(5) { height: 32rpx; }
-  }
-
-  &.playing .hero-bar {
-    background: #fff;
-    animation: heroWave 1.1s ease-in-out infinite;
-
-    &:nth-child(1) { animation-delay: 0s; }
-    &:nth-child(2) { animation-delay: 0.15s; }
-    &:nth-child(3) { animation-delay: 0.3s; }
-    &:nth-child(4) { animation-delay: 0.45s; }
-    &:nth-child(5) { animation-delay: 0.6s; }
-  }
-}
-
-@keyframes heroWave {
-  0%, 100% { transform: scaleY(0.55); }
-  50% { transform: scaleY(1.15); }
-}
-
-.hero-play {
-  width: 96rpx;
-  height: 96rpx;
-  border-radius: 50%;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-left: 30rpx;
-  box-shadow: 0 12rpx 26rpx rgba(0, 0, 0, .18);
-  transition: transform 0.16s cubic-bezier(.4, 0, .2, 1);
+  min-height: 88rpx;
+  padding: 0 28rpx;
+  border-radius: 999rpx;
+  background: var(--app-surface);
+  border: 1rpx solid var(--app-line);
+  box-shadow: var(--app-shadow-1), var(--app-inset);
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
-    transform: scale(0.92);
+    transform: scale(0.96);
   }
 }
 
-.hero-actions {
-  display: flex;
-  gap: 20rpx;
-}
-
-.hero-action {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  padding: 12rpx 24rpx;
-  border-radius: 28rpx;
-  background: rgba(255, 255, 255, .16);
-  transition: all 0.16s;
-
-  &:active {
-    transform: scale(0.94);
-  }
-}
-
-.hero-action-text {
-  font-size: 22rpx;
-  color: #fff;
+.quick-chip-label {
+  font-size: 26rpx;
   font-weight: 600;
+  color: var(--app-text);
+  letter-spacing: -0.2rpx;
 }
 
-.hero-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12rpx;
-  min-height: 230rpx;
-}
-
-.hero-empty-icon {
-  width: 108rpx;
-  height: 108rpx;
-  border-radius: 34rpx;
-  background: rgba(255, 255, 255, .18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8rpx;
-  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, .35);
-}
-
-.hero-empty-title {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 1rpx;
-}
-
-.hero-empty-sub {
-  font-size: 23rpx;
-  color: rgba(255, 255, 255, .82);
-  letter-spacing: 0.5rpx;
-}
-
-/* ③ 金刚区 */
-.quick-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16rpx;
-  margin-top: 24rpx;
-}
-
-.quick-item {
-  width: calc(50% - 8rpx);
-  padding: 22rpx;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  gap: 18rpx;
-  transition: transform 0.16s cubic-bezier(.4, 0, .2, 1);
-
-  &:active {
-    transform: scale(0.97);
-  }
-}
-
-.quick-icon {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 22rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: inset 0 -2rpx 0 rgba(0, 0, 0, .08), inset 0 2rpx 0 rgba(255, 255, 255, .25), 0 6rpx 14rpx rgba(0, 0, 0, .10);
-}
-
-.quick-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
-  min-width: 0;
-}
-
-.quick-name {
-  font-size: 27rpx;
-  font-weight: 700;
-  color: var(--app-text, $uni-text-color);
-}
-
-.quick-desc {
-  font-size: 21rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* 通用分区 */
-.section {
-  margin-top: 32rpx;
-}
-
-.section-header {
+.flow-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 18rpx;
-  padding: 0 4rpx;
+  margin-bottom: 16rpx;
+  padding: 0 8rpx;
+
+  .section-title {
+    margin-bottom: 0;
+  }
 }
 
-.section-title {
+.flow-more {
   font-size: 24rpx;
-  font-weight: 600;
-  letter-spacing: 0.3rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
-}
-
-.section-more {
-  font-size: 22rpx;
-  color: var(--app-primary, $app-primary);
   font-weight: 500;
-}
-
-/* ④ 今日精选 */
-.pick-scroll {
-  white-space: nowrap;
-  width: 100%;
-}
-
-.pick-list {
-  display: inline-flex;
-  gap: 16rpx;
-  padding-bottom: 8rpx;
-}
-
-.pick-card {
-  width: 480rpx;
-  height: 210rpx;
-  border-radius: 28rpx;
-  padding: 26rpx 28rpx;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex-shrink: 0;
-  overflow: hidden;
-  transition: transform 0.16s cubic-bezier(.4, 0, .2, 1);
-
-  &:active {
-    transform: scale(0.98);
-  }
-}
-
-.pick-tag {
-  align-self: flex-start;
-  padding: 4rpx 16rpx;
-  border-radius: 22rpx;
-  background: rgba(255, 255, 255, .24);
-
-  text {
-    font-size: 19rpx;
-    color: #fff;
-    font-weight: 600;
-    letter-spacing: 1rpx;
-  }
-}
-
-.pick-title {
-  font-size: 34rpx;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 0.5rpx;
-}
-
-.pick-desc {
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, .84);
-}
-
-.pick-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.pick-combo {
-  font-size: 20rpx;
-  color: rgba(255, 255, 255, .72);
-}
-
-.pick-play {
-  width: 52rpx;
-  height: 52rpx;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .94);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, .08);
-}
-
-/* ⑤ 场景推荐 */
-.category-tabs {
-  display: flex;
-  gap: 8rpx;
-  margin-bottom: 26rpx;
-  padding: 8rpx;
-  background: var(--app-subtle, $uni-bg-color-grey);
-  border-radius: 30rpx;
-}
-
-.cat-tab {
-  flex: 1;
-  height: 66rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 24rpx;
-  font-size: 26rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
-  font-weight: 500;
-  transition: all 0.2s cubic-bezier(.4, 0, .2, 1);
-  background: transparent;
-
-  &.active {
-    background: var(--app-card-bg, #fff);
-    color: var(--app-primary, $app-primary);
-    font-weight: 600;
-    box-shadow: 0 4rpx 12rpx color-mix(in srgb, var(--app-primary, $app-primary) 14%, transparent);
-  }
+  color: var(--app-primary);
 }
 
 .scene-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16rpx;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24rpx;
+  margin-top: 28rpx;
+  box-sizing: border-box;
 
-  .scene-card {
-    width: calc(50% - 8rpx);
+  :deep(.scene-card) {
     margin-bottom: 0;
     box-sizing: border-box;
   }
 }
 
 .scene-empty {
+  margin-top: 28rpx;
   padding: 60rpx 32rpx;
   text-align: center;
   font-size: 25rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
-}
-
-/* ⑥ 最近使用 */
-.recent-scroll {
-  white-space: nowrap;
-  width: 100%;
-}
-
-.recent-list {
-  display: inline-flex;
-  gap: 16rpx;
-  padding-bottom: 8rpx;
-}
-
-.recent-item {
-  width: 180rpx;
-  padding: 22rpx 14rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10rpx;
-  transition: transform 0.16s cubic-bezier(.4, 0, .2, 1);
-
-  &:active {
-    transform: scale(0.97);
-  }
-}
-
-.recent-icon {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 22rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: inset 0 -2rpx 0 rgba(0, 0, 0, .08), inset 0 2rpx 0 rgba(255, 255, 255, .25);
-}
-
-.recent-name {
-  font-size: 23rpx;
-  font-weight: 500;
-  color: var(--app-text, $uni-text-color);
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.recent-time {
-  font-size: 19rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
-}
-
-/* ⑦ 声音库入口 */
-.library-entry {
-  padding: 24rpx;
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  transition: transform 0.16s cubic-bezier(.4, 0, .2, 1);
-
-  &:active {
-    transform: scale(0.98);
-  }
-}
-
-.library-icon {
-  width: 76rpx;
-  height: 76rpx;
-  border-radius: 24rpx;
-  background: var(--app-primary-soft, rgba($app-primary, 0.12));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.library-meta {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
-}
-
-.library-name {
-  font-size: 28rpx;
-  font-weight: 700;
-  color: var(--app-text, $uni-text-color);
-}
-
-.library-desc {
-  font-size: 21rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
-}
-
-/* 保存弹窗 */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--app-overlay, rgba(0, 0, 0, 0.38));
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 64rpx;
-}
-
-.modal-content {
-  width: 100%;
-  padding: 36rpx;
-  max-width: 620rpx;
-}
-
-.modal-title {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: var(--app-text, $uni-text-color);
-  display: block;
-  margin-bottom: 32rpx;
-  text-align: center;
-}
-
-.modal-input {
-  height: 92rpx;
-  background: var(--app-input-bg, $uni-bg-color-grey);
-  border: 1rpx solid var(--app-input-border, transparent);
-  border-radius: 20rpx;
-  padding: 0 24rpx;
-  font-size: 28rpx;
-  margin-bottom: 32rpx;
-  width: 100%;
-  box-sizing: border-box;
-  color: var(--app-text, $uni-text-color);
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: center;
-  gap: 24rpx;
+  color: var(--app-text-2);
 }
 </style>
