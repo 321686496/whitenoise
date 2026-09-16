@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:snapp/app/app.dart';
+import 'package:snapp/services/achievement_service.dart';
 import 'package:snapp/services/checkin_service.dart';
 import 'package:snapp/services/custom_scene_service.dart';
 import 'package:snapp/services/favorites_service.dart';
 import 'package:snapp/services/player_service.dart';
+import 'package:snapp/services/stats_service.dart';
 import 'package:snapp/theme/theme_notifier.dart';
 import 'package:snapp/widgets/tab_bar.dart';
 
@@ -19,12 +21,24 @@ void main() {
     addTearDown(window.clearPhysicalSizeTestValue);
     addTearDown(window.clearDevicePixelRatioTestValue);
 
+    final stats = StatsService();
+    final player = PlayerService(stats: stats);
+    final checkin = CheckinService();
+    final customScenes = CustomSceneService();
     await tester.pumpWidget(Root(
         notifier: ThemeNotifier(),
-        player: PlayerService(),
+        player: player,
         favorites: FavoritesService(),
-        checkin: CheckinService(),
-        customScenes: CustomSceneService()));
+        checkin: checkin,
+        customScenes: customScenes,
+        stats: stats,
+        achievement: AchievementService(
+          player: player,
+          checkin: checkin,
+          customScenes: customScenes,
+          stats: stats,
+          themeNotifier: ThemeNotifier(),
+        )));
     expect(tester.takeException(), isNull);
 
     final tabBar = find.byType(AppTabBar);

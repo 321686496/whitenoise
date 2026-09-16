@@ -19,6 +19,8 @@ class AppStorage {
   static const String keyStats = 'shengqi-stats';
   static const String keyPlaySettings = 'shengqi-play-settings';
   static const String keyOnboarded = 'shengqi-onboarded';
+  static const String keyThemeVisits = 'shengqi-theme-visits';
+  static const String keyAchievements = 'shengqi-achievements';
 
   static Future<SharedPreferences?> _instance() async {
     try {

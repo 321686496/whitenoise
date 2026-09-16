@@ -5,10 +5,12 @@ import '../pages/discover/discover_page.dart';
 import '../pages/index/index_page.dart';
 import '../pages/mine/mine_page.dart';
 import '../pages/scene/scene_page.dart';
+import '../services/achievement_service.dart';
 import '../services/checkin_service.dart';
 import '../services/custom_scene_service.dart';
 import '../services/favorites_service.dart';
 import '../services/player_service.dart';
+import '../services/stats_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_extension.dart';
 import '../theme/theme_notifier.dart';
@@ -83,6 +85,8 @@ class Root extends StatelessWidget {
   final FavoritesService favorites;
   final CheckinService checkin;
   final CustomSceneService customScenes;
+  final StatsService stats;
+  final AchievementService achievement;
   const Root({
     super.key,
     required this.notifier,
@@ -90,6 +94,8 @@ class Root extends StatelessWidget {
     required this.favorites,
     required this.checkin,
     required this.customScenes,
+    required this.stats,
+    required this.achievement,
   });
 
   @override
@@ -101,6 +107,8 @@ class Root extends StatelessWidget {
         ChangeNotifierProvider<FavoritesService>.value(value: favorites),
         ChangeNotifierProvider<CheckinService>.value(value: checkin),
         ChangeNotifierProvider<CustomSceneService>.value(value: customScenes),
+        ChangeNotifierProvider<StatsService>.value(value: stats),
+        ChangeNotifierProvider<AchievementService>.value(value: achievement),
         ChangeNotifierProvider<ShellTabNotifier>(create: (_) => ShellTabNotifier()),
       ],
       child: Consumer<ThemeNotifier>(
