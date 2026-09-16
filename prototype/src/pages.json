@@ -38,9 +38,8 @@
 		{
 			"path": "pages/theme/theme",
 			"style": {
-				"navigationBarTitleText": "主题设置",
-				"navigationBarBackgroundColor": "#F5F2ED",
-				"navigationBarTextStyle": "black"
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
 			}
 		},
 		{
@@ -62,9 +61,8 @@
 		{
 			"path": "pages/settings/settings",
 			"style": {
-				"navigationBarTitleText": "设置",
-				"navigationBarBackgroundColor": "#F5F2ED",
-				"navigationBarTextStyle": "black"
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
 			}
 		},
 		{

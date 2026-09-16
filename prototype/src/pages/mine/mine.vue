@@ -206,7 +206,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   height: 84rpx;
   border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: 0 8rpx 22rpx color-mix(in srgb, var(--app-primary, $app-primary) 22%, transparent);
+  box-shadow: 0 8rpx 22rpx color-mix(in srgb, var(--app-primary) 22%, transparent);
 }
 
 .brand-logo {
@@ -223,14 +223,14 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
 .app-title {
   font-size: 46rpx;
   font-weight: 800;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
   letter-spacing: 4rpx;
   line-height: 1.1;
 }
 
 .app-slogan {
   font-size: 22rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
   letter-spacing: 1rpx;
 }
 
@@ -241,7 +241,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.16s cubic-bezier(.4, 0, .2, 1);
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
     transform: scale(0.9);
@@ -259,9 +259,9 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   border-radius: 36rpx;
   background: linear-gradient(
     150deg,
-    color-mix(in srgb, var(--app-primary, $app-primary) 30%, var(--app-card-bg, #fff)) 0%,
-    color-mix(in srgb, var(--app-primary, $app-primary) 16%, var(--app-bg, #fff)) 55%,
-    var(--app-card-bg, #fff) 100%
+    color-mix(in srgb, var(--app-primary) 30%, var(--app-surface)) 0%,
+    color-mix(in srgb, var(--app-primary) 16%, var(--app-bg)) 55%,
+    var(--app-surface) 100%
   );
 }
 
@@ -275,7 +275,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
     height: 260rpx;
     right: -80rpx;
     top: -90rpx;
-    background: color-mix(in srgb, var(--app-primary, $app-primary) 14%, transparent);
+    background: color-mix(in srgb, var(--app-primary) 14%, transparent);
   }
 
   &.blob-b {
@@ -283,7 +283,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
     height: 160rpx;
     bottom: -70rpx;
     right: 90rpx;
-    background: color-mix(in srgb, var(--app-primary, $app-primary) 8%, transparent);
+    background: color-mix(in srgb, var(--app-primary) 8%, transparent);
   }
 }
 
@@ -292,13 +292,13 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   width: 132rpx;
   height: 132rpx;
   border-radius: 44rpx;
-  background: var(--app-card-bg, #fff);
+  background: var(--app-surface);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 14rpx 30rpx color-mix(in srgb, var(--app-primary, $app-primary) 22%, transparent),
-    inset 0 -2rpx 0 rgba(0, 0, 0, 0.05), inset 0 2rpx 0 rgba(255, 255, 255, 0.5);
+  box-shadow: 0 14rpx 30rpx color-mix(in srgb, var(--app-primary) 22%, transparent),
+    inset 0 -2rpx 0 var(--app-press), inset 0 2rpx 0 var(--p-neu-b);
 }
 
 .hero-id {
@@ -320,7 +320,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
 .hero-name {
   font-size: 46rpx;
   font-weight: 800;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
   letter-spacing: -0.5rpx;
   line-height: 1.1;
 }
@@ -331,18 +331,18 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   gap: 6rpx;
   padding: 6rpx 16rpx;
   border-radius: 18rpx;
-  background: var(--app-card-bg, #fff);
+  background: var(--app-surface);
 }
 
 .member-text {
   font-size: 20rpx;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
   font-weight: 600;
 }
 
 .hero-tag {
   font-size: 24rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
   letter-spacing: 0.5rpx;
 }
 
@@ -355,7 +355,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform 0.16s cubic-bezier(.4, 0, .2, 1);
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
     transform: scale(0.9);
@@ -369,7 +369,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   padding: 28rpx 12rpx;
   display: flex;
   align-items: center;
-  box-shadow: 0 20rpx 48rpx color-mix(in srgb, var(--app-primary, $app-primary) 14%, transparent);
+  box-shadow: 0 20rpx 48rpx color-mix(in srgb, var(--app-primary) 14%, transparent);
 }
 
 .stat-item {
@@ -379,7 +379,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   align-items: center;
   gap: 8rpx;
   padding: 8rpx 0;
-  transition: transform 0.16s cubic-bezier(.4, 0, .2, 1);
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
     transform: scale(0.95);
@@ -389,20 +389,20 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
 .stat-value {
   font-size: 48rpx;
   font-weight: 800;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
   letter-spacing: -1rpx;
   line-height: 1;
 }
 
 .stat-label {
   font-size: 21rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
 }
 
 .stat-sep {
   width: 1rpx;
   height: 58rpx;
-  background: var(--app-divider, rgba($app-primary, 0.1));
+  background: var(--app-line);
 }
 
 /* 分组标题 */
@@ -410,7 +410,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   font-size: 24rpx;
   font-weight: 600;
   letter-spacing: 0.3rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
   margin: 40rpx 4rpx 16rpx;
   padding-left: 4rpx;
 }
@@ -430,7 +430,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   flex-direction: column;
   align-items: center;
   gap: 14rpx;
-  transition: all 0.16s cubic-bezier(.4, 0, .2, 1);
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
     transform: scale(0.97);
@@ -441,34 +441,34 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   width: 92rpx;
   height: 92rpx;
   border-radius: 30rpx;
-  background: var(--app-primary-soft, rgba($app-primary, 0.12));
+  background: var(--app-primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 -2rpx 0 rgba(0, 0, 0, 0.05), inset 0 2rpx 0 rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 -2rpx 0 var(--app-press), inset 0 2rpx 0 var(--p-neu-b);
 }
 
 .q-name {
   font-size: 29rpx;
   font-weight: 600;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
 }
 
 .q-badge {
   padding: 6rpx 20rpx;
   border-radius: 20rpx;
-  background: var(--app-subtle, $uni-bg-color-grey);
+  background: var(--app-surface-2);
 
   text {
     font-size: 20rpx;
-    color: var(--app-text-2, $uni-text-color-grey);
+    color: var(--app-text-2);
   }
 
   &.primary {
-    background: var(--app-primary-soft, rgba($app-primary, 0.12));
+    background: var(--app-primary-soft);
 
     text {
-      color: var(--app-primary, $app-primary);
+      color: var(--app-primary);
       font-weight: 600;
     }
   }
@@ -488,10 +488,10 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   display: flex;
   align-items: center;
   gap: 22rpx;
-  transition: transform 0.16s cubic-bezier(.4, 0, .2, 1);
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
-    background: var(--app-press, $uni-bg-color-hover);
+    background: var(--app-press);
     transform: scale(0.99);
   }
 }
@@ -500,7 +500,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   width: 60rpx;
   height: 60rpx;
   border-radius: 20rpx;
-  background: var(--app-primary-soft, rgba($app-primary, 0.12));
+  background: var(--app-primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -508,7 +508,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
 
 .menu-label {
   font-size: 29rpx;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
   font-weight: 500;
   flex: 1;
 }
@@ -517,24 +517,24 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   font-size: 21rpx;
   padding: 4rpx 16rpx;
   border-radius: 20rpx;
-  background: var(--app-subtle, $uni-bg-color-grey);
-  color: var(--app-text-2, $uni-text-color-grey);
+  background: var(--app-surface-2);
+  color: var(--app-text-2);
 
   &.primary {
-    background: var(--app-primary-soft, rgba($app-primary, 0.12));
-    color: var(--app-primary, $app-primary);
+    background: var(--app-primary-soft);
+    color: var(--app-primary);
     font-weight: 600;
   }
 }
 
 .menu-value {
   font-size: 22rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
 }
 
 .current-theme {
   font-weight: 500;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
 }
 
 /* ⑥ 最近成就 */
@@ -550,7 +550,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   flex-direction: column;
   align-items: center;
   gap: 14rpx;
-  transition: all 0.16s cubic-bezier(.4, 0, .2, 1);
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
     transform: scale(0.96);
@@ -561,7 +561,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
   width: 68rpx;
   height: 68rpx;
   border-radius: 22rpx;
-  background: var(--app-primary-soft, rgba($app-primary, 0.12));
+  background: var(--app-primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -569,7 +569,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
 
 .achi-name {
   font-size: 23rpx;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
   font-weight: 500;
   text-align: center;
 }
