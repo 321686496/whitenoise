@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app/app.dart';
 import 'app/theme_prefs.dart';
+import 'services/checkin_service.dart';
 import 'services/favorites_service.dart';
 import 'services/player_service.dart';
 import 'theme/theme_notifier.dart';
@@ -16,5 +17,11 @@ Future<void> main() async {
   await player.loadRecent();
   final favorites = FavoritesService();
   await favorites.load();
-  runApp(Root(notifier: notifier, player: player, favorites: favorites));
+  final checkin = CheckinService();
+  await checkin.load();
+  runApp(Root(
+      notifier: notifier,
+      player: player,
+      favorites: favorites,
+      checkin: checkin));
 }

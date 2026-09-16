@@ -6,6 +6,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:snapp/app/app.dart';
+import 'package:snapp/services/checkin_service.dart';
 import 'package:snapp/services/favorites_service.dart';
 import 'package:snapp/services/player_service.dart';
 import 'package:snapp/theme/theme_notifier.dart';
@@ -17,7 +18,8 @@ void main() {
     await tester.pumpWidget(Root(
         notifier: ThemeNotifier(),
         player: PlayerService(),
-        favorites: FavoritesService()));
+        favorites: FavoritesService(),
+        checkin: CheckinService()));
     expect(tester.takeException(), isNull);
 
     expect(find.byType(AppTabBar), findsOneWidget);
@@ -43,7 +45,8 @@ void main() {
     await tester.pumpWidget(Root(
         notifier: ThemeNotifier(),
         player: PlayerService(),
-        favorites: FavoritesService()));
+        favorites: FavoritesService(),
+        checkin: CheckinService()));
 
     await tester.tap(
       find.descendant(of: find.byType(AppTabBar), matching: find.text('我的')),
