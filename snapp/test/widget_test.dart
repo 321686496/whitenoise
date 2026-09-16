@@ -6,6 +6,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:snapp/app/app.dart';
+import 'package:snapp/pages/onboarding/onboarding_page.dart';
 import 'package:snapp/services/achievement_service.dart';
 import 'package:snapp/services/checkin_service.dart';
 import 'package:snapp/services/custom_scene_service.dart';
@@ -49,10 +50,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('first launch shows onboarding, finish enters shell',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(_buildRoot(onboarded: false));
+
+    // 未引导：home 为引导页，无 TabBar
+    expect(find.byType(OnboardingPage), findsOneWidget);
+    expect(find.byType(AppTabBar), findsNothing);
+
+    // 「跳过」完成引导 → 切换主界面
+    await tester.tap(find.text('跳过'));
+    await tester.pumpAndSettle();
+    expect(find.byType(OnboardingPage), findsNothing);
+    expect(find.byType(AppTabBar), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 /// 组装完整 Root（含 stats / achievement 服务，与 main.dart 注入一致）。
-Root _buildRoot() {
+Root _buildRoot({bool onboarded = true}) {
   final stats = StatsService();
   final player = PlayerService(stats: stats);
   final checkin = CheckinService();
@@ -71,5 +88,6 @@ Root _buildRoot() {
       stats: stats,
       themeNotifier: ThemeNotifier(),
     ),
+    onboarded: onboarded,
   );
 }

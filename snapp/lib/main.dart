@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'app/app.dart';
 import 'app/theme_prefs.dart';
 import 'services/achievement_service.dart';
+import 'services/app_storage.dart';
 import 'services/checkin_service.dart';
 import 'services/custom_scene_service.dart';
 import 'services/favorites_service.dart';
@@ -14,6 +15,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final notifier = ThemeNotifier(persist: ThemePrefs.write);
   await notifier.loadFrom(ThemePrefs.read);
+  // 首启引导标记：未标记（'true'）时 Root 先挂载引导页，完成后写回。
+  final onboarded =
+      await AppStorage.getString(AppStorage.keyOnboarded) == 'true';
   // 播放服务单例：main 创建一次并恢复最近播放，Provider 以 .value 注入同一实例，
   // 避免冷启动时 Provider 另建实例导致最近播放为空（存储不可用时静默降级）。
   final stats = StatsService();
@@ -42,5 +46,6 @@ Future<void> main() async {
       checkin: checkin,
       customScenes: customScenes,
       stats: stats,
-      achievement: achievement));
+      achievement: achievement,
+      onboarded: onboarded));
 }

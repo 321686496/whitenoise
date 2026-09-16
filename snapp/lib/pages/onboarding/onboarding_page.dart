@@ -16,8 +16,12 @@ class _Slide {
 
 /// 新人引导（对照原型 `pages/onboarding/onboarding.vue`）：
 /// 三页轮播（欢迎 / 混音 / 入眠）+ 指示点 + 跳过 / 下一步 / 开始体验。
+///
+/// [onDone]：首启完成回调（由 Root 传入，负责写入 `shengqi-onboarded` 并切换到
+/// 主界面）；为 null 时（经命名路由 `/onboarding` 进入）保留原跳转行为。
 class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({super.key});
+  final VoidCallback? onDone;
+  const OnboardingPage({this.onDone, super.key});
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
@@ -36,6 +40,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
   ];
 
   void _goHome() {
+    // 首启流程（Root 作 home 挂载）：交还 Root 写标记并切换主界面；
+    // 否则（命名路由进入）直接清栈回首页。
+    final done = widget.onDone;
+    if (done != null) {
+      done();
+      return;
+    }
     Navigator.pushNamedAndRemoveUntil(context, '/index', (_) => false);
   }
 
