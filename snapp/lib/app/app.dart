@@ -6,6 +6,7 @@ import '../pages/index/index_page.dart';
 import '../pages/mine/mine_page.dart';
 import '../pages/scene/scene_page.dart';
 import '../services/checkin_service.dart';
+import '../services/custom_scene_service.dart';
 import '../services/favorites_service.dart';
 import '../services/player_service.dart';
 import '../theme/app_theme.dart';
@@ -81,12 +82,14 @@ class Root extends StatelessWidget {
   final PlayerService player;
   final FavoritesService favorites;
   final CheckinService checkin;
+  final CustomSceneService customScenes;
   const Root({
     super.key,
     required this.notifier,
     required this.player,
     required this.favorites,
     required this.checkin,
+    required this.customScenes,
   });
 
   @override
@@ -97,6 +100,7 @@ class Root extends StatelessWidget {
         ChangeNotifierProvider<PlayerService>.value(value: player),
         ChangeNotifierProvider<FavoritesService>.value(value: favorites),
         ChangeNotifierProvider<CheckinService>.value(value: checkin),
+        ChangeNotifierProvider<CustomSceneService>.value(value: customScenes),
         ChangeNotifierProvider<ShellTabNotifier>(create: (_) => ShellTabNotifier()),
       ],
       child: Consumer<ThemeNotifier>(

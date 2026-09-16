@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:snapp/app/app.dart';
 import 'package:snapp/services/checkin_service.dart';
+import 'package:snapp/services/custom_scene_service.dart';
 import 'package:snapp/services/favorites_service.dart';
 import 'package:snapp/services/player_service.dart';
 import 'package:snapp/theme/theme_notifier.dart';
@@ -19,7 +20,8 @@ void main() {
         notifier: ThemeNotifier(),
         player: PlayerService(),
         favorites: FavoritesService(),
-        checkin: CheckinService()));
+        checkin: CheckinService(),
+        customScenes: CustomSceneService()));
     expect(tester.takeException(), isNull);
 
     expect(find.byType(AppTabBar), findsOneWidget);
@@ -46,7 +48,8 @@ void main() {
         notifier: ThemeNotifier(),
         player: PlayerService(),
         favorites: FavoritesService(),
-        checkin: CheckinService()));
+        checkin: CheckinService(),
+        customScenes: CustomSceneService()));
 
     await tester.tap(
       find.descendant(of: find.byType(AppTabBar), matching: find.text('我的')),

@@ -37,6 +37,32 @@ class Scene {
   final String image;
   final List<String> soundIds;
   final bool isPreset;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'id': id,
+        'name': name,
+        'category': category,
+        'desc': desc,
+        'iconName': iconName,
+        'gradient': gradient,
+        'image': image,
+        'soundIds': soundIds,
+        'isPreset': isPreset,
+      };
+
+  static Scene fromJson(Map<String, dynamic> j) => Scene(
+        id: j['id'] as String? ?? '',
+        name: j['name'] as String? ?? '',
+        category: j['category'] as String? ?? '',
+        desc: j['desc'] as String? ?? '',
+        iconName: j['iconName'] as String? ?? 'wave',
+        gradient: j['gradient'] as String? ?? '',
+        image: j['image'] as String? ?? '',
+        soundIds: (j['soundIds'] as List<dynamic>? ?? <dynamic>[])
+            .whereType<String>()
+            .toList(),
+        isPreset: j['isPreset'] as bool? ?? false,
+      );
 }
 
 /// 发现页推荐场景（FeaturedScene）。
@@ -69,11 +95,12 @@ class FeaturedScene {
   final String duration;
 }
 
-/// 场景分类选项（key + label）。
+/// 场景分类选项（key + label + icon，与原型一致）。
 class SceneCategoryItem {
-  const SceneCategoryItem(this.key, this.label);
+  const SceneCategoryItem(this.key, this.label, this.icon);
   final String key;
   final String label;
+  final String icon;
 }
 
 /// 最近播放记录（用于推荐剔除已听场景）。

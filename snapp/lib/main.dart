@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'app/app.dart';
 import 'app/theme_prefs.dart';
 import 'services/checkin_service.dart';
+import 'services/custom_scene_service.dart';
 import 'services/favorites_service.dart';
 import 'services/player_service.dart';
 import 'theme/theme_notifier.dart';
@@ -19,9 +20,12 @@ Future<void> main() async {
   await favorites.load();
   final checkin = CheckinService();
   await checkin.load();
+  final customScenes = CustomSceneService();
+  await customScenes.load();
   runApp(Root(
       notifier: notifier,
       player: player,
       favorites: favorites,
-      checkin: checkin));
+      checkin: checkin,
+      customScenes: customScenes));
 }
