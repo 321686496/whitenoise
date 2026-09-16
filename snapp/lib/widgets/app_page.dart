@@ -34,11 +34,17 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    if (_reducedMotion()) {
-      _controller.value = 1;
-    } else {
-      _controller.forward();
-    }
+    // 延后到首帧后再启动动画：initState 阶段外层路由的 TickerMode 可能尚未激活，
+    // 若在此处 forward() 且 ticker 被静音后未能恢复（部分嵌入式/OHOS 引擎），控制器会停在 0。
+    // 推迟启动即可避免把内容做成“依赖 ticker 才能可见”。
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_reducedMotion()) {
+        _controller.value = 1;
+      } else {
+        _controller.forward();
+      }
+    });
   }
 
   @override
@@ -74,7 +80,8 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
         SafeArea(
           bottom: false,
           child: FadeTransition(
-            opacity: _controller,
+            // 底值 0.3：即使 ticker 卡住导致控制器停在 0，页面也已可见（避免整页消失）。
+            opacity: Tween<double>(begin: 0.3, end: 1.0).animate(_controller),
             child: SlideTransition(
               position: slide,
               child: Padding(
