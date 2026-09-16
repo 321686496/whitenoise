@@ -1,26 +1,26 @@
 <template>
-  <view class="page-container">
+  <!-- v2：自定义导航（pages.json 已改 custom），NavBar 自带安全区；概览全部 computed 驱动（MASTER §10.3-4） -->
+  <view class="page-container achievement-page">
     <view class="page-bg"></view>
 
-    <view class="header">
-      <text class="page-title">成就墙</text>
-      <text class="page-subtitle">记录你的每一次专注与放松</text>
-    </view>
+    <NavBar title="成就墙" />
 
-    <!-- 达成概览 -->
+    <text class="page-subtitle">记录你的每一次专注与放松</text>
+
+    <!-- 达成概览（§10.3-4：数字与百分比一律来自 computed，禁止字面量） -->
     <view class="overview app-card">
       <view class="overview-item">
-        <text class="overview-num">3</text>
+        <text class="overview-num num">{{ unlockedCount }}</text>
         <text class="overview-label">已解锁</text>
       </view>
       <view class="overview-sep"></view>
       <view class="overview-item">
-        <text class="overview-num">8</text>
+        <text class="overview-num num">{{ totalAchievements }}</text>
         <text class="overview-label">全部成就</text>
       </view>
       <view class="overview-sep"></view>
       <view class="overview-item">
-        <text class="overview-num accent">38%</text>
+        <text class="overview-num accent num">{{ progressPercent }}%</text>
         <text class="overview-label">完成度</text>
       </view>
     </view>
@@ -48,9 +48,9 @@
     <view class="section">
       <view class="progress-row">
         <text class="section-title">全部成就</text>
-        <text class="progress-count">3 / 8</text>
+        <text class="progress-count num">{{ unlockedCount }} / {{ totalAchievements }}</text>
       </view>
-      <view class="progress-track app-card">
+      <view class="progress-track">
         <view class="progress-fill" :style="{ width: progressPercent + '%' }"></view>
       </view>
       <view class="achievement-list">
@@ -60,7 +60,7 @@
           class="achievement-card app-card"
           :class="{ locked: !ach.unlocked }"
         >
-          <view class="ach-icon-wrap" :class="{ locked: !ach.unlocked }">
+          <view class="ach-icon-wrap">
             <Icon v-if="ach.unlocked" :name="ach.iconName" :size="24" color="var(--app-primary)" />
             <Icon v-else name="lock" :size="20" color="var(--app-text-3)" />
           </view>
@@ -69,7 +69,7 @@
             <text class="ach-desc">{{ ach.desc }}</text>
           </view>
           <view class="ach-status" :class="{ locked: !ach.unlocked }">
-            <Icon :name="ach.unlocked ? 'check' : 'lock'" :size="14" :color="ach.unlocked ? 'var(--app-primary)' : 'var(--app-text-3)'" />
+            <Icon :name="ach.unlocked ? 'check' : 'lock'" :size="14" :color="ach.unlocked ? 'var(--app-success)' : 'var(--app-text-3)'" />
             <text class="ach-status-text">{{ ach.unlocked ? '已解锁' : '未解锁' }}</text>
           </view>
         </view>
@@ -81,6 +81,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import Icon from '@/components/Icon.vue'
+import NavBar from '@/components/NavBar.vue'
 
 interface Achievement {
   id: string
@@ -108,20 +109,18 @@ const allAchievements = ref<Achievement[]>([
   { id: 'a8', name: '审美家', desc: '切换过所有主题风格', iconName: 'palette', unlocked: false },
 ])
 
+/* §10.3-4：单一 computed 数据源驱动概览与进度，杜绝「3 / 38%」与进度条不一致 */
 const unlockedCount = computed(() => allAchievements.value.filter(a => a.unlocked).length)
-const progressPercent = computed(() => Math.round((unlockedCount.value / allAchievements.value.length) * 100))
+const totalAchievements = computed(() => allAchievements.value.length)
+const progressPercent = computed(() =>
+  totalAchievements.value === 0 ? 0 : Math.round((unlockedCount.value / totalAchievements.value) * 100)
+)
 </script>
 
 <style lang="scss" scoped>
-.header {
-  padding: 16rpx 4rpx 8rpx;
-}
-
-.page-subtitle {
-  font-size: 24rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
-  margin-top: 10rpx;
-  display: block;
+/* NavBar 自带 env(safe-area-inset-top)，去掉容器重复的安全区顶距 */
+.achievement-page {
+  padding-top: calc(env(safe-area-inset-top, 0rpx) + 12rpx);
 }
 
 /* 达成概览 */
@@ -143,36 +142,27 @@ const progressPercent = computed(() => Math.round((unlockedCount.value / allAchi
 .overview-num {
   font-size: 38rpx;
   font-weight: 800;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
 
+  /* v1 误用 --app-danger 表达完成度 → v2 完成度语义为成功色 */
   &.accent {
-    color: var(--app-danger, $uni-color-error);
+    color: var(--app-success);
   }
 }
 
 .overview-label {
   font-size: 21rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
 }
 
 .overview-sep {
   width: 1rpx;
   height: 56rpx;
-  background: var(--app-divider, $uni-border-color);
+  background: var(--app-line);
 }
 
 .section {
   margin-top: 36rpx;
-}
-
-.section-title {
-  font-size: 24rpx;
-  font-weight: 600;
-  letter-spacing: 0.3rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
-  margin-bottom: 18rpx;
-  padding-left: 4rpx;
-  display: block;
 }
 
 .recent-grid {
@@ -190,8 +180,8 @@ const progressPercent = computed(() => Math.round((unlockedCount.value / allAchi
   min-width: 176rpx;
 
   &.recent {
-    border-color: var(--app-primary, $app-primary);
-    background: linear-gradient(180deg, var(--app-primary-soft, rgba($app-primary, 0.12)), var(--app-card-bg));
+    border-color: var(--app-primary);
+    background: linear-gradient(180deg, var(--app-primary-soft), var(--app-surface));
   }
 
   &.locked {
@@ -203,36 +193,32 @@ const progressPercent = computed(() => Math.round((unlockedCount.value / allAchi
   width: 76rpx;
   height: 76rpx;
   border-radius: 24rpx;
-  background: var(--app-subtle, $uni-bg-color-grey);
+  background: var(--app-surface-2);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-
-  &.locked {
-    background: var(--app-subtle, $uni-bg-color-grey);
-  }
 }
 
 .ach-name {
   font-size: 24rpx;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
   font-weight: 600;
   text-align: center;
 }
 
 .ach-desc {
   font-size: 20rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
   text-align: center;
 }
 
 .ach-date {
   font-size: 20rpx;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
 }
 
-/* 进度 */
+/* 进度（MASTER §9：Progress 6px 高、圆角 full，槽走 --app-sunken） */
 .progress-row {
   display: flex;
   align-items: center;
@@ -246,23 +232,23 @@ const progressPercent = computed(() => Math.round((unlockedCount.value / allAchi
 
 .progress-count {
   font-size: 23rpx;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
   font-weight: 600;
 }
 
 .progress-track {
-  height: 14rpx;
-  border-radius: 7rpx;
-  padding: 0;
+  height: 12rpx;
+  border-radius: 999rpx;
+  background: var(--app-sunken);
   overflow: hidden;
   position: relative;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--app-primary, $app-primary), var(--app-accent, $app-morandi-sage));
-  border-radius: 7rpx;
-  transition: width 0.5s;
+  background: var(--app-success);
+  border-radius: 999rpx;
+  transition: width var(--dur-slow) var(--ease-std);
 }
 
 .achievement-list {
@@ -314,11 +300,11 @@ const progressPercent = computed(() => Math.round((unlockedCount.value / allAchi
 
 .ach-status-text {
   font-size: 22rpx;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-success);
   font-weight: 500;
+}
 
-  &.locked {
-    color: var(--app-text-3, $uni-text-color-disable);
-  }
+.ach-status.locked .ach-status-text {
+  color: var(--app-text-3);
 }
 </style>

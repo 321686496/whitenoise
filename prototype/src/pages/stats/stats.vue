@@ -1,20 +1,20 @@
 <template>
-  <view class="page-container">
+  <!-- v2：自定义导航（pages.json 已改 custom）；金银铜走 --app-rank-*，柱状图走 primary 渐变（MASTER §11 P1） -->
+  <view class="page-container stats-page">
     <view class="page-bg"></view>
 
-    <view class="header">
-      <text class="page-title">使用数据</text>
-      <text class="page-subtitle">你的声音旅程</text>
-    </view>
+    <NavBar title="使用数据" />
+
+    <text class="page-subtitle">你的声音旅程</text>
 
     <view class="overview-card app-card">
       <view class="overview-item">
-        <text class="overview-num">{{ weekUsageDays }}</text>
+        <text class="overview-num num">{{ weekUsageDays }}</text>
         <text class="overview-label">使用天数</text>
       </view>
       <view class="overview-sep" />
       <view class="overview-item">
-        <text class="overview-num">{{ weekTotalHours }}</text>
+        <text class="overview-num num">{{ weekTotalHours }}</text>
         <text class="overview-label">累计时长</text>
       </view>
       <view class="overview-sep" />
@@ -41,7 +41,7 @@
               />
             </view>
             <text class="bar-label">{{ bar.label }}</text>
-            <text class="bar-value" v-if="bar.minutes > 0">{{ bar.minutes }}m</text>
+            <text class="bar-value num" v-if="bar.minutes > 0">{{ bar.minutes }}m</text>
           </view>
         </view>
       </view>
@@ -55,18 +55,18 @@
           :key="scene.name"
           class="top-item app-card"
         >
-          <view class="rank-badge" :class="{ gold: index === 0, silver: index === 1, bronze: index === 2 }">
-            <text class="rank-num">{{ index + 1 }}</text>
+          <view class="rank-badge" :class="rankClass(index)">
+            <text class="rank-num num">{{ index + 1 }}</text>
           </view>
           <view class="top-info">
             <view class="top-name-row">
               <text class="top-name">{{ scene.name }}</text>
-              <text class="top-duration">{{ scene.duration }}</text>
+              <text class="top-duration num">{{ scene.duration }}</text>
             </view>
             <view class="percent-track">
               <view class="percent-fill" :style="{ width: scene.percent + '%' }" />
             </view>
-            <text class="percent-text">{{ scene.percent }}%</text>
+            <text class="percent-text num">{{ scene.percent }}%</text>
           </view>
         </view>
       </view>
@@ -79,21 +79,21 @@
           <view class="achieve-icon">
             <Icon name="clock" :size="22" color="var(--app-primary)" />
           </view>
-          <text class="achieve-num">128</text>
+          <text class="achieve-num num">128</text>
           <text class="achieve-label">累计使用分钟</text>
         </view>
         <view class="achieve-item app-card">
           <view class="achieve-icon">
             <Icon name="mountain" :size="22" color="var(--app-primary)" />
           </view>
-          <text class="achieve-num">5</text>
+          <text class="achieve-num num">5</text>
           <text class="achieve-label">探索场景</text>
         </view>
         <view class="achieve-item app-card">
           <view class="achieve-icon">
             <Icon name="mixer" :size="22" color="var(--app-primary)" />
           </view>
-          <text class="achieve-num">3</text>
+          <text class="achieve-num num">3</text>
           <text class="achieve-label">自定义场景</text>
         </view>
       </view>
@@ -104,6 +104,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import Icon from '@/components/Icon.vue'
+import NavBar from '@/components/NavBar.vue'
 
 interface ChartBar {
   label: string
@@ -139,11 +140,15 @@ const topScenes = ref<TopScene[]>([
   { name: '白噪音', duration: '1h 02m', percent: 30 },
   { name: '森林', duration: '31m', percent: 15 },
 ])
+
+/* 金银铜由 --app-rank-* token 提供渐变底（禁自造 hex） */
+const rankClass = (index: number): string => (index < 3 ? `rank-${index + 1}` : '')
 </script>
 
 <style lang="scss" scoped>
-.header {
-  padding: 16rpx 4rpx 8rpx;
+/* NavBar 自带 env(safe-area-inset-top)，去掉容器重复的安全区顶距 */
+.stats-page {
+  padding-top: calc(env(safe-area-inset-top, 0rpx) + 12rpx);
 }
 
 .overview-card {
@@ -164,7 +169,7 @@ const topScenes = ref<TopScene[]>([
 .overview-num {
   font-size: 36rpx;
   font-weight: 800;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
   line-height: 1.2;
 
   &.accent {
@@ -174,13 +179,13 @@ const topScenes = ref<TopScene[]>([
 
 .overview-label {
   font-size: 21rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
 }
 
 .overview-sep {
   width: 1rpx;
   height: 56rpx;
-  background: var(--app-divider, $uni-border-color);
+  background: var(--app-line);
 }
 
 .section {
@@ -215,29 +220,30 @@ const topScenes = ref<TopScene[]>([
   justify-content: center;
 }
 
+/* 柱状图（MASTER §11 P1）：primary→primary-strong 渐变、圆角 full、空柱走 --app-sunken 轨道色 */
 .bar {
-  width: 40rpx;
-  border-radius: 10rpx 10rpx 4rpx 4rpx;
-  background: linear-gradient(180deg, var(--app-primary, $app-primary), var(--app-primary-soft, rgba($app-primary, 0.35)));
-  transition: height 0.4s cubic-bezier(.4, 0, .2, 1);
+  width: 24rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(180deg, var(--app-primary), var(--app-primary-strong));
+  transition: height var(--dur-slow) var(--ease-std);
   min-height: 8rpx;
 
   &.empty {
-    background: var(--app-subtle, $uni-bg-color-grey);
+    background: var(--app-sunken);
     min-height: 8rpx;
   }
 }
 
 .bar-label {
   font-size: 22rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
   margin-top: 10rpx;
   font-weight: 500;
 }
 
 .bar-value {
   font-size: 18rpx;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
   font-weight: 600;
   margin-top: 4rpx;
 }
@@ -253,40 +259,42 @@ const topScenes = ref<TopScene[]>([
   align-items: center;
   gap: 20rpx;
   padding: 22rpx 24rpx;
-  transition: all 0.16s cubic-bezier(.4, 0, .2, 1);
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
-    transform: scale(0.99);
+    transform: scale(0.96);
   }
 }
 
+/* 名次奖牌底 = --app-rank-1/2/3（渐变值来自主题引擎，删除旧 6 个 hex） */
 .rank-badge {
   width: 52rpx;
   height: 52rpx;
   border-radius: 16rpx;
-  background: var(--app-subtle, $uni-bg-color-grey);
+  background: var(--app-surface-2);
+  box-shadow: var(--app-inset);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 
-  &.gold {
-    background: linear-gradient(135deg, #f0c27f, #e8a849);
+  &.rank-1 {
+    background: var(--app-rank-1);
   }
 
-  &.silver {
-    background: linear-gradient(135deg, #c0c7cf, #9ea8b3);
+  &.rank-2 {
+    background: var(--app-rank-2);
   }
 
-  &.bronze {
-    background: linear-gradient(135deg, #d4a373, #bc8a5f);
+  &.rank-3 {
+    background: var(--app-rank-3);
   }
 }
 
 .rank-num {
   font-size: 24rpx;
   font-weight: 700;
-  color: #fff;
+  color: var(--app-on-primary);
 }
 
 .top-info {
@@ -304,32 +312,32 @@ const topScenes = ref<TopScene[]>([
 
 .top-name {
   font-size: 27rpx;
-  color: var(--app-text, $uni-text-color);
+  color: var(--app-text);
   font-weight: 600;
 }
 
 .top-duration {
   font-size: 23rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
 }
 
 .percent-track {
   height: 12rpx;
-  border-radius: 6rpx;
-  background: var(--app-subtle, $uni-bg-color-grey);
+  border-radius: 999rpx;
+  background: var(--app-sunken);
   overflow: hidden;
 }
 
 .percent-fill {
   height: 100%;
-  border-radius: 6rpx;
-  background: linear-gradient(90deg, var(--app-primary, $app-primary), var(--app-primary-soft, rgba($app-primary, 0.5)));
-  transition: width 0.5s cubic-bezier(.4, 0, .2, 1);
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, var(--app-primary), var(--app-primary-strong));
+  transition: width var(--dur-slow) var(--ease-std);
 }
 
 .percent-text {
   font-size: 21rpx;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
   font-weight: 600;
 }
 
@@ -345,10 +353,10 @@ const topScenes = ref<TopScene[]>([
   flex-direction: column;
   align-items: center;
   gap: 8rpx;
-  transition: all 0.16s cubic-bezier(.4, 0, .2, 1);
+  transition: transform var(--dur-fast) var(--ease-std);
 
   &:active {
-    transform: scale(0.99);
+    transform: scale(0.96);
   }
 }
 
@@ -356,7 +364,7 @@ const topScenes = ref<TopScene[]>([
   width: 60rpx;
   height: 60rpx;
   border-radius: 18rpx;
-  background: var(--app-primary-soft, rgba($app-primary, 0.12));
+  background: var(--app-primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -365,13 +373,13 @@ const topScenes = ref<TopScene[]>([
 .achieve-num {
   font-size: 36rpx;
   font-weight: 800;
-  color: var(--app-primary, $app-primary);
+  color: var(--app-primary);
   line-height: 1.2;
 }
 
 .achieve-label {
   font-size: 20rpx;
-  color: var(--app-text-2, $uni-text-color-grey);
+  color: var(--app-text-2);
   text-align: center;
 }
 </style>

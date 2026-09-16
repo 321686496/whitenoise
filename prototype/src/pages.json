@@ -45,9 +45,8 @@
 		{
 			"path": "pages/achievement/achievement",
 			"style": {
-				"navigationBarTitleText": "成就墙",
-				"navigationBarBackgroundColor": "#F5F2ED",
-				"navigationBarTextStyle": "black"
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
 			}
 		},
 		{
@@ -68,17 +67,15 @@
 		{
 			"path": "pages/checkin/checkin",
 			"style": {
-				"navigationBarTitleText": "每日签到",
-				"navigationBarBackgroundColor": "#F5F2ED",
-				"navigationBarTextStyle": "black"
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
 			}
 		},
 		{
 			"path": "pages/stats/stats",
 			"style": {
-				"navigationBarTitleText": "使用数据",
-				"navigationBarBackgroundColor": "#F5F2ED",
-				"navigationBarTextStyle": "black"
+				"navigationStyle": "custom",
+				"navigationBarTitleText": ""
 			}
 		},
 		{
