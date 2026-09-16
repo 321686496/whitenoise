@@ -543,6 +543,8 @@ const playMyScene = (scene: { name: string }) => {
 .more-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
+  min-height: 88rpx;
   gap: 2rpx;
   padding: 8rpx 12rpx;
   transition: transform var(--dur-fast) var(--ease-std);
@@ -561,6 +563,8 @@ const playMyScene = (scene: { name: string }) => {
 .new-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
+  min-height: 88rpx;
   gap: 8rpx;
   padding: 10rpx 24rpx;
   border-radius: 30rpx;
