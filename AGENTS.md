@@ -1,7 +1,7 @@
 # AGENT.md — 声栖（白噪音混音助眠应用）
 
 > 项目根目录智能体指令文件
-> 最后更新：2026-09-11
+> 最后更新：2026-09-16
 
 ---
 
@@ -250,6 +250,8 @@ snapp/lib/
 | 音频组件 | `docs/superpowers/specs/2026-09-07-html-audio-components-design.md` | 播放器 / 混音组件规格 |
 | 场景页个性化 | `docs/superpowers/specs/2026-09-08-scene-page-personalization-design.md` | 场景页个性化设计 |
 | 场景页 iOS 改版 | `docs/superpowers/specs/2026-09-08-scene-page-ios-redesign-design.md` | 场景页 iOS 化改版 |
+| 设计系统 v2 | `docs/design-system/MASTER.md` | 全界面 redesign 单一事实来源（v2 token / 组件 / IA） |
+| 原型 v2 落地 | `docs/superpowers/specs/2026-09-16-prototype-v2-implementation-design.md` | 原型 v2 全量落地实施设计 |
 | 代码维基 | `docs/code-wiki/whitenoise-code-wiki.md` | 代码结构 / 约定速查 |
 | 项目规则 | `.trae/rules/project_rules.md` | TRAE IDE 行为规则 |
 
