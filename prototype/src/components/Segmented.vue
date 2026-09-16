@@ -17,11 +17,11 @@ defineEmits<{ (e: 'update:modelValue', key: string): void }>()
 
 <style lang="scss" scoped>
 .seg {
-  display: flex; gap: 8rpx; padding: 8rpx;
+  display: flex; gap: 8rpx; padding: 6rpx;
   background: var(--app-surface-2); border-radius: 999rpx; border: 1rpx solid var(--app-line);
 }
 .seg-item {
-  flex: 1; height: 64rpx; display: flex; align-items: center; justify-content: center;
+  flex: 1; min-height: 88rpx; display: flex; align-items: center; justify-content: center;
   border-radius: 999rpx; font-size: 26rpx; color: var(--app-text-2); font-weight: 500;
   transition: all var(--dur-base) var(--ease-std);
 }

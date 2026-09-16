@@ -24,7 +24,7 @@ defineEmits<{ (e: 'action'): void }>()
 .empty-title { font-size: 32rpx; font-weight: 600; color: var(--app-text); }
 .empty-desc { font-size: 26rpx; color: var(--app-text-2); margin-top: 12rpx; text-align: center; line-height: 1.5; }
 .empty-btn {
-  margin-top: 40rpx; padding: 20rpx 56rpx; border-radius: 999rpx;
+  margin-top: 40rpx; padding: 26rpx 56rpx; border-radius: 999rpx;
   background: var(--app-primary); color: var(--app-on-primary);
   font-size: 28rpx; font-weight: 600; box-shadow: var(--app-shadow-2);
   transition: transform var(--dur-fast) var(--ease-std);
