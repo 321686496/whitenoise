@@ -6,6 +6,7 @@ import '../data/scene_models.dart';
 import '../data/seed_data.dart';
 import '../data/sound_models.dart';
 import 'app_storage.dart';
+import 'audio_engine.dart';
 import 'stats_service.dart';
 
 /// 单条音轨（对应原型 usePlayer 的 `Track`）。
@@ -63,14 +64,20 @@ class RecentItem {
 /// 声栖 · 共享播放状态（`composables/usePlayer.ts` 的 ChangeNotifier 移植）。
 ///
 /// 模块级单例语义经 Provider 全局注入实现：首页大播放卡 / 场景网格 /
-/// 底部 PlayBar 读写同一状态。音频引擎为后续接入预留（原型阶段为状态模拟）。
+/// 底部 PlayBar 读写同一状态。音频引擎经 [AudioEngine] 接入：有合成资产的
+/// 音轨走真实播放，其余静默模拟；平台插件缺失时引擎整体降级为静默。
 class PlayerService extends ChangeNotifier {
-  PlayerService({StatsService? stats}) : _stats = stats;
+  PlayerService({StatsService? stats, AudioEngine? engine})
+      : _stats = stats,
+        _engine = engine ?? JustAudioEngine();
 
   static const int _recentMax = 10;
 
   /// 统计服务（可选注入）：每次应用场景时记录一次播放。
   final StatsService? _stats;
+
+  /// 音频引擎（注入或默认 just_audio；测试环境自动降级为静默）。
+  final AudioEngine _engine;
 
   Scene? currentScene;
   List<PlayerTrack> tracks = <PlayerTrack>[];
@@ -138,6 +145,12 @@ class PlayerService extends ChangeNotifier {
     final now = DateTime.now();
     if (now.hour >= 22 || now.hour < 2) nightPlayRecorded = true;
     isPlaying = true;
+    // 引擎侧：清空旧轨，按合成资产逐个加载（无资产音轨保持静默）。
+    unawaited(_engine.disposeAll());
+    for (final PlayerTrack t in tracks) {
+      unawaited(_engine.loadTrack(t.id, audioAssetFor(t.id)));
+    }
+    unawaited(_engine.play());
     pushRecent(scene);
     _stats?.recordPlay(scene.id);
     notifyListeners();
@@ -147,6 +160,11 @@ class PlayerService extends ChangeNotifier {
   bool togglePlay() {
     if (tracks.isEmpty) return false;
     isPlaying = !isPlaying;
+    if (isPlaying) {
+      unawaited(_engine.play());
+    } else {
+      unawaited(_engine.pause());
+    }
     notifyListeners();
     return true;
   }
@@ -155,6 +173,7 @@ class PlayerService extends ChangeNotifier {
     for (final t in tracks) {
       if (t.id == id) {
         t.volume = volume.clamp(0, 100).toInt();
+        unawaited(_engine.setVolume(id, t.volume / 100));
         break;
       }
     }
@@ -165,6 +184,7 @@ class PlayerService extends ChangeNotifier {
     for (final t in tracks) {
       if (t.id == id) {
         t.muted = !t.muted;
+        unawaited(_engine.setMute(id, t.muted));
         break;
       }
     }
@@ -173,6 +193,7 @@ class PlayerService extends ChangeNotifier {
 
   void removeTrack(String id) {
     tracks = tracks.where((PlayerTrack t) => t.id != id).toList();
+    unawaited(_engine.disposeTrack(id));
     if (tracks.isEmpty) isPlaying = false;
     notifyListeners();
   }
@@ -298,6 +319,7 @@ class PlayerService extends ChangeNotifier {
   @override
   void dispose() {
     _countdownTimer?.cancel();
+    unawaited(_engine.disposeAll());
     super.dispose();
   }
 }

@@ -116,3 +116,15 @@ Sound _sound(String id) {
   }
   throw StateError('seed_data.dart: 未找到声音 $id');
 }
+
+/// 有合成 WAV 资产的声音 id（`assets/audio/<id>.wav`，由 `tool/gen_audio.dart`
+/// 生成）。其余真实采录音（鸟鸣/虫鸣/咖啡厅/打字机等）不在其列。
+const Set<String> generatedAudioIds = <String>{
+  'white-noise', 'pink-noise', 'brown-noise', 'red-noise',
+  'rain', 'wind', 'stream', 'ocean-wave', 'campfire', 'forest',
+  'fan', 'train',
+};
+
+/// 声音 id → WAV 资产路径；无合成资产返回 null（对应音轨走模拟引擎）。
+String? audioAssetFor(String id) =>
+    generatedAudioIds.contains(id) ? 'assets/audio/$id.wav' : null;

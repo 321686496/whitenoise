@@ -1,13 +1,18 @@
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:snapp/services/audio_engine.dart';
 import 'package:snapp/services/player_service.dart';
 import 'package:snapp/services/scene_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  /// 播放状态单例：注入模拟引擎，保持测试无插件、无真实音频依赖。
+  PlayerService buildPlayer() =>
+      PlayerService(engine: SimulatedAudioEngine());
+
   test('applyScene rebuilds tracks from soundIds and marks playing', () {
-    final player = PlayerService();
+    final player = buildPlayer();
     final scene = findScene('deep-sleep');
     player.applyScene(scene);
     expect(player.currentScene?.id, 'deep-sleep');
@@ -20,7 +25,7 @@ void main() {
   });
 
   test('togglePlay returns false when no tracks, true otherwise', () {
-    final player = PlayerService();
+    final player = buildPlayer();
     expect(player.togglePlay(), isFalse);
     player.applyScene(findScene('focus-white-noise'));
     expect(player.togglePlay(), isTrue);
@@ -30,7 +35,7 @@ void main() {
   });
 
   test('setTimer toggles off on same duration', () {
-    final player = PlayerService();
+    final player = buildPlayer();
     player.setTimer(30);
     expect(player.timerMinutes, 30);
     player.setTimer(30);
@@ -38,7 +43,7 @@ void main() {
   });
 
   test('setTrackVolume clamps and toggleTrackMute/removeTrack work', () {
-    final player = PlayerService();
+    final player = buildPlayer();
     player.applyScene(findScene('ocean-sleep'));
     final id = player.tracks.first.id;
     player.setTrackVolume(id, 150);
@@ -70,7 +75,7 @@ void main() {
 
   test('setTimer countdown reaches zero stops playback and completes timer',
       () {
-    final player = PlayerService();
+    final player = buildPlayer();
     player.applyScene(findScene('deep-sleep'));
     fakeAsync((FakeAsync async) {
       player.setTimer(1); // 60 秒
@@ -90,7 +95,7 @@ void main() {
   });
 
   test('stopCountdown cancels and resets remaining seconds', () {
-    final player = PlayerService();
+    final player = buildPlayer();
     fakeAsync((FakeAsync async) {
       player.setTimer(15);
       expect(player.remainingSeconds, 900);
@@ -103,7 +108,7 @@ void main() {
   });
 
   test('setTimer toggles off on same duration and cancels countdown', () {
-    final player = PlayerService();
+    final player = buildPlayer();
     fakeAsync((FakeAsync async) {
       player.setTimer(30);
       expect(player.timerMinutes, 30);
@@ -117,7 +122,7 @@ void main() {
   });
 
   test('timerLabel formats countdown and minutes', () {
-    final player = PlayerService();
+    final player = buildPlayer();
     fakeAsync((FakeAsync async) {
       player.setTimer(2);
       expect(player.timerLabel, '2:00');
@@ -130,7 +135,7 @@ void main() {
   });
 
   test('toggleLock flips isLocked', () {
-    final player = PlayerService();
+    final player = buildPlayer();
     expect(player.isLocked, isFalse);
     player.toggleLock();
     expect(player.isLocked, isTrue);
