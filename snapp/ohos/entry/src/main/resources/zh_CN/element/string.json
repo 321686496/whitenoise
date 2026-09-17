@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "snapp"
+    },
+    {
+      "name": "reason_background",
+      "value": "后台播放白噪音以支持助眠混音"
     }
   ]
 }

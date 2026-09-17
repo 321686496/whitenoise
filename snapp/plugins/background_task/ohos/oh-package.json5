@@ -1,0 +1,11 @@
+{
+  "name": "background_task",
+  "version": "1.0.0",
+  "description": "声栖 OHOS 后台长时任务插件",
+  "main": "index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ohos/flutter_ohos": "file:./har/flutter.har"
+  }
+}

@@ -329,14 +329,17 @@ class _SwatchRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           for (var i = 0; i < colors.length; i++)
-            Container(
-              width: 14,
-              height: 14,
-              margin: EdgeInsets.only(left: i == 0 ? 0 : -4),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colors[i],
-                border: Border.all(color: surface, width: 1),
+            Transform.translate(
+              // 原负 margin 会被 Container 断言拒绝，改用平移复刻色点相叠
+              offset: Offset(i == 0 ? 0 : -4, 0),
+              child: Container(
+                width: 14,
+                height: 14,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colors[i],
+                  border: Border.all(color: surface, width: 1),
+                ),
               ),
             ),
         ],
@@ -483,25 +486,25 @@ class _ModeDemo extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            height: 12,
+            height: 8,
             width: 39,
             decoration: BoxDecoration(
               color: cardColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           Container(
-            height: 8,
+            height: 5,
             width: 23,
             decoration: BoxDecoration(
               color: btnColor,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           Container(
-            height: 5,
+            height: 4,
             width: 30,
             decoration: BoxDecoration(
               color: barColor,

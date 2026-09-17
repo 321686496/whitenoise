@@ -279,7 +279,6 @@ class _SoundDetailSheet extends StatelessWidget {
         decoration: BoxDecoration(
           color: c.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          border: Border(top: BorderSide(color: c.line, width: 0.5)),
           boxShadow: c.shadow4,
         ),
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 18),
@@ -311,13 +310,14 @@ class _SoundDetailSheet extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      margin: const EdgeInsets.only(right: -9),
-                      alignment: Alignment.center,
-                      child:
-                          AppIcon(name: 'close', size: 18, color: c.text3),
+                    child: Transform.translate(
+                      offset: const Offset(9, 0),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        alignment: Alignment.center,
+                        child: AppIcon(name: 'close', size: 18, color: c.text3),
+                      ),
                     ),
                   ),
                 ],

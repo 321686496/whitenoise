@@ -407,12 +407,14 @@ class _PlayerPageState extends State<PlayerPage> {
                 ),
                 GestureDetector(
                   onTap: () => player.setShowTimerPanel(false),
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    margin: const EdgeInsets.only(right: -8),
-                    alignment: Alignment.center,
-                    child: AppIcon(name: 'close', size: 18, color: c.text3),
+                  child: Transform.translate(
+                    offset: const Offset(8, 0),
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      alignment: Alignment.center,
+                      child: AppIcon(name: 'close', size: 18, color: c.text3),
+                    ),
                   ),
                 ),
               ],

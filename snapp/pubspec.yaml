@@ -34,7 +34,22 @@ dependencies:
   provider: ^6.1.1
   shared_preferences: 2.1.1
   flutter_svg: 2.0.5
-  just_audio: 0.9.37
+  # OHOS 后台长时任务插件：播放时申请 audioPlayback 长时任务，
+  # 退后台持续播放并显示通知栏播放条。
+  background_task:
+    path: plugins/background_task
+  # Harmony 适配的 just_audio fork（br_0.9.37_ohos 对应 0.9.37 基线）。
+  # 解析：just_audio_ohos 提供 ohos 原生实现，构建 HAP 时自动注入注册表与 har。
+  just_audio:
+    git:
+      url: https://gitcode.com/openharmony-sig/fluttertpc_just_audio.git
+      path: just_audio
+      ref: br_0.9.37_ohos
+  just_audio_ohos:
+    git:
+      url: https://gitcode.com/openharmony-sig/fluttertpc_just_audio.git
+      path: just_audio/ohos
+      ref: br_0.9.37_ohos
 
 dev_dependencies:
   flutter_test:
@@ -47,6 +62,17 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+
+# just_audio_ohos 依赖的 path_provider / audio_session 走 Harmony fork 源，
+# 与 just_audio fork 里 hosted 的声明冲突，统一 override 到 fork 源解决。
+dependency_overrides:
+  path_provider:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/path_provider/path_provider
+  audio_session:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_audio_session.git
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

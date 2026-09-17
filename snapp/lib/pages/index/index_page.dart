@@ -11,7 +11,6 @@ import '../../widgets/app_card.dart';
 import '../../widgets/app_icon.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/brand_bar.dart';
-import '../../widgets/now_playing_card.dart';
 import '../../widgets/pressable.dart';
 import '../../widgets/scene_card.dart';
 import '../../widgets/segmented.dart';
@@ -25,8 +24,8 @@ class _QuickChipDef {
 }
 
 /// 首页（对照原型 `pages/index/index.vue`）：
-/// 品牌行 → 主控卡 → 一键播 chips → 分类分段 + 场景网格。
-/// 首页不渲染 PlayBar（与主控卡互斥）。
+/// 品牌行 → 一键播 chips → 分类分段 + 场景网格。
+/// 首页不渲染大主控卡，播放主控统一走全局悬浮 PlayBar（对其他 tab 一致）。
 class IndexPage extends StatefulWidget {
   const IndexPage({super.key});
 
@@ -89,7 +88,6 @@ class _IndexPageState extends State<IndexPage> {
           children: [
             const BrandBar(),
             const SizedBox(height: 16),
-            const NowPlayingCard(),
 
             // ③ 场景流
             Padding(

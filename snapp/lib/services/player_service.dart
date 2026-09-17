@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:background_task/background_task.dart';
 import 'package:flutter/foundation.dart';
-
 import '../data/scene_models.dart';
 import '../data/seed_data.dart';
 import '../data/sound_models.dart';
@@ -151,6 +151,8 @@ class PlayerService extends ChangeNotifier {
       unawaited(_engine.loadTrack(t.id, audioAssetFor(t.id)));
     }
     unawaited(_engine.play());
+    // OHOS：开始播放即申请 audioPlayback 长时任务（退后台持续播放 + 通知栏播放条）。
+    unawaited(BackgroundTask.start());
     pushRecent(scene);
     _stats?.recordPlay(scene.id);
     notifyListeners();
@@ -162,8 +164,12 @@ class PlayerService extends ChangeNotifier {
     isPlaying = !isPlaying;
     if (isPlaying) {
       unawaited(_engine.play());
+      // 恢复播放 → 重新申请长时任务。
+      unawaited(BackgroundTask.start());
     } else {
       unawaited(_engine.pause());
+      // 暂停播放(系统无音频在跑) → 释放长时任务，避免被系统以"未在播放"取消。
+      unawaited(BackgroundTask.stop());
     }
     notifyListeners();
     return true;
@@ -194,7 +200,11 @@ class PlayerService extends ChangeNotifier {
   void removeTrack(String id) {
     tracks = tracks.where((PlayerTrack t) => t.id != id).toList();
     unawaited(_engine.disposeTrack(id));
-    if (tracks.isEmpty) isPlaying = false;
+    if (tracks.isEmpty) {
+      isPlaying = false;
+      // 全部音轨移除 → 无音频可播，释放长时任务。
+      unawaited(BackgroundTask.stop());
+    }
     notifyListeners();
   }
 
@@ -227,6 +237,8 @@ class PlayerService extends ChangeNotifier {
         _countdownTimer = null;
         isPlaying = false;
         timerCompleted = true;
+        // 睡眠定时到点停止播放 → 释放长时任务。
+        unawaited(BackgroundTask.stop());
       }
       notifyListeners();
     });

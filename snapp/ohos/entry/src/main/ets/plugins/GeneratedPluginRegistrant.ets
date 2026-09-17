@@ -1,4 +1,8 @@
 import { FlutterEngine, Log } from '@ohos/flutter_ohos';
+import AudioSessionPlugin from 'audio_session';
+import BackgroundTaskPlugin from 'background_task';
+import JustAudioOhosPlugin from 'just_audio_ohos';
+import PathProviderPlugin from 'path_provider_ohos';
 
 /**
  * Generated file. Do not edit.
@@ -12,6 +16,10 @@ export class GeneratedPluginRegistrant {
 
   static registerWith(flutterEngine: FlutterEngine) {
     try {
+      flutterEngine.getPlugins()?.add(new AudioSessionPlugin());
+      flutterEngine.getPlugins()?.add(new BackgroundTaskPlugin());
+      flutterEngine.getPlugins()?.add(new JustAudioOhosPlugin());
+      flutterEngine.getPlugins()?.add(new PathProviderPlugin());
     } catch (e) {
       Log.e(
         TAG,

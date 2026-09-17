@@ -1,13 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../pages/player/player_page.dart';
 import '../services/player_service.dart';
 import '../theme/theme_extension.dart';
 import 'app_toast.dart';
 import 'app_card.dart';
 import 'app_icon.dart';
-import 'mix_track.dart';
 import 'pressable.dart';
+
+/// 从底部滑入的全屏播放页路由（curved + fade，回到原 tab）。
+Route<void> _playerRoute() => PageRouteBuilder<void>(
+      transitionDuration: const Duration(milliseconds: 320),
+      reverseTransitionDuration: const Duration(milliseconds: 240),
+      pageBuilder: (_, __, ___) => const PlayerPage(),
+      transitionsBuilder: (_, Animation<double> anim, __, Widget child) {
+        final curved =
+            CurvedAnimation(parent: anim, curve: Curves.easeOutCubic);
+        return FadeTransition(
+          opacity: Tween<double>(begin: 0.6, end: 1).animate(curved),
+          child: SlideTransition(
+            position:
+                Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+                    .animate(curved),
+            child: child,
+          ),
+        );
+      },
+    );
 
 /// 底部悬浮主控条（对应原型 `components/PlayBar.vue`）。
 ///
@@ -24,7 +44,6 @@ class PlayBar extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (player.showTimerPanel) const _TimerPanel(),
-        if (player.showMixPanel) const _MixPanel(),
         const SizedBox(height: 8),
         _PlayBarInner(onSaveTap: onSaveTap),
       ],
@@ -49,7 +68,11 @@ class _PlayBarInner extends StatelessWidget {
             Expanded(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: () => player.setShowMixPanel(!player.showMixPanel),
+                // 点击封面/标题区 → 从底部滑入打开完整播放页。
+                onTap: () => Navigator.push(
+                  context,
+                  _playerRoute(),
+                ),
                 child: Row(
                   children: [
                     Container(
@@ -302,7 +325,7 @@ class _TimerPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _PanelHeader(title: '睡眠定时'),
+          const _PanelHeader(title: '睡眠定时'),
           const SizedBox(height: 10),
           Row(
             children: _options.map((int m) {
@@ -371,64 +394,11 @@ class _TimerPanel extends StatelessWidget {
   }
 }
 
-/// 混音面板（对应原型 `.mix-panel`）。
-class _MixPanel extends StatelessWidget {
-  const _MixPanel();
-
-  @override
-  Widget build(BuildContext context) {
-    final c = Theme.of(context).appColors;
-    final player = context.watch<PlayerService>();
-    return _PanelCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _PanelHeader(
-            title: '当前混音',
-            badge: player.tracks.isNotEmpty
-                ? '${player.tracks.length}/6 路'
-                : null,
-          ),
-          if (player.tracks.isNotEmpty)
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 210),
-              child: ListView.builder(
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                itemCount: player.tracks.length,
-                itemBuilder: (BuildContext context, int i) {
-                  final t = player.tracks[i];
-                  return MixTrack(
-                    name: t.name,
-                    iconName: t.iconName,
-                    color: t.color,
-                    volume: t.volume,
-                    isMuted: t.muted,
-                    onVolumeChange: (int v) => player.setTrackVolume(t.id, v),
-                    onMute: () => player.toggleTrackMute(t.id),
-                    onRemove: () => player.removeTrack(t.id),
-                  );
-                },
-              ),
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Center(
-                child: Text('暂无音轨，去首页选择一个场景吧',
-                    style: TextStyle(fontSize: 12, color: c.text2)),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
+///
+/// 定时面板头（标题 + 关闭）。
 class _PanelHeader extends StatelessWidget {
   final String title;
-  final String? badge;
-  const _PanelHeader({required this.title, this.badge});
+  const _PanelHeader({required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -441,30 +411,20 @@ class _PanelHeader extends StatelessWidget {
               style: TextStyle(
                   fontSize: 14, fontWeight: FontWeight.w700, color: c.text)),
         ),
-        if (badge != null)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-            decoration: BoxDecoration(
-              color: c.primarySoft,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(badge!,
-                style: TextStyle(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w600,
-                    color: c.primary)),
-          ),
         GestureDetector(
           onTap: () {
             player.setShowTimerPanel(false);
             player.setShowMixPanel(false);
           },
-          child: Container(
-            width: 44,
-            height: 44,
-            margin: const EdgeInsets.only(right: -14),
-            alignment: Alignment.center,
-            child: AppIcon(name: 'close', size: 16, color: c.text3),
+          child: Transform.translate(
+            // 原负 margin 会被 Container 断言拒绝，改用平移复刻「贴右缘」观感
+            offset: const Offset(14, 0),
+            child: Container(
+              width: 44,
+              height: 44,
+              alignment: Alignment.center,
+              child: AppIcon(name: 'close', size: 16, color: c.text3),
+            ),
           ),
         ),
       ],

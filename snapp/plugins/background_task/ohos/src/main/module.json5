@@ -1,0 +1,10 @@
+{
+  "module": {
+    "name": "background_task",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet"
+    ]
+  }
+}

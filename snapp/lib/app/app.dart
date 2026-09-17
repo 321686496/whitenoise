@@ -25,8 +25,8 @@ import 'shell_tabs.dart';
 
 /// 底部 4 tab 内容（对照原型 tabBar：首页 / 场景 / 发现 / 我的）。
 ///
-/// PlayBar 仅在「发现」tab 挂载（对照原型：首页用主控卡互斥，场景/我的
-/// 不含 PlayBar；发现页 `<PlayBar @save-tap>`）。保存行为：跳转编辑场景。
+/// 有播放内容时四个 tab 全局悬浮 PlayBar（覆盖在页面之上，不压缩页面高度）；
+/// 点击 PlayBar 从底部滑入完整播放页。保存行为：toast 提示。
 class _Shell extends StatefulWidget {
   const _Shell();
 
@@ -47,9 +47,8 @@ class _ShellState extends State<_Shell> {
     final tabIndex = context.watch<ShellTabNotifier>().index;
     final player = context.watch<PlayerService>();
     final safeBottom = MediaQuery.of(context).padding.bottom;
-    // 有播放内容时，在「场景 / 发现 / 我的」tab 全局显示悬浮 PlayBar；
-    // 首页（tab 0）用主控卡互斥不挂载（对照原型）。
-    final showPlayBar = tabIndex != 0 && player.currentScene != null;
+    // 有播放内容时，四个 tab 全局显示悬浮 PlayBar（覆盖页面、不压缩页面高度）。
+    final showPlayBar = player.currentScene != null;
     return Scaffold(
       body: Stack(
         children: [

@@ -18,13 +18,21 @@ packages:
     source: hosted
     version: "2.10.0"
   audio_session:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: audio_session
-      sha256: "343e83bc7809fbda2591a49e525d6b63213ade10c76f15813be9aed6657b3261"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.1.21"
+      path: "."
+      ref: HEAD
+      resolved-ref: bb1f683aad8d5097855f22542547f0ee459de49e
+      url: "https://gitcode.com/CPF-Flutter/flutter_audio_session.git"
+    source: git
+    version: "0.1.18"
+  background_task:
+    dependency: "direct main"
+    description:
+      path: "plugins/background_task"
+      relative: true
+    source: path
+    version: "1.0.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -139,11 +147,21 @@ packages:
   just_audio:
     dependency: "direct main"
     description:
-      name: just_audio
-      sha256: b7cb6bbf3750caa924d03f432ba401ec300fd90936b3f73a9b33d58b1e96286b
-      url: "https://pub.flutter-io.cn"
-    source: hosted
+      path: just_audio
+      ref: "br_0.9.37_ohos"
+      resolved-ref: f103bec53ce72bf0dc685440021a84e329147450
+      url: "https://gitcode.com/openharmony-sig/fluttertpc_just_audio.git"
+    source: git
     version: "0.9.37"
+  just_audio_ohos:
+    dependency: "direct main"
+    description:
+      path: "just_audio/ohos"
+      ref: "br_0.9.37_ohos"
+      resolved-ref: f103bec53ce72bf0dc685440021a84e329147450
+      url: "https://gitcode.com/openharmony-sig/fluttertpc_just_audio.git"
+    source: git
+    version: "1.0.0"
   just_audio_platform_interface:
     dependency: transitive
     description:
@@ -217,13 +235,14 @@ packages:
     source: hosted
     version: "1.0.1"
   path_provider:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: path_provider
-      sha256: a1aa8aaa2542a6bc57e381f132af822420216c80d4781f7aa085ca3229208aaa
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "2.1.1"
+      path: "packages/path_provider/path_provider"
+      ref: HEAD
+      resolved-ref: "2f21e26e09efb92b8429c840ae7ca0cb024f036c"
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+    source: git
+    version: "2.1.0"
   path_provider_android:
     dependency: transitive
     description:
@@ -247,6 +266,15 @@ packages:
       sha256: f7a1fe3a634fe7734c8d3f2766ad746ae2a2884abe22e241a8b301bf5cac3279
       url: "https://pub.flutter-io.cn"
     source: hosted
+    version: "2.2.1"
+  path_provider_ohos:
+    dependency: transitive
+    description:
+      path: "packages/path_provider/path_provider_ohos"
+      ref: HEAD
+      resolved-ref: "2f21e26e09efb92b8429c840ae7ca0cb024f036c"
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+    source: git
     version: "2.2.1"
   path_provider_platform_interface:
     dependency: transitive
