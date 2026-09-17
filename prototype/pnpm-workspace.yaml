@@ -1,5 +1,5 @@
 allowBuilds:
-  '@parcel/watcher': set this to true or false
+  '@parcel/watcher': true
   core-js: true
   core-js-pure: true
   esbuild: true
@@ -39,4 +39,7 @@ minimumReleaseAgeExclude:
   - '@dcloudio/uni-stacktracey@3.0.0-5020420260813003'
   - '@dcloudio/uni-stat@3.0.0-5020420260813003'
   - '@dcloudio/vite-plugin-uni@3.0.0-5020420260813003'
-onlyBuiltDependencies: '[esbuild,core-js,core-js-pure]'
+onlyBuiltDependencies:
+  - esbuild
+  - core-js
+  - core-js-pure

@@ -480,7 +480,7 @@ const goHistory = () => uni.navigateTo({ url: '/pages/history/history' })
 }
 
 .menu-card .divider {
-  margin-left: 106rpx;
+  margin-left: 108rpx;
 }
 
 .menu-item {

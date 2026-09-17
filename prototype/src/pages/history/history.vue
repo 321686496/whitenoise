@@ -205,7 +205,7 @@ const clearHistory = () => {
 .clear-btn {
   padding: 12rpx 24rpx;
   border-radius: 20rpx;
-  background: rgba(196, 139, 139, 0.1);
+  background: var(--app-danger-soft);
   margin-top: 8rpx;
   transition: all 0.16s cubic-bezier(.4, 0, .2, 1);
 
@@ -216,7 +216,7 @@ const clearHistory = () => {
 
 .clear-text {
   font-size: 24rpx;
-  color: #C48B8B;
+  color: var(--app-danger);
   font-weight: 500;
 }
 
@@ -245,7 +245,7 @@ const clearHistory = () => {
 .item-divider {
   position: absolute;
   bottom: 0;
-  left: 102rpx;
+  left: 120rpx;
   right: 24rpx;
   height: 1rpx;
   background: var(--app-divider, $uni-border-color);

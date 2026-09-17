@@ -223,6 +223,10 @@
       <template v-else-if="name === 'chevron-left'">
         <path d="M15 18l-6-6 6-6" />
       </template>
+      <!-- 箭头下（收起播放器） -->
+      <template v-else-if="name === 'chevron-down'">
+        <path d="M6 9l6 6 6-6" />
+      </template>
       <!-- 成就/奖章 -->
       <template v-else-if="name === 'award'">
         <circle cx="12" cy="9" r="6" />
@@ -253,7 +257,7 @@ import { computed } from 'vue'
  * 图标名清单（name 取值）：
  * wave white-noise pink-noise brown-noise red-noise rain wave-ocean forest stream
  * fire coffee train fan play pause timer save palette trophy settings share user
- * edit mute volume close chevron-right chevron-left gift moon flame mixer clock copy
+ * edit mute volume close chevron-right chevron-left chevron-down gift moon flame mixer clock copy
  * lock check mountain bird shuffle heart award sun contrast
  */
 const props = withDefaults(defineProps<{

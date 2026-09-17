@@ -1,7 +1,7 @@
 # 声栖原型 v2 全量落地 · 实施设计
 
 > 日期：2026-09-16
-> 状态：已与用户确认方向（落地既有 v2 设计 / 全量一次到位）
+> 状态：已全量落地（主题引擎 v2 / 全局样式 / 6 新组件 / 17 页迁移完成）；2026-09-16 收尾轮补齐 discover·onboarding·history 硬编码清理，并修复 pnpm-workspace.yaml 配置使 install/type-check/dev:h5 可用
 > 设计规范来源：`docs/design-system/MASTER.md`（v2.0，单一事实来源）
 > 视觉对照基准：`html/design-preview.html`（17 界面 + 4 浮层高保真稿）
 

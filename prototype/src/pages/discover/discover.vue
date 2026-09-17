@@ -36,7 +36,7 @@
       </view>
       <view class="hero-row" @click="goDetail(hero)">
         <view class="hero-cover" :style="{ background: hero.gradient }">
-          <Icon :name="hero.iconName" :size="72" color="rgba(255,255,255,.95)" />
+          <Icon :name="hero.iconName" :size="72" color="var(--app-on-cover)" />
           <view class="hero-plays-badge">
             <Icon name="play" :size="12" color="var(--app-primary)" />
             <text class="hero-plays-text">{{ hero.playCount }}</text>
@@ -55,7 +55,7 @@
           </view>
           <view class="hero-btn" @click.stop="playScene(hero)">
             <text>立即体验</text>
-            <Icon name="chevron-right" :size="16" color="#fff" />
+            <Icon name="chevron-right" :size="16" color="var(--app-on-primary)" />
           </view>
         </view>
       </view>
@@ -121,7 +121,7 @@
             @click="addSound(sound)"
           >
             <view class="featured-icon" :style="{ background: sound.color }">
-              <Icon :name="sound.iconName" :size="34" color="#fff" />
+              <Icon :name="sound.iconName" :size="34" color="var(--app-on-cover)" />
             </view>
             <text class="featured-name">{{ sound.name }}</text>
             <text class="featured-heat">热度 {{ sound.hot }}</text>
@@ -138,7 +138,7 @@
       </view>
       <view class="story-item" v-for="story in stories" :key="story.id" @click="goDetailOf(story)">
         <view class="story-icon" :style="{ background: story.gradient }">
-          <Icon :name="story.iconName" :size="28" color="#fff" />
+          <Icon :name="story.iconName" :size="28" color="var(--app-on-cover)" />
         </view>
         <view class="story-body">
           <text class="story-title">{{ story.title }}</text>
@@ -388,7 +388,7 @@ const onSaveTap = () =>
   align-items: center;
   justify-content: center;
   position: relative;
-  box-shadow: inset 0 -2rpx 0 rgba(0, 0, 0, 0.08), inset 0 2rpx 0 rgba(255, 255, 255, 0.25);
+  box-shadow: var(--app-inset);
 }
 
 .hero-plays-badge {
@@ -400,7 +400,8 @@ const onSaveTap = () =>
   gap: 6rpx;
   padding: 6rpx 16rpx;
   border-radius: 20rpx;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--app-card-bg);
+  box-shadow: var(--app-shadow-1);
 }
 
 .hero-plays-text {
@@ -471,7 +472,7 @@ const onSaveTap = () =>
   padding: 14rpx 26rpx;
   border-radius: 30rpx;
   background: linear-gradient(135deg, var(--app-primary, $app-primary), var(--app-primary-dark, $app-primary-dark));
-  color: #fff;
+  color: var(--app-on-primary);
   font-size: 24rpx;
   font-weight: 700;
   margin-top: 12rpx;
@@ -483,7 +484,7 @@ const onSaveTap = () =>
   }
 
   text {
-    color: #fff;
+    color: var(--app-on-primary);
   }
 }
 
@@ -603,7 +604,7 @@ const onSaveTap = () =>
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 -2rpx 0 rgba(0, 0, 0, 0.08), inset 0 2rpx 0 rgba(255, 255, 255, 0.25), 0 6rpx 14rpx rgba(0, 0, 0, 0.1);
+  box-shadow: var(--app-inset), var(--app-shadow-1);
 }
 
 .featured-name {

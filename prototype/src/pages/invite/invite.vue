@@ -21,7 +21,7 @@
         </view>
       </view>
       <view class="btn-primary invite-btn" @click="shareInvite">
-        <Icon name="share" :size="20" color="#fff" />
+        <Icon name="share" :size="20" color="var(--app-on-primary)" />
         <text class="invite-btn-text">分享邀请</text>
       </view>
     </view>
@@ -45,7 +45,7 @@
             :class="{ unlocked: inviteCount >= r.count }"
           >
             <view class="reward-dot">
-              <Icon v-if="inviteCount >= r.count" name="check" :size="12" color="#fff" />
+              <Icon v-if="inviteCount >= r.count" name="check" :size="12" color="var(--app-on-primary)" />
             </view>
             <text class="reward-label">{{ r.label }}</text>
             <text class="reward-count">邀请 {{ r.count }} 人</text>

@@ -3,6 +3,9 @@ import 'package:snapp/app/theme_prefs.dart';
 import 'package:snapp/theme/theme_notifier.dart';
 
 void main() {
+  // ThemeNotifier 构造时监听系统明暗，需要先初始化绑定。
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('default scheme/ui are morandi + flat', () {
     final n = ThemeNotifier();
     expect(n.schemeKey, 'morandi');
@@ -28,7 +31,7 @@ void main() {
 
   test('ThemePrefs.write does not throw when plugin is missing', () async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    await ThemePrefs.write('ocean', 'glass');
+    await ThemePrefs.write('ocean', 'glass', 'auto');
     // 不应抛出（写失败可被吞掉，避免 fire-and-forget 的未捕获异步异常）。
     expect(1, 1);
   });

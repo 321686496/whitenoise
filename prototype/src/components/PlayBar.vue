@@ -1,7 +1,7 @@
 <template>
   <view class="play-bar">
     <view class="play-bar-inner app-card">
-      <view class="play-info" @click="player.showMixPanel = !player.showMixPanel">
+      <view class="play-info" @click="goPlayer">
         <view class="play-thumb">
           <view class="mini-logo">
             <image src="/static/logo-v10-1.jpg" mode="aspectFit" />
@@ -67,43 +67,13 @@
         </view>
       </view>
     </view>
-
-    <!-- 混音面板（收纳原首页音轨调节） -->
-    <view class="mix-panel app-card" v-if="player.showMixPanel">
-      <view class="mix-panel-header">
-        <text class="mix-panel-title">当前混音</text>
-        <view class="mix-panel-count" v-if="player.tracks.length > 0">
-          <text>{{ player.tracks.length }}/6 路</text>
-        </view>
-        <view class="timer-close" @click="player.showMixPanel = false">
-          <Icon name="close" :size="16" color="var(--app-text-3)" />
-        </view>
-      </view>
-      <view class="mix-list" v-if="player.tracks.length > 0">
-        <MixTrack
-          v-for="track in player.tracks"
-          :key="track.id"
-          :name="track.name"
-          :icon-name="track.iconName"
-          :color="track.color"
-          :volume="track.volume"
-          :is-muted="track.muted"
-          @mute="toggleTrackMute(track.id)"
-          @remove="removeTrack(track.id)"
-        />
-      </view>
-      <view class="mix-empty" v-else>
-        <text>暂无音轨，去首页选择一个场景吧</text>
-      </view>
-    </view>
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import Icon from './Icon.vue'
-import MixTrack from './MixTrack.vue'
-import { player, togglePlay, setTimer, toggleTrackMute, removeTrack } from '@/composables/usePlayer'
+import { player, togglePlay, setTimer } from '@/composables/usePlayer'
 
 defineEmits<{
   saveTap: []
@@ -133,6 +103,11 @@ const onMainPlay = () => {
   if (!togglePlay()) {
     uni.showToast({ title: '请先选择场景', icon: 'none' })
   }
+}
+
+/* 点击悬浮主控左侧信息区 → 展开完整播放器详情页（听歌软件式收起/展开） */
+const goPlayer = () => {
+  uni.navigateTo({ url: '/pages/player/player' })
 }
 </script>
 

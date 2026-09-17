@@ -11,7 +11,7 @@
       <swiper-item v-for="(item, index) in slides" :key="index">
         <view class="slide-content">
           <view class="slide-icon-wrap" :style="{ background: item.iconBg }">
-            <Icon :name="item.icon" :size="80" color="#fff" />
+            <Icon :name="item.icon" :size="80" color="var(--app-on-cover)" />
           </view>
           <text class="slide-title">{{ item.title }}</text>
           <text class="slide-subtitle">{{ item.subtitle }}</text>
@@ -106,7 +106,7 @@ const goHome = () => {
   top: 0;
   right: 0;
   height: 520rpx;
-  background: linear-gradient(180deg, var(--app-bg-grad) 0%, var(--app-bg) 80%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(180deg, var(--app-bg-grad) 0%, var(--app-bg) 80%, transparent 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -134,7 +134,7 @@ const goHome = () => {
   align-items: center;
   justify-content: center;
   margin-bottom: 56rpx;
-  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.12);
+  box-shadow: var(--app-shadow-3);
 }
 
 .slide-title {
@@ -223,7 +223,7 @@ const goHome = () => {
 .next-text {
   font-size: 29rpx;
   font-weight: 600;
-  color: #fff;
+  color: var(--app-on-primary);
   letter-spacing: 1rpx;
 }
 
@@ -251,7 +251,7 @@ const goHome = () => {
 .start-text {
   font-size: 30rpx;
   font-weight: 600;
-  color: #fff;
+  color: var(--app-on-primary);
   letter-spacing: 2rpx;
 }
 </style>
