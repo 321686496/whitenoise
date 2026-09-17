@@ -10,7 +10,7 @@
       <view class="header-top">
         <view class="brand">
           <view class="brand-logo-wrap">
-            <image class="brand-logo" src="/static/logo-v10-1.jpg" mode="aspectFit" />
+            <image class="brand-logo" src="/static/logo-v13.svg" mode="aspectFit" />
           </view>
           <view class="brand-text">
             <text class="app-title">声栖</text>

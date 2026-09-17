@@ -45,13 +45,16 @@ class _ShellState extends State<_Shell> {
   @override
   Widget build(BuildContext context) {
     final tabIndex = context.watch<ShellTabNotifier>().index;
+    final player = context.watch<PlayerService>();
     final safeBottom = MediaQuery.of(context).padding.bottom;
+    // 有播放内容时，在「场景 / 发现 / 我的」tab 全局显示悬浮 PlayBar；
+    // 首页（tab 0）用主控卡互斥不挂载（对照原型）。
+    final showPlayBar = tabIndex != 0 && player.currentScene != null;
     return Scaffold(
       body: Stack(
         children: [
           IndexedStack(index: tabIndex, children: _pages),
-          // PlayBar：仅发现 tab（浮在 TabBar 之上）
-          if (tabIndex == 2)
+          if (showPlayBar)
             Positioned(
               left: 13,
               right: 13,

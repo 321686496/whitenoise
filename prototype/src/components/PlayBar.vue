@@ -4,7 +4,7 @@
       <view class="play-info" @click="goPlayer">
         <view class="play-thumb">
           <view class="mini-logo">
-            <image src="/static/logo-v10-1.jpg" mode="aspectFit" />
+            <image src="/static/logo-v13.svg" mode="aspectFit" />
           </view>
         </view>
         <view class="play-meta">

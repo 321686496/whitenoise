@@ -9,7 +9,7 @@
     <view class="preview-hero app-card">
       <view class="preview-brand">
         <view class="preview-logo">
-          <image src="/static/logo-v10-1.jpg" mode="aspectFit" />
+          <image src="/static/logo-v13.svg" mode="aspectFit" />
         </view>
         <view class="preview-info">
           <text class="preview-name">{{ currentSchemeLabel }}</text>
