@@ -54,17 +54,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
     _DiscoverTag('nature', '自然', 'mountain'),
   ];
 
-  /// 精选场景的归类映射（原型 CATEGORY_MAP）。
-  static const Map<String, String> _categoryMap = <String, String>{
-    'deep-sleep': 'sleep',
-    'focus-white-noise': 'focus',
-    'nature-relax': 'nature',
-    'urban-afternoon': 'focus',
-    'rainy-night': 'sleep',
-    'forest-meditation': 'relax',
-    'seaside-sunset': 'relax',
-    'coffee-time': 'focus',
-  };
+  /// 精选场景网格：按热度（播放量）降序，排除今日推荐 hero。
+  List<FeaturedScene> get _filteredFeatured =>
+      getHotScenes(_activeTag, excludeId: _hero.id);
 
   static const List<_Story> _stories = <_Story>[
     _Story('st1', '雨夜书桌', '城市夜晚，雨滴敲打窗棂，世界安静下来，只有翻书声与雨声相伴',
@@ -77,20 +69,11 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
   String _activeTag = 'all';
 
-  List<FeaturedScene> get _filteredFeatured {
-    final rest =
-        featuredScenes.where((FeaturedScene s) => s.id != _hero.id).toList();
-    if (_activeTag == 'all') return rest;
-    return rest
-        .where((FeaturedScene s) => _categoryMap[s.id] == _activeTag)
-        .toList();
-  }
-
   /// 精选场景 → 播放器所需 Scene（补全 category / isPreset，均视为预设）。
   Scene _toScene(FeaturedScene f) => Scene(
         id: f.id,
         name: f.name,
-        category: _categoryMap[f.id] ?? 'relax',
+        category: featuredSceneCategory[f.id] ?? 'relax',
         desc: f.desc,
         iconName: f.iconName,
         gradient: f.gradient,
@@ -134,7 +117,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
-    final player = context.watch<PlayerService>();
+    // 只订阅当前场景 id；播放器其余通知不再整页重建。
+    final currentSceneId = context.select<PlayerService, String?>(
+        (PlayerService p) => p.currentScene?.id);
     final heroSoundNames = _soundNames(_hero.soundIds);
 
     return AppPage(
@@ -146,7 +131,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
             _buildHeader(c),
             _GroupCard(children: [
               const _CardHead(icon: 'flame', title: '今日推荐'),
-              _buildHero(c, player, heroSoundNames),
+              _buildHero(c, heroSoundNames),
             ]),
             _GroupCard(children: [
               _buildTagFilter(c),
@@ -183,7 +168,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               if (_filteredFeatured.isNotEmpty)
                 _FeaturedGrid(
                   scenes: _filteredFeatured,
-                  player: player,
+                  currentSceneId: currentSceneId,
                   soundNamesOf: _soundNames,
                   onTap: (FeaturedScene s) => _goDetail(s.id),
                   onPlay: (FeaturedScene s) => _playScene(s.id),
@@ -279,7 +264,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
     );
   }
 
-  Widget _buildHero(AppColors c, PlayerService player, List<String> heroSounds) {
+  Widget _buildHero(AppColors c, List<String> heroSounds) {
     final g = parseCssGradient(_hero.gradient);
     return GestureDetector(
       onTap: () => _goDetail(_hero.id),
@@ -663,14 +648,14 @@ class _StoryItem extends StatelessWidget {
 /// 精选场景双列网格。
 class _FeaturedGrid extends StatelessWidget {
   final List<FeaturedScene> scenes;
-  final PlayerService player;
+  final String? currentSceneId;
   final List<String> Function(List<String>) soundNamesOf;
   final void Function(FeaturedScene) onTap;
   final void Function(FeaturedScene) onPlay;
 
   const _FeaturedGrid({
     required this.scenes,
-    required this.player,
+    required this.currentSceneId,
     required this.soundNamesOf,
     required this.onTap,
     required this.onPlay,
@@ -706,7 +691,7 @@ class _FeaturedGrid extends StatelessWidget {
       isPreset: true,
       isGrid: true,
       soundLabel: soundNamesOf(f.soundIds).join(' + '),
-      active: player.currentScene?.id == f.id,
+      active: currentSceneId == f.id,
       onTap: () => onTap(f),
       onPlay: () => onPlay(f),
     );

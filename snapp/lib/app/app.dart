@@ -45,10 +45,11 @@ class _ShellState extends State<_Shell> {
   @override
   Widget build(BuildContext context) {
     final tabIndex = context.watch<ShellTabNotifier>().index;
-    final player = context.watch<PlayerService>();
+    // 只订阅是否需要展示 PlayBar：避免音量拖拽 / 静音 / 睡眠定时逐秒等
+    // PlayerService 的高频变更导致整棵 Shell（Stack + TabBar + PlayBar）重建。
+    final showPlayBar = context.select<PlayerService, bool>(
+        (PlayerService p) => p.currentScene != null);
     final safeBottom = MediaQuery.of(context).padding.bottom;
-    // 有播放内容时，四个 tab 全局显示悬浮 PlayBar（覆盖页面、不压缩页面高度）。
-    final showPlayBar = player.currentScene != null;
     return Scaffold(
       body: Stack(
         children: [
@@ -62,7 +63,8 @@ class _ShellState extends State<_Shell> {
                 onSaveTap: () => showAppToast(context, '可在首页保存为场景'),
               ),
             ),
-          // 紧约束包裹：避免松约束下 Expanded 自适应导致 TabBar 溢出
+          // 紧约束包裹：避免松约束下 Expanded 自适应导致 TabBar 溢出。
+          // 无外部盒子的悬浮 tab：4 项图标浮于底部，内容可滚到最底不被截断。
           Positioned(
             left: 12,
             right: 12,

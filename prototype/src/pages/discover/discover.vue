@@ -164,7 +164,7 @@ import TabBar from '@/components/TabBar.vue'
 import PlayBar from '@/components/PlayBar.vue'
 import SceneCard from '@/components/SceneCard.vue'
 import { player, applyScene } from '@/composables/usePlayer'
-import { soundNames, findScene } from '@/data/scenes'
+import { soundNames, findScene, getHotScenes, featuredSceneCategory } from '@/data/scenes'
 import type { Scene } from '@/data/scenes'
 import { featuredScenes, featuredSounds, sounds as allSounds } from '@/data/sounds'
 
@@ -186,28 +186,16 @@ const tags = [
   { id: 'nature', label: '自然', icon: 'mountain' },
 ]
 
-const CATEGORY_MAP: Record<string, string> = {
-  'deep-sleep': 'sleep',
-  'focus-white-noise': 'focus',
-  'nature-relax': 'nature',
-  'urban-afternoon': 'focus',
-  'rainy-night': 'sleep',
-  'forest-meditation': 'relax',
-  'seaside-sunset': 'relax',
-  'coffee-time': 'focus',
-}
-
-const filteredFeatured = computed(() => {
-  const rest = featuredScenes.filter((s) => s.id !== hero.id)
-  if (activeTag.value === 'all') return rest
-  return rest.filter((s) => CATEGORY_MAP[s.id] === activeTag.value)
-})
+// 精选场景网格：按热度（播放量）降序，排除今日推荐 hero
+const filteredFeatured = computed(() =>
+  getHotScenes(activeTag.value as 'all' | Scene['category'], hero.id),
+)
 
 // 精选场景 → 播放器所需 Scene（补全 category / isPreset，均视为预设）
 const toScene = (f: (typeof featuredScenes)[number]): Scene => ({
   id: f.id,
   name: f.name,
-  category: (CATEGORY_MAP[f.id] ?? 'relax') as Scene['category'],
+  category: featuredSceneCategory[f.id] ?? 'relax',
   desc: f.desc,
   iconName: f.iconName,
   gradient: f.gradient,

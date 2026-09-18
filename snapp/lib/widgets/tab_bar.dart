@@ -36,12 +36,14 @@ class AppTabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
     final s = Theme.of(context).appShapes;
+    // 实底悬浮胶囊：不透明表面，选中项主色软底高亮；
+    // 内容可滚到屏幕最底（0 底部间距），胶囊叠在其上，干净清爽不显透明残影。
     return Container(
       height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
       decoration: BoxDecoration(
         color: c.surface,
-        borderRadius: BorderRadius.circular(17),
+        borderRadius: BorderRadius.circular(26),
         border: c.line.opacity > 0.01
             ? Border.all(color: c.line, width: 0.5)
             : null,

@@ -131,8 +131,11 @@ class _ScenePageState extends State<ScenePage> {
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
-    final player = context.watch<PlayerService>();
-    final recent = player.recent;
+    // 只订阅实际展示字段：最近播放列表、当前场景 id。播放器其余通知不再整页重建。
+    final recent = context.select<PlayerService, List<RecentItem>>(
+        (PlayerService p) => p.recent);
+    final currentSceneId = context.select<PlayerService, String?>(
+        (PlayerService p) => p.currentScene?.id);
 
     return AppPage(
       bottomBarSpace: true,
@@ -235,7 +238,7 @@ class _ScenePageState extends State<ScenePage> {
                 ),
                 _FeaturedGrid(
                   scenes: _featuredScenes,
-                  player: player,
+                  currentSceneId: currentSceneId,
                   onTap: (Scene s) => _openDetail(s.id),
                   onPlay: _playScene,
                 ),
@@ -282,7 +285,7 @@ class _ScenePageState extends State<ScenePage> {
                     soundIcons: _soundIconsOf(my),
                     bgColor: my.gradient,
                     isPreset: false,
-                    active: player.currentScene?.id == my.id,
+                    active: currentSceneId == my.id,
                     bottomMargin: true,
                     onTap: () => _editScene(my),
                     onShare: () => _deleteScene(my),
@@ -715,13 +718,13 @@ class _TagChip extends StatelessWidget {
 /// 精选场景双列网格（复用首页布局方式）。
 class _FeaturedGrid extends StatelessWidget {
   final List<Scene> scenes;
-  final PlayerService player;
+  final String? currentSceneId;
   final void Function(Scene) onTap;
   final void Function(Scene) onPlay;
 
   const _FeaturedGrid({
     required this.scenes,
-    required this.player,
+    required this.currentSceneId,
     required this.onTap,
     required this.onPlay,
   });
@@ -742,7 +745,7 @@ class _FeaturedGrid extends StatelessWidget {
               cover: scenes[i].image,
               isPreset: scenes[i].isPreset,
               isGrid: true,
-              active: player.currentScene?.id == scenes[i].id,
+              active: currentSceneId == scenes[i].id,
               onTap: () => onTap(scenes[i]),
               onPlay: () => onPlay(scenes[i]),
             ),
@@ -758,7 +761,7 @@ class _FeaturedGrid extends StatelessWidget {
                 cover: scenes[i + 1].image,
                 isPreset: scenes[i + 1].isPreset,
                 isGrid: true,
-                active: player.currentScene?.id == scenes[i + 1].id,
+                active: currentSceneId == scenes[i + 1].id,
                 onTap: () => onTap(scenes[i + 1]),
                 onPlay: () => onPlay(scenes[i + 1]),
               ),

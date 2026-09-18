@@ -135,8 +135,10 @@ class _HistoryPageState extends State<HistoryPage> {
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
-    final player = context.watch<PlayerService>();
-    final groups = _groupsFrom(player.recent);
+    // 只订阅最近播放列表；播放器其余通知不再整页重建。
+    final recent = context.select<PlayerService, List<RecentItem>>(
+        (PlayerService p) => p.recent);
+    final groups = _groupsFrom(recent);
     final totalCount =
         groups.fold(0, (int sum, _HistoryGroup g) => sum + g.items.length);
     return AppPage(
@@ -168,7 +170,7 @@ class _HistoryPageState extends State<HistoryPage> {
                   ),
                   if (totalCount > 0)
                     GestureDetector(
-                      onTap: () => _clearHistory(player),
+                      onTap: () => _clearHistory(context.read<PlayerService>()),
                       behavior: HitTestBehavior.opaque,
                       child: Padding(
                         padding: const EdgeInsets.all(6),
@@ -201,7 +203,8 @@ class _HistoryPageState extends State<HistoryPage> {
                           item: group.items[i],
                           showDivider: i < group.items.length - 1,
                           onReplay: () {
-                            player.applyScene(findScene(group.items[i].id));
+                            context.read<PlayerService>().applyScene(
+                                findScene(group.items[i].id));
                             showAppToast(context,
                                 '正在播放「${group.items[i].sceneName}」');
                           },

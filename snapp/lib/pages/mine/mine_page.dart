@@ -27,9 +27,9 @@ class MinePage extends StatelessWidget {
   }
 
   /// 今天播放次数（历史页「今天N次」徽章）。
-  int _todayPlayCount(PlayerService player) {
+  int _todayPlayCount(List<RecentItem> recent) {
     final today = StatsService.dateKey(DateTime.now());
-    return player.recent
+    return recent
         .where((RecentItem r) =>
             StatsService.dateKey(DateTime.fromMillisecondsSinceEpoch(r.ts)) ==
             today)
@@ -45,7 +45,9 @@ class MinePage extends StatelessWidget {
     final customScenes = context.watch<CustomSceneService>();
     final achievement = context.watch<AchievementService>();
     final favorites = context.watch<FavoritesService>();
-    final player = context.watch<PlayerService>();
+    // 只订阅最近播放列表；播放器其余通知不再整页重建。
+    final recent = context.select<PlayerService, List<RecentItem>>(
+        (PlayerService p) => p.recent);
     final currentThemeLabel =
         '${schemeLabels[n.schemeKey]?.label ?? n.schemeKey} · ${n.ui.label}';
 
@@ -62,7 +64,7 @@ class MinePage extends StatelessWidget {
                 context, c, stats, checkin, customScenes, achievement),
             const _GroupHead('常用功能'),
             _buildQuickGrid(context, c, checkin, achievement, favorites,
-                player),
+                recent),
             const _GroupHead('偏好与设置'),
             _buildMenuCard(context, c, currentThemeLabel, stats),
             const _GroupHead('最近成就'),
@@ -280,11 +282,11 @@ class MinePage extends StatelessWidget {
 
   Widget _buildQuickGrid(BuildContext context, AppColors c,
       CheckinService checkin, AchievementService achievement,
-      FavoritesService favorites, PlayerService player) {
+      FavoritesService favorites, List<RecentItem> recent) {
     final actions = <_QuickAction>[
       _QuickAction('checkin', '每日签到', 'flame', '连续${checkin.streak}天', true),
       _QuickAction('favorites', '我的收藏', 'save', '${favorites.ids.length} 个', false),
-      _QuickAction('history', '播放历史', 'clock', '今天${_todayPlayCount(player)}次', false),
+      _QuickAction('history', '播放历史', 'clock', '今天${_todayPlayCount(recent)}次', false),
       _QuickAction('achievement', '成就墙', 'trophy', '${achievement.unlockedCount}/${achievement.total}', false),
     ];
     final routes = <String, String>{

@@ -128,3 +128,40 @@ const Set<String> generatedAudioIds = <String>{
 /// 声音 id → WAV 资产路径；无合成资产返回 null（对应音轨走模拟引擎）。
 String? audioAssetFor(String id) =>
     generatedAudioIds.contains(id) ? 'assets/audio/$id.wav' : null;
+
+/// 发现页热门精选相关（对应原型 `scenes.ts` 的 parsePlayCount / featuredSceneCategory / getHotScenes）。
+
+/// featuredScenes 各 id → 场景分类 key（口径与 sceneCategories 一致，单一来源）。
+const Map<String, String> featuredSceneCategory = <String, String>{
+  'deep-sleep': 'sleep',
+  'focus-white-noise': 'focus',
+  'nature-relax': 'nature',
+  'urban-afternoon': 'focus',
+  'rainy-night': 'sleep',
+  'forest-meditation': 'relax',
+  'seaside-sunset': 'relax',
+  'coffee-time': 'focus',
+};
+
+/// 解析播放量字符串（"12.6万" → 126000 / "9.8千" → 9800 / "5000" → 5000），用作热度排序；失败返回 0。
+double parsePlayCount(String pc) {
+  final m = RegExp(r'^([\d.]+)(万|千)?$').firstMatch(pc);
+  if (m == null) return 0;
+  final num = double.parse(m.group(1)!);
+  final unit = m.group(2);
+  if (unit == '万') return num * 10000;
+  if (unit == '千') return num * 1000;
+  return num;
+}
+
+/// 发现页热门精选：按分类过滤（'all' 不过滤），再按播放量降序，
+/// 体现「大家都在听的热门」。excludeId 用于排除今日推荐 hero，避免重复展示。
+List<FeaturedScene> getHotScenes(String category, {String excludeId = ''}) {
+  final list = featuredScenes.where((FeaturedScene s) => s.id != excludeId).toList();
+  final filtered = category == 'all'
+      ? list
+      : list.where((FeaturedScene s) => featuredSceneCategory[s.id] == category).toList();
+  filtered.sort((FeaturedScene a, FeaturedScene b) =>
+      parsePlayCount(b.playCount).compareTo(parsePlayCount(a.playCount)));
+  return filtered;
+}

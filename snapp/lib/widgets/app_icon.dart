@@ -9,6 +9,25 @@ String colorToHex(Color c) {
   return '#${p(c.red)}${p(c.green)}${p(c.blue)}';
 }
 
+/// SVG 签名缓存：按「label+size+完整 svg 字符串」复用 `SvgPicture` 实例，
+/// 避免页面在播放器通知下整页重建时对每个图标重复做字符串拼接与 SVG 解析。
+/// svg 字符串已内嵌色值/描边宽度，天然涵盖不同颜色与 stroke 变体；缓存大小
+/// 受「图标数 × 颜色数 × 尺寸」约束，界面色板有限可接受。
+final Map<String, SvgPicture> _svgPictureCache = <String, SvgPicture>{};
+
+SvgPicture _cachedSvgPicture(String svg, double size, String label) {
+  final key = '$label\u0000$size\u0000$svg';
+  return _svgPictureCache.putIfAbsent(
+    key,
+    () => SvgPicture.string(
+      svg,
+      width: size,
+      height: size,
+      semanticsLabel: label,
+    ),
+  );
+}
+
 /// 声栖自定义图标（对应原型 `components/Icon.vue`，禁止 emoji）。
 ///
 /// 图标默认加载自 [appIconBodies] 的 SVG body；未知名图标回退默认圆点。
@@ -37,12 +56,7 @@ class AppIcon extends StatelessWidget {
         '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" '
         'stroke="$hex" stroke-width="$stroke" '
         'stroke-linecap="round" stroke-linejoin="round">$body</svg>';
-    return SvgPicture.string(
-      svg,
-      width: size,
-      height: size,
-      semanticsLabel: name,
-    );
+    return _cachedSvgPicture(svg, size, name);
   }
 }
 
@@ -67,11 +81,6 @@ class AppRawIcon extends StatelessWidget {
         '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" '
         'stroke="$hex" stroke-width="1.6" '
         'stroke-linecap="round" stroke-linejoin="round">$b</svg>';
-    return SvgPicture.string(
-      svg,
-      width: size,
-      height: size,
-      semanticsLabel: 'tab-icon',
-    );
+    return _cachedSvgPicture(svg, size, 'tab-icon');
   }
 }

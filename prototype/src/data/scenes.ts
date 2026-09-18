@@ -5,7 +5,7 @@
  * iconName 需与 components/Icon.vue 中已定义的图标名保持一致。
  */
 
-import { sounds } from './sounds'
+import { sounds, featuredScenes, type FeaturedScene } from './sounds'
 
 export type SceneCategory = 'sleep' | 'focus' | 'relax' | 'nature'
 
@@ -140,4 +140,43 @@ export function buildPresets(scene: Scene): PresetOption[] {
     { name: '标准', badgeColor: 'linear-gradient(135deg, #8296A8, #5F7A92)', ratios: spread(40) },
     { name: '深度', badgeColor: 'linear-gradient(135deg, #6E6290, #8E82A6)', ratios: spread(60) },
   ]
+}
+
+/* ------------------------- 发现页热门精选（热度维度） ------------------------- */
+
+/** 解析播放量字符串（"12.6万" → 126000 / "9.8千" → 9800 / "5000" → 5000），仅作热度排序依据 */
+export function parsePlayCount(pc: string): number {
+  const m = pc.match(/^([\d.]+)(万|千)?$/)
+  if (!m) return 0
+  const num = parseFloat(m[1])
+  const unit = m[2]
+  if (unit === '万') return num * 10000
+  if (unit === '千') return num * 1000
+  return num
+}
+
+/** featuredScenes 各 id → 场景分类 key（分类口径仍沿用 sceneCategories，单一来源） */
+export const featuredSceneCategory: Record<string, SceneCategory> = {
+  'deep-sleep': 'sleep',
+  'focus-white-noise': 'focus',
+  'nature-relax': 'nature',
+  'urban-afternoon': 'focus',
+  'rainy-night': 'sleep',
+  'forest-meditation': 'relax',
+  'seaside-sunset': 'relax',
+  'coffee-time': 'focus',
+}
+
+/**
+ * 发现页热门精选：按分类过滤（'all' 不过滤），再按播放量降序返回，
+ * 体现「大家都在听的热门」。excludeId 用于排除今日推荐 hero，避免重复展示。
+ */
+export function getHotScenes(
+  category: 'all' | SceneCategory = 'all',
+  excludeId?: string,
+): FeaturedScene[] {
+  const list = featuredScenes.filter((s) => s.id !== excludeId)
+  const filtered =
+    category === 'all' ? list : list.filter((s) => featuredSceneCategory[s.id] === category)
+  return [...filtered].sort((a, b) => parsePlayCount(b.playCount) - parsePlayCount(a.playCount))
 }

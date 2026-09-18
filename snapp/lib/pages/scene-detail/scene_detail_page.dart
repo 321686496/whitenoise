@@ -42,14 +42,19 @@ class _SceneDetailPageState extends State<SceneDetailPage> {
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
-    final player = context.watch<PlayerService>();
+    // 只订阅本页真正展示的字段：当前场景 id、播放态；其余播放器通知不再整页重建。
+    final currentSceneId = context.select<PlayerService, String?>(
+        (PlayerService p) => p.currentScene?.id);
+    final isPlaying = context.select<PlayerService, bool>(
+        (PlayerService p) => p.isPlaying);
+    final player = context.read<PlayerService>();
     final fav = context.watch<FavoritesService>();
     final scene = findScene(_sceneId);
     final recipe = buildRecipe(scene);
     final presets = buildPresets(scene);
     final isFavorited = fav.isFav(scene.id);
-    final isCurrent = player.currentScene?.id == scene.id;
-    final isThisPlaying = isCurrent && player.isPlaying;
+    final isCurrent = currentSceneId == scene.id;
+    final isThisPlaying = isCurrent && isPlaying;
     final g = parseCssGradient(scene.gradient);
 
     return AppPage(
@@ -63,7 +68,7 @@ class _SceneDetailPageState extends State<SceneDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: NavBar(title: '场景详情'),
             ),
-            _buildHero(c, scene, isThisPlaying, isCurrent, player),
+            _buildHero(c, scene, isThisPlaying, player),
             _buildSection(c, '场景故事', _StoryCard(scene: scene)),
             _buildSection(c, '声音配方', _RecipeCard(recipe: recipe, c: c)),
             _buildSection(
@@ -128,10 +133,12 @@ class _SceneDetailPageState extends State<SceneDetailPage> {
     AppColors c,
     Scene scene,
     bool isThisPlaying,
-    bool isCurrent,
     PlayerService player,
   ) {
     final g = parseCssGradient(scene.gradient);
+    // hero 定时 chip 独立订阅定时分钟，其余播放器通知不 rebuild 整块 hero。
+    final timerMinutes = context.select<PlayerService, int>(
+        (PlayerService p) => p.timerMinutes);
     return Container(
       decoration: BoxDecoration(
         gradient: g == null
@@ -186,7 +193,7 @@ class _SceneDetailPageState extends State<SceneDetailPage> {
                   ),
                   alignment: Alignment.center,
                   child: AppIcon(
-                      name: isCurrent && player.isPlaying ? 'pause' : 'play',
+                      name: isThisPlaying ? 'pause' : 'play',
                       size: 64,
                       color: c.onPrimary),
                 ),
@@ -199,16 +206,16 @@ class _SceneDetailPageState extends State<SceneDetailPage> {
             children: [
               _HeroChip(
                 icon: AppIcon(name: 'timer', size: 20,
-                    color: player.timerMinutes > 0 ? c.primaryStrong : c.onCover),
-                label: player.timerMinutes > 0 ? '${player.timerMinutes}分' : '定时',
-                on: player.timerMinutes > 0,
-                onTap: () => _openTimerSheet(player),
+                    color: timerMinutes > 0 ? c.primaryStrong : c.onCover),
+                label: timerMinutes > 0 ? '$timerMinutes分' : '定时',
+                on: timerMinutes > 0,
+                onTap: () => _openTimerSheet(),
               ),
               const SizedBox(width: 10),
               _HeroChip(
                 icon: AppIcon(name: 'shuffle', size: 20, color: c.onCover),
                 label: '混音',
-                onTap: () => _openMixSheet(player),
+                onTap: () => _openMixSheet(),
               ),
             ],
           ),
@@ -236,7 +243,7 @@ class _SceneDetailPageState extends State<SceneDetailPage> {
     );
   }
 
-  void _openTimerSheet(PlayerService player) {
+  void _openTimerSheet() {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -244,7 +251,7 @@ class _SceneDetailPageState extends State<SceneDetailPage> {
     );
   }
 
-  void _openMixSheet(PlayerService player) {
+  void _openMixSheet() {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -794,18 +801,21 @@ class _TimerSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
-    final player = context.watch<PlayerService>();
+    // 只订阅定时分钟；每秒倒计时/音量等不重建此弹层。
+    final timerMinutes = context.select<PlayerService, int>(
+        (PlayerService p) => p.timerMinutes);
     return _SheetShell(
       title: '睡眠定时',
       children: [
         const SizedBox(height: 12),
         Row(
           children: [15, 30, 45, 60].map((int m) {
-            final on = player.timerMinutes == m;
+            final on = timerMinutes == m;
             return Expanded(
               child: GestureDetector(
                 onTap: () {
-                  final willCancel = player.timerMinutes == m;
+                  final player = context.read<PlayerService>();
+                  final willCancel = timerMinutes == m;
                   player.setTimer(m);
                   showAppToast(context, willCancel ? '已取消定时' : '定时 $m 分钟');
                 },
@@ -847,19 +857,22 @@ class _MixSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
-    final player = context.watch<PlayerService>();
+    // 只订阅音轨列表；其余播放器通知不重建弹层。
+    final tracks = context.select<PlayerService, List<PlayerTrack>>(
+        (PlayerService p) => p.tracks);
     return _SheetShell(
       title: '当前混音',
-      badge: player.tracks.isNotEmpty ? '${player.tracks.length}/6 路' : null,
+      badge: tracks.isNotEmpty ? '${tracks.length}/6 路' : null,
       children: [
         Flexible(
-          child: player.tracks.isNotEmpty
+          child: tracks.isNotEmpty
               ? ListView.builder(
                   shrinkWrap: true,
                   padding: const EdgeInsets.only(top: 8),
-                  itemCount: player.tracks.length,
+                  itemCount: tracks.length,
                   itemBuilder: (BuildContext context, int i) {
-                    final t = player.tracks[i];
+                    final player = context.read<PlayerService>();
+                    final t = tracks[i];
                     return MixTrack(
                       name: t.name,
                       iconName: t.iconName,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../services/player_service.dart';
 import '../theme/theme_extension.dart';
 import '../theme/theme_tokens.dart';
 import '../utils/style_utils.dart';
@@ -7,8 +9,9 @@ import '../utils/style_utils.dart';
 /// 页面容器：顶部安全区 + 顶部柔和渐变（`.page-bg`，高度 440rpx）+
 /// 轻微上浮/淡入进入动效（尊重系统「减弱动态效果」）。
 ///
-/// [bottomBarSpace]：true 时预留「悬浮 TabBar + PlayBar」高度
-/// （tab 高 56 + playbar 64 + 余量 28），对应原型 `.page-container` 底部 padding。
+/// [bottomBarSpace]：true 时预留「悬浮 TabBar +（有播放时叠加）PlayBar」高度，
+/// 对应原型 `.page-container` 底部 padding。PlayBar 高度只在真正有播放内容时
+/// 才预留，避免未播放时滚动到底留出整条空白。
 class AppPage extends StatefulWidget {
   final Widget child;
   final bool bottomBarSpace;
@@ -69,11 +72,18 @@ class _AppPageState extends State<AppPage> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
+    // PlayBar 只在有播放内容时才浮起：data 驱动，跟随播放状态即时收放底部空间。
+    final bool showPlayBar = context.select<PlayerService, bool>(
+      (PlayerService p) => p.currentScene != null,
+    );
     final slide = Tween<Offset>(
       begin: const Offset(0, 0.02),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    final bottomPad = widget.bottomBarSpace ? kTabHeight + kPlayBarHeight + 28.0 : 28.0;
+    // 内容可滚到屏幕最底：未播放时底部不留间距；仅在有悬浮播放条时为其让位。
+    final double bottomPad = widget.bottomBarSpace
+        ? (showPlayBar ? kTabHeight + kPlayBarHeight + 28.0 : 0.0)
+        : 28.0;
     return Stack(
       children: [
         Positioned(

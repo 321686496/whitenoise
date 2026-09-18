@@ -3,6 +3,7 @@ import AudioSessionPlugin from 'audio_session';
 import BackgroundTaskPlugin from 'background_task';
 import JustAudioOhosPlugin from 'just_audio_ohos';
 import PathProviderPlugin from 'path_provider_ohos';
+import SharedPreferencesPlugin from 'shared_preferences_ohos';
 
 /**
  * Generated file. Do not edit.
@@ -20,6 +21,7 @@ export class GeneratedPluginRegistrant {
       flutterEngine.getPlugins()?.add(new BackgroundTaskPlugin());
       flutterEngine.getPlugins()?.add(new JustAudioOhosPlugin());
       flutterEngine.getPlugins()?.add(new PathProviderPlugin());
+      flutterEngine.getPlugins()?.add(new SharedPreferencesPlugin());
     } catch (e) {
       Log.e(
         TAG,

@@ -29,6 +29,7 @@ class OnboardingPage extends StatefulWidget {
 
 class _OnboardingPageState extends State<OnboardingPage> {
   int _currentPage = 0;
+  final PageController _pageController = PageController();
 
   static const List<_Slide> _slides = <_Slide>[
     _Slide('wave', '欢迎来到声栖', '用声音构建你的专属宁静空间',
@@ -52,8 +53,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   void _goNext() {
     if (_currentPage < _slides.length - 1) {
-      setState(() => _currentPage++);
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOut,
+      );
     }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -87,6 +97,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               children: [
                 Expanded(
                   child: PageView.builder(
+                    controller: _pageController,
                     itemCount: _slides.length,
                     onPageChanged: (int i) =>
                         setState(() => _currentPage = i),

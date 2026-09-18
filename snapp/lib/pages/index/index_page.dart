@@ -95,11 +95,17 @@ class _IndexPageState extends State<IndexPage> {
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
-    final player = context.watch<PlayerService>();
+    // 只订阅首页真正展示的字段：最近播放列表、当前场景 id。播放器其余通知
+    // （音量/静音/睡眠定时每秒 tick）不再整页重建。
+    final recent = context.select<PlayerService, List<RecentItem>>(
+        (PlayerService p) => p.recent);
+    final currentSceneId = context.select<PlayerService, String?>(
+        (PlayerService p) => p.currentScene?.id);
+    final player = context.read<PlayerService>();
     final stats = context.read<StatsService>();
     final banners = buildBanners(
       hour: DateTime.now().hour,
-      recent: player.recent,
+      recent: recent,
       stats: stats,
     );
 
@@ -205,7 +211,7 @@ class _IndexPageState extends State<IndexPage> {
                   if (_gridScenes.isNotEmpty)
                     _SceneGrid(
                       scenes: _gridScenes,
-                      player: player,
+                      currentSceneId: currentSceneId,
                       onTap: _openDetail,
                       onPlay: _playScene,
                     )
@@ -231,13 +237,13 @@ class _IndexPageState extends State<IndexPage> {
 /// 双列网格（Row 成对布局，卡片高度自适应内容，避免 GridView 定高溢出）。
 class _SceneGrid extends StatelessWidget {
   final List<Scene> scenes;
-  final PlayerService player;
+  final String? currentSceneId;
   final void Function(Scene) onTap;
   final void Function(Scene, PlayerService) onPlay;
 
   const _SceneGrid({
     required this.scenes,
-    required this.player,
+    required this.currentSceneId,
     required this.onTap,
     required this.onPlay,
   });
@@ -259,9 +265,9 @@ class _SceneGrid extends StatelessWidget {
                 cover: scenes[i].image,
                 isPreset: scenes[i].isPreset,
                 isGrid: true,
-                active: player.currentScene?.id == scenes[i].id,
+                active: currentSceneId == scenes[i].id,
                 onTap: () => onTap(scenes[i]),
-                onPlay: () => onPlay(scenes[i], player),
+                onPlay: () => onPlay(scenes[i], context.read<PlayerService>()),
               ),
             ),
             const SizedBox(width: 12),
@@ -275,9 +281,10 @@ class _SceneGrid extends StatelessWidget {
                   cover: scenes[i + 1].image,
                   isPreset: scenes[i + 1].isPreset,
                   isGrid: true,
-                  active: player.currentScene?.id == scenes[i + 1].id,
+                  active: currentSceneId == scenes[i + 1].id,
                   onTap: () => onTap(scenes[i + 1]),
-                  onPlay: () => onPlay(scenes[i + 1], player),
+                  onPlay: () =>
+                      onPlay(scenes[i + 1], context.read<PlayerService>()),
                 ),
               )
             else

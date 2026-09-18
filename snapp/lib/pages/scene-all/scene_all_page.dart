@@ -65,7 +65,9 @@ class _SceneAllPageState extends State<SceneAllPage> {
 
   @override
   Widget build(BuildContext context) {
-    final player = context.watch<PlayerService>();
+    // 只订阅当前场景 id；播放器其余通知不再整页重建。
+    final currentSceneId = context.select<PlayerService, String?>(
+        (PlayerService p) => p.currentScene?.id);
     final scenes = _filteredScenes;
     return AppPage(
       bottomBarSpace: true,
@@ -107,7 +109,7 @@ class _SceneAllPageState extends State<SceneAllPage> {
                               cover: scenes[i].image,
                               isPreset: scenes[i].isPreset,
                               isGrid: true,
-                              active: player.currentScene?.id == scenes[i].id,
+                              active: currentSceneId == scenes[i].id,
                               onTap: () => _openDetail(scenes[i]),
                               onPlay: () => _playScene(scenes[i]),
                             ),
@@ -123,8 +125,7 @@ class _SceneAllPageState extends State<SceneAllPage> {
                                 cover: scenes[i + 1].image,
                                 isPreset: scenes[i + 1].isPreset,
                                 isGrid: true,
-                                active:
-                                    player.currentScene?.id == scenes[i + 1].id,
+                                active: currentSceneId == scenes[i + 1].id,
                                 onTap: () => _openDetail(scenes[i + 1]),
                                 onPlay: () => _playScene(scenes[i + 1]),
                               ),

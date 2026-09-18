@@ -32,7 +32,17 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   provider: ^6.1.1
-  shared_preferences: 2.1.1
+  # Harmony 适配的 shared_preferences fork：官方 pub 包没有 ohos 原生实现，
+  # 会抛 MissingPluginException。改用 OpenHarmony fork，由
+  # shared_preferences_ohos 提供 ohos 原生实现，构建 HAP 时自动注入注册表。
+  shared_preferences:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/shared_preferences/shared_preferences
+  shared_preferences_ohos:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/shared_preferences/shared_preferences_ohos
   flutter_svg: 2.0.5
   # OHOS 后台长时任务插件：播放时申请 audioPlayback 长时任务，
   # 退后台持续播放并显示通知栏播放条。
