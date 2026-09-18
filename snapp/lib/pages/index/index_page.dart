@@ -1,15 +1,19 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Banner;
 import 'package:provider/provider.dart';
 
 import '../../app/shell_tabs.dart';
+import '../../data/banner_models.dart';
 import '../../data/scene_models.dart';
 import '../../data/seed_data.dart';
+import '../../services/banner_service.dart';
 import '../../services/player_service.dart';
 import '../../services/scene_service.dart';
+import '../../services/stats_service.dart';
 import '../../theme/theme_extension.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_icon.dart';
 import '../../widgets/app_page.dart';
+import '../../widgets/banner_carousel.dart';
 import '../../widgets/brand_bar.dart';
 import '../../widgets/pressable.dart';
 import '../../widgets/scene_card.dart';
@@ -62,6 +66,19 @@ class _IndexPageState extends State<IndexPage> {
     );
   }
 
+  void _onBannerTap(Banner b, PlayerService player) {
+    if (b.kind == BannerKind.play && b.sceneId != null) {
+      player.applyScene(findScene(b.sceneId!));
+    } else if (b.kind == BannerKind.navigate && b.route != null) {
+      if (b.route == '/scene-detail' && b.sceneId != null) {
+        Navigator.pushNamed(context, b.route!,
+            arguments: <String, dynamic>{'sceneId': b.sceneId!});
+      } else {
+        Navigator.pushNamed(context, b.route!);
+      }
+    }
+  }
+
   void _playScene(Scene scene, PlayerService player) {
     if (player.currentScene?.id == scene.id) {
       player.togglePlay();
@@ -79,6 +96,12 @@ class _IndexPageState extends State<IndexPage> {
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
     final player = context.watch<PlayerService>();
+    final stats = context.read<StatsService>();
+    final banners = buildBanners(
+      hour: DateTime.now().hour,
+      recent: player.recent,
+      stats: stats,
+    );
 
     return AppPage(
       bottomBarSpace: true,
@@ -87,7 +110,13 @@ class _IndexPageState extends State<IndexPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const BrandBar(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            if (banners.isNotEmpty)
+              BannerCarousel(
+                banners: banners,
+                onTapBanner: (Banner b) => _onBannerTap(b, player),
+              ),
+            const SizedBox(height: 4),
 
             // ③ 场景流
             Padding(
