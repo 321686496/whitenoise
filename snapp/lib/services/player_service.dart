@@ -243,6 +243,8 @@ class PlayerService extends ChangeNotifier {
     }
     remainingSeconds = minutes * 60;
     _fading = false;
+    // 清理淡出残留：把每轨引擎音量恢复基准，避免「淡出中改长时长」残留低音量/pop。
+    _restoreTrackVolumes();
     // 淡出持续时长 = min(fadeMinutes, timerMinutes) 分钟（超短定时也整体淡出）。
     final fadeSeconds = (fadeMinutes < minutes ? fadeMinutes : minutes) * 60;
     // 淡出窗口覆盖整个倒计时（如 1 分钟定时 + 1 分钟淡入）→ 立即进入淡出。
@@ -275,6 +277,8 @@ class PlayerService extends ChangeNotifier {
         timerCompleted = true;
         // 淡出后暂停引擎（原实现缺失，避免静默常驻）。
         unawaited(_engine.pause());
+        // 恢复每轨引擎基准音量：下次重新播放从基准发声，而非从 0（静音）开始。
+        _restoreTrackVolumes();
         // 睡眠定时到点停止播放 → 释放长时任务。
         unawaited(BackgroundTask.stop());
       }
@@ -287,6 +291,13 @@ class PlayerService extends ChangeNotifier {
     _fadeBase.clear();
     for (final PlayerTrack t in tracks) {
       _fadeBase[t.id] = t.muted ? 0 : t.volume / 100;
+    }
+  }
+
+  /// 把每轨引擎音量恢复到其原始基准（muted 轨按 0），弃置淡出残留。
+  void _restoreTrackVolumes() {
+    for (final PlayerTrack t in tracks) {
+      unawaited(_engine.setVolume(t.id, t.muted ? 0 : t.volume / 100));
     }
   }
 

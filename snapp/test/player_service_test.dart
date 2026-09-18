@@ -156,18 +156,26 @@ void main() {
       for (final id in ids) {
         expect(engine.volumes[id], isNotNull);
       }
-      async.elapse(const Duration(seconds: 15));
+      async.elapse(const Duration(seconds: 14)); // remaining = 16
       final mid = <double>[for (final id in ids) engine.volumes[id] ?? 0];
-      async.elapse(const Duration(seconds: 15));
+      async.elapse(const Duration(seconds: 15)); // remaining = 1，淡出近归零
       for (var i = 0; i < ids.length; i++) {
         expect(engine.volumes[ids[i]] ?? 0, lessThanOrEqualTo(mid[i])); // 单调不增
         expect(engine.volumes[ids[i]] ?? 0, lessThan(mid[i]));
+        expect(engine.volumes[ids[i]] ?? 0, lessThan(0.02)); // 到点前音量已近归零
       }
-      expect(engine.volumes[ids.first] ?? 0, closeTo(0, 0.001)); // 到点音量 ≈0
+      async.elapse(const Duration(seconds: 1)); // remaining = 0 → 到点
+      // 到点淡出归零后引擎音量恢复基准（50/100），不再从 0（静音）开始。
+      expect(engine.volumes[ids.first] ?? 0, closeTo(0.5, 0.001));
       expect(player.isPlaying, isFalse);
       expect(engine.playing, isFalse); // 已 pause
       expect(player.timerCompleted, isTrue);
       expect(player.fading, isFalse);
+      // 恢复/重新播放：从基准 0.5 发声（修复前为 0 静音）。
+      player.togglePlay();
+      expect(player.isPlaying, isTrue);
+      expect(engine.playing, isTrue);
+      expect(engine.volumes[ids.first] ?? 0, closeTo(0.5, 0.001));
     });
   });
 
