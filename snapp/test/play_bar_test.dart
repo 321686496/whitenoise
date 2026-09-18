@@ -1,5 +1,4 @@
 // PlayBar 显隐、定时面板、播放交互测试。
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:snapp/services/audio_engine.dart';
 import 'package:snapp/services/player_service.dart';
