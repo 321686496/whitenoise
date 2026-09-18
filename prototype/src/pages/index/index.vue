@@ -8,6 +8,9 @@
     <!-- ① 品牌行 -->
     <BrandBar />
 
+    <!-- ⑧ Banners 分发位 -->
+    <BannerCarousel :banners="banners" @action="onBannerAction" />
+
     <!-- ② 主控卡（黄金位） -->
     <NowPlayingCard />
 
@@ -59,14 +62,17 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { onShow, onHide } from '@dcloudio/uni-app'
+import BannerCarousel from '@/components/BannerCarousel.vue'
 import BrandBar from '@/components/BrandBar.vue'
 import NowPlayingCard from '@/components/NowPlayingCard.vue'
 import Segmented from '@/components/Segmented.vue'
 import SceneCard from '@/components/SceneCard.vue'
 import TabBar from '@/components/TabBar.vue'
 import Icon from '@/components/Icon.vue'
-import { player, applyScene, togglePlay } from '@/composables/usePlayer'
+import { player, applyScene, togglePlay, getRecent } from '@/composables/usePlayer'
 import { sceneCategories, getCategoryScenes, findScene } from '@/data/scenes'
+import { buildBanners } from '@/data/banners'
+import type { Banner, BannerAction } from '@/data/banners'
 import type { Scene, SceneCategory } from '@/data/scenes'
 
 /* ③ 场景流 —— 一键播 chip：优先按场景 id 解析，缺失时回退对应分类首条 */
@@ -126,6 +132,29 @@ const playScene = (scene: Scene) => {
 const goSceneFlow = () => {
   player.pendingSceneCategory = activeCat.value
   uni.switchTab({ url: '/pages/scene/scene' })
+}
+
+/* ⑧ Banners 分发位：运营 + 时段精选 + 个性化 + 最近状态 */
+const preference: SceneCategory[] = ['sleep', 'nature'] // 与 getRecommended 偏好一致
+const banners = ref<Banner[]>([])
+
+function refreshBanners() {
+  const hour = new Date().getHours()
+  banners.value = buildBanners({
+    hour,
+    recent: getRecent().map((r) => ({ sceneId: r.sceneId, name: r.name })),
+    preference,
+  })
+}
+onShow(refreshBanners)
+
+function onBannerAction(a: BannerAction) {
+  if (a.kind === 'play') {
+    const s = findScene(a.sceneId)
+    if (s) applyScene(s)
+  } else {
+    uni.navigateTo({ url: a.url })
+  }
 }
 </script>
 
