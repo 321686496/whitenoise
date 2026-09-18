@@ -95,6 +95,12 @@ class PlayerService extends ChangeNotifier {
 
   Timer? _countdownTimer;
 
+  /// 是否处于睡眠倒计时末段「渐隐淡出」阶段（UI 据此做柔和提示）。
+  bool _fading = false;
+
+  /// 每轨淡出起点基准音量（0–1，muted 轨按 0）；取消时据此恢复。
+  final Map<String, double> _fadeBase = <String, double>{};
+
   /// 历史最高同时加载音轨数（成就「混音大师」数据源）。
   int maxTrackCount = 0;
 
@@ -183,6 +189,9 @@ class PlayerService extends ChangeNotifier {
         break;
       }
     }
+    // 原地改了 track 对象，需重建列表实例，否则 context.select((p)=>p.tracks)
+    // 按引用比较不会触发重建，界面读不到新音量。
+    tracks = List<PlayerTrack>.of(tracks);
     notifyListeners();
   }
 
@@ -194,6 +203,8 @@ class PlayerService extends ChangeNotifier {
         break;
       }
     }
+    // 同 setTrackVolume：重建列表实例使 select((p)=>p.tracks) 生效。
+    tracks = List<PlayerTrack>.of(tracks);
     notifyListeners();
   }
 
@@ -220,23 +231,50 @@ class PlayerService extends ChangeNotifier {
     startCountdown(minutes);
   }
 
-  /// 启动睡眠倒计时：每秒递减；到点停止播放并解锁「初次入眠」成就数据源。
+  /// 启动睡眠倒计时：每秒递减；进入最后 fade 段将逐轨音量平滑降到 0，
+  /// 到点暂停停止并解锁「初次入眠」成就数据源。
   void startCountdown(int minutes) {
     _countdownTimer?.cancel();
     if (minutes <= 0) {
       remainingSeconds = 0;
+      _fading = false;
+      _fadeBase.clear();
       return;
     }
     remainingSeconds = minutes * 60;
+    _fading = false;
+    // 淡出持续时长 = min(fadeMinutes, timerMinutes) 分钟（超短定时也整体淡出）。
+    final fadeSeconds = (fadeMinutes < minutes ? fadeMinutes : minutes) * 60;
+    // 淡出窗口覆盖整个倒计时（如 1 分钟定时 + 1 分钟淡入）→ 立即进入淡出。
+    if (fadeSeconds >= remainingSeconds) {
+      _fading = true;
+      _enterFade();
+    }
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       remainingSeconds--;
+      if (fadeSeconds > 0 && remainingSeconds <= fadeSeconds && !_fading) {
+        _fading = true;
+        _enterFade();
+      }
+      if (_fading) {
+        final progress =
+            1 - (remainingSeconds.clamp(0, fadeSeconds) / fadeSeconds);
+        for (final PlayerTrack t in tracks) {
+          final base = _fadeBase[t.id] ?? (t.muted ? 0 : t.volume / 100);
+          unawaited(_engine.setVolume(t.id, base * (1 - progress)));
+        }
+      }
       if (remainingSeconds <= 0) {
         remainingSeconds = 0;
         timerMinutes = 0;
         _countdownTimer?.cancel();
         _countdownTimer = null;
+        _fading = false;
+        _fadeBase.clear();
         isPlaying = false;
         timerCompleted = true;
+        // 淡出后暂停引擎（原实现缺失，避免静默常驻）。
+        unawaited(_engine.pause());
         // 睡眠定时到点停止播放 → 释放长时任务。
         unawaited(BackgroundTask.stop());
       }
@@ -244,11 +282,24 @@ class PlayerService extends ChangeNotifier {
     });
   }
 
-  /// 取消睡眠倒计时并清零剩余秒数。
+  /// 进入淡出段时记录每轨基准音量作为渐变起点。
+  void _enterFade() {
+    _fadeBase.clear();
+    for (final PlayerTrack t in tracks) {
+      _fadeBase[t.id] = t.muted ? 0 : t.volume / 100;
+    }
+  }
+
+  /// 取消睡眠倒计时并清零剩余秒数；恢复淡出前的每轨基准音量。
   void stopCountdown() {
     _countdownTimer?.cancel();
     _countdownTimer = null;
     remainingSeconds = 0;
+    _fading = false;
+    for (final MapEntry<String, double> e in _fadeBase.entries) {
+      unawaited(_engine.setVolume(e.key, e.value));
+    }
+    _fadeBase.clear();
   }
 
   /// 播放锁切换（toast 由调用方展示）。
@@ -267,6 +318,9 @@ class PlayerService extends ChangeNotifier {
     if (timerMinutes > 0) return '$timerMinutes分钟';
     return '';
   }
+
+  /// 当前是否处于淡出段（进入最后 min(fadeMinutes, timerMinutes) 分钟）。
+  bool get fading => _fading;
 
   void setFadeMinutes(int minutes) {
     if (fadeMinutes == minutes) return;

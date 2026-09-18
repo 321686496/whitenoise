@@ -142,4 +142,55 @@ void main() {
     player.toggleLock();
     expect(player.isLocked, isFalse);
   });
+
+  test('sleep timer fades volumes monotonically to 0 then pauses', () {
+    final engine = SimulatedAudioEngine();
+    final player = PlayerService(engine: engine);
+    player.fadeMinutes = 1;
+    player.applyScene(findScene('deep-sleep'));
+    final ids = player.tracks.map((t) => t.id).toList();
+    fakeAsync((FakeAsync async) {
+      player.setTimer(1); // 60s，fadeSeconds = min(1,1)*60 = 60
+      expect(player.fading, isTrue);
+      async.elapse(const Duration(seconds: 30));
+      for (final id in ids) {
+        expect(engine.volumes[id], isNotNull);
+      }
+      async.elapse(const Duration(seconds: 15));
+      final mid = <double>[for (final id in ids) engine.volumes[id] ?? 0];
+      async.elapse(const Duration(seconds: 15));
+      for (var i = 0; i < ids.length; i++) {
+        expect(engine.volumes[ids[i]] ?? 0, lessThanOrEqualTo(mid[i])); // 单调不增
+        expect(engine.volumes[ids[i]] ?? 0, lessThan(mid[i]));
+      }
+      expect(engine.volumes[ids.first] ?? 0, closeTo(0, 0.001)); // 到点音量 ≈0
+      expect(player.isPlaying, isFalse);
+      expect(engine.playing, isFalse); // 已 pause
+      expect(player.timerCompleted, isTrue);
+      expect(player.fading, isFalse);
+    });
+  });
+
+  test('cancel timer restores base volumes and clears fading', () {
+    final engine = SimulatedAudioEngine();
+    final player = PlayerService(engine: engine);
+    player.fadeMinutes = 1;
+    player.applyScene(findScene('deep-sleep'));
+    final id = player.tracks.first.id;
+    fakeAsync((FakeAsync async) {
+      player.setTimer(2); // 120s，fadeSeconds=60
+      async.elapse(const Duration(seconds: 70)); // 进入淡出段 10s
+      expect(player.fading, isTrue);
+      expect(engine.volumes[id] ?? 0, lessThan(0.5)); // 已开始降幅
+      player.setTimer(2); // 重复点击取消
+      expect(player.timerMinutes, 0);
+      expect(player.remainingSeconds, 0);
+      expect(player.fading, isFalse);
+      expect(engine.volumes[id] ?? 0, closeTo(0.5, 0.001)); // 恢复基准 50/100
+      // 继续走时间不再有音量变化（倒计时已取消）
+      async.elapse(const Duration(seconds: 90));
+      expect(engine.volumes[id] ?? 0, closeTo(0.5, 0.001));
+      expect(player.isPlaying, isTrue);
+    });
+  });
 }
