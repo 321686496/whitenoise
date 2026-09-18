@@ -39,11 +39,14 @@ class PlayBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final player = context.watch<PlayerService>();
+    // 顶层只订阅定时面板显隐；播放器其余通知（每秒倒计时等）不连坐重建
+    // 下方 PlayBar 主体。
+    final showTimerPanel = context.select<PlayerService, bool>(
+        (PlayerService p) => p.showTimerPanel);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (player.showTimerPanel) const _TimerPanel(),
+        if (showTimerPanel) const _TimerPanel(),
         const SizedBox(height: 8),
         _PlayBarInner(onSaveTap: onSaveTap),
       ],
@@ -58,7 +61,15 @@ class _PlayBarInner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
-    final player = context.watch<PlayerService>();
+    // 各自只订阅本块真正展示的字段；音量/静音/每秒倒计时不重建 PlayBar 主体。
+    final isPlaying = context.select<PlayerService, bool>(
+        (PlayerService p) => p.isPlaying);
+    final sceneName = context.select<PlayerService, String?>(
+        (PlayerService p) => p.currentScene?.name);
+    final isLocked = context.select<PlayerService, bool>(
+        (PlayerService p) => p.isLocked);
+    final hasTimer = context.select<PlayerService, bool>(
+        (PlayerService p) => p.timerMinutes > 0);
     return AppCard(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: SizedBox(
@@ -96,13 +107,13 @@ class _PlayBarInner extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _PlayBars(playing: player.isPlaying),
+                          _PlayBars(playing: isPlaying),
                           const SizedBox(height: 4),
                           Row(
                             children: [
                               Flexible(
                                 child: Text(
-                                  player.currentScene?.name ?? '未选择场景',
+                                  sceneName ?? '未选择场景',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -113,22 +124,8 @@ class _PlayBarInner extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              if (player.timerMinutes > 0) ...[
-                                const SizedBox(width: 5),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 7, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: c.primarySoft,
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: Text(player.timerLabel,
-                                      style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          color: c.primary)),
-                                ),
-                              ],
+                              // 剩余秒标签独立成 widget，每秒倒计时只重建它。
+                              const _TimerChip(),
                             ],
                           ),
                         ],
@@ -139,26 +136,29 @@ class _PlayBarInner extends StatelessWidget {
               ),
             ),
             _BarAction(
-              active: player.isLocked,
+              active: isLocked,
               icon: AppIcon(
                   name: 'lock',
                   size: 20,
-                  color: player.isLocked ? c.primary : c.text3),
+                  color: isLocked ? c.primary : c.text3),
               onTap: () {
+                final player = context.read<PlayerService>();
                 player.toggleLock();
                 showAppToast(context, player.isLocked ? '已锁定播放' : '已解锁');
               },
             ),
             _BarAction(
-              active: player.showTimerPanel,
+              active: hasTimer,
               icon: AppIcon(
                   name: 'timer',
                   size: 20,
-                  color: player.timerMinutes > 0 ? c.primary : c.text3),
-              onTap: () =>
-                  player.setShowTimerPanel(!player.showTimerPanel),
+                  color: hasTimer ? c.primary : c.text3),
+              onTap: () {
+                final player = context.read<PlayerService>();
+                player.setShowTimerPanel(!player.showTimerPanel);
+              },
             ),
-            _MainPlayButton(),
+            const _MainPlayButton(),
             _BarAction(
               icon: AppIcon(name: 'save', size: 20, color: c.text3),
               onTap: onSaveTap,
@@ -196,13 +196,17 @@ class _BarAction extends StatelessWidget {
 }
 
 class _MainPlayButton extends StatelessWidget {
+  const _MainPlayButton();
+
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
-    final player = context.watch<PlayerService>();
+    // 仅订阅播放态；其余播放器通知不重建此按钮。
+    final isPlaying = context.select<PlayerService, bool>(
+        (PlayerService p) => p.isPlaying);
     return PressableScale(
       onTap: () {
-        if (!player.togglePlay()) {
+        if (!context.read<PlayerService>().togglePlay()) {
           showAppToast(context, '请先选择场景');
         }
       },
@@ -221,9 +225,42 @@ class _MainPlayButton extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: AppIcon(
-            name: player.isPlaying ? 'pause' : 'play',
+            name: isPlaying ? 'pause' : 'play',
             size: 30,
             color: c.onPrimary),
+      ),
+    );
+  }
+}
+
+/// 剩余秒 / 定时标签 chip：独立订阅 `timerLabel`，睡眠定时每秒倒计时时
+/// 仅此 chip 重建，避免连坐整条 PlayBar 主体。标签为空（未启用定时）时隐藏。
+class _TimerChip extends StatelessWidget {
+  const _TimerChip();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Theme.of(context).appColors;
+    final label = context.select<PlayerService, String>(
+        (PlayerService p) => p.timerLabel);
+    final fading = context.select<PlayerService, bool>(
+        (PlayerService p) => p.fading);
+    if (label.isEmpty) return const SizedBox.shrink();
+    return AnimatedContainer(
+      margin: const EdgeInsets.only(left: 5),
+      duration: const Duration(milliseconds: 400),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: fading ? c.surface2 : c.primarySoft,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: AnimatedDefaultTextStyle(
+        duration: const Duration(milliseconds: 400),
+        style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: fading ? c.text2 : c.primary),
+        child: Text(fading ? '$label · 入眠中' : label),
       ),
     );
   }
@@ -276,30 +313,32 @@ class _PlayBarsState extends State<_PlayBars> with SingleTickerProviderStateMixi
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
-    return SizedBox(
-      height: 12,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: List<Widget>.generate(_heights.length, (int i) {
-          return AnimatedBuilder(
-            animation: _ctrl,
-            builder: (BuildContext context, _) {
-              final t = widget.playing
-                  ? 0.5 + 0.5 * _wave(_ctrl.value * 2 + i * 0.2)
-                  : 1.0;
-              return Container(
-                width: 2.5,
-                height: (_heights[i] * (widget.playing ? t : 1)).clamp(2.0, 12.0),
-                margin: const EdgeInsets.only(right: 2.5),
-                decoration: BoxDecoration(
-                  color: widget.playing ? c.primary : c.text3,
-                  borderRadius: BorderRadius.circular(1.5),
-                ),
-              );
-            },
-          );
-        }),
+    return RepaintBoundary(
+      child: SizedBox(
+        height: 12,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: List<Widget>.generate(_heights.length, (int i) {
+            return AnimatedBuilder(
+              animation: _ctrl,
+              builder: (BuildContext context, _) {
+                final t = widget.playing
+                    ? 0.5 + 0.5 * _wave(_ctrl.value * 2 + i * 0.2)
+                    : 1.0;
+                return Container(
+                  width: 2.5,
+                  height: (_heights[i] * (widget.playing ? t : 1)).clamp(2.0, 12.0),
+                  margin: const EdgeInsets.only(right: 2.5),
+                  decoration: BoxDecoration(
+                    color: widget.playing ? c.primary : c.text3,
+                    borderRadius: BorderRadius.circular(1.5),
+                  ),
+                );
+              },
+            );
+          }),
+        ),
       ),
     );
   }
@@ -320,7 +359,11 @@ class _TimerPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
-    final player = context.watch<PlayerService>();
+    // 只订阅定时分钟 / 渐弱分钟；其余通知不重建面板。
+    final timerMinutes = context.select<PlayerService, int>(
+        (PlayerService p) => p.timerMinutes);
+    final fadeMinutes = context.select<PlayerService, int>(
+        (PlayerService p) => p.fadeMinutes);
     return _PanelCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -329,10 +372,10 @@ class _TimerPanel extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: _options.map((int m) {
-              final on = player.timerMinutes == m;
+              final on = timerMinutes == m;
               return Expanded(
                 child: GestureDetector(
-                  onTap: () => player.setTimer(m),
+                  onTap: () => context.read<PlayerService>().setTimer(m),
                   child: Container(
                     height: 44,
                     margin: EdgeInsets.only(
@@ -361,10 +404,11 @@ class _TimerPanel extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: _fades.map((int f) {
-                    final on = player.fadeMinutes == f;
+                    final on = fadeMinutes == f;
                     return Expanded(
                       child: GestureDetector(
-                        onTap: () => player.setFadeMinutes(f),
+                        onTap: () =>
+                            context.read<PlayerService>().setFadeMinutes(f),
                         child: Container(
                           height: 32,
                           margin: EdgeInsets.only(
@@ -403,7 +447,6 @@ class _PanelHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).appColors;
-    final player = context.watch<PlayerService>();
     return Row(
       children: [
         Expanded(
@@ -413,6 +456,7 @@ class _PanelHeader extends StatelessWidget {
         ),
         GestureDetector(
           onTap: () {
+            final player = context.read<PlayerService>();
             player.setShowTimerPanel(false);
             player.setShowMixPanel(false);
           },
