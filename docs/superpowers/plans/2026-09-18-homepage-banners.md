@@ -521,6 +521,7 @@ List<Banner> buildBanners({
       gradient: personal.gradient,
       kind: BannerKind.navigate,
       route: '/scene-detail',
+      sceneId: personal.id, // navigate 目标为 /scene-detail 时须携带 sceneId 参数
     ));
   }
 
@@ -767,8 +768,13 @@ void _onBannerTap(Banner b) {
     final s = findScene(b.sceneId!);
     player.applyScene(s);
   } else if (b.kind == BannerKind.navigate && b.route != null) {
-    // /scene-detail 走命名路由；其余短路由直接 pushNamed
-    navigatorKey_push(b.route!);
+    // /scene-detail 须携带 sceneId 参数；其余短路由直接 pushNamed
+    if (b.route == '/scene-detail' && b.sceneId != null) {
+      Navigator.pushNamed(context, b.route!,
+          arguments: <String, dynamic>{'sceneId': b.sceneId!});
+    } else {
+      navigatorKey_push(b.route!);
+    }
   }
 }
 ```
