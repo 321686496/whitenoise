@@ -120,3 +120,45 @@
 - 本设计文档写入 `docs/superpowers/specs/` 并提交 git。
 - AGENT.md 第八章「关键文档索引」需补录本设计文档。
 - 实施计划文档（writing-plans）引用本设计文档。
+
+---
+
+## 10. Phase 3 审计结论（Task 12）
+
+> 审计对象：`snapp/lib/services/*.dart`（`media_bridge.dart` 为本优化并行、仅只读观察，不在本审计范围）。审计日期 2026-09-19。
+
+### 10.1 Service 面积 / 职责一览
+
+| Service | 文件 | 行数 | 职责 | 接口/实现 | 注入方式 | 结论 |
+|---|---|---|---|---|---|---|
+| `AudioEngine` | audio_engine.dart | 169 | 抽象引擎接口 + `SimulatedAudioEngine` / `JustAudioEngine` 两实现 | ✅ 明确抽象接口分离 | 构造注入（PlayerService） | 优 |
+| `AppStorage` | app_storage.dart | ~90 | 本地存储统一静态入口（`shengqi-*`） | static，无状态 | N/A | 良 |
+| `PlayerService` | player_service.dart | ~400 | 播放/混音/定时/最近记录状态机（含 `PlayerTrack`、`RecentItem` 模型） | ChangeNotifier | stats/engine 构造注入 | 良（文件偏大） |
+| `StatsService` | stats_service.dart | ~175 | 播放统计 / 排行 / 活跃天数，时钟可注入 | ChangeNotifier | 时钟构造注入 | 良 |
+| `FavoritesService` | favorites_service.dart | ~40 | 收藏 ID 集合持久化 | ChangeNotifier | N/A | 良 |
+| `CheckinService` | checkin_service.dart | ~75 | 签到集合 / 连续天数，时钟可注入 | ChangeNotifier | 时钟构造注入 | 良 |
+| `CustomSceneService` | custom_scene_service.dart | ~70 | 自定义场景 CRUD | ChangeNotifier | N/A | 良 |
+| `AchievementService` | achievement_service.dart | ~190 | 8 项成就评估，订阅 5 数据源 | ChangeNotifier | 5 依赖全构造注入 | 优 |
+| `SceneService` | scene_service.dart | ~130 | 场景/配方/推荐纯函数 | 顶层函数 + 模型 | N/A | 优 |
+| `BannerService` | banner_service.dart | ~100 | 首页 banner 组装（纯函数，注入 stats/recent） | 顶层函数 | 参数注入 | 优 |
+
+### 10.2 审计结论
+
+1. **接口与实现分离**：达标。`AudioEngine` 抽象 + 双实现清晰；`SceneService`/`BannerService` 为纯函数式服务，`StatsService`/`CheckinService` 支持时钟注入，均符合 AGENTS.md `services/` 目标形态。
+2. **Service 间直接引用 / Store-to-Store**：无违规。审计确认没有任何 service 直接 `new` 另一 service——全部依赖经构造函数/参数注入装配（`AchievementService` 5 个依赖、`PlayerService` stats/engine、`BannerService` stats/recent 均为注入）。装配点集中在 `main.dart`（该文件属并行改动，未触碰）。
+3. **`dynamic` 滥用**：存在一处根因——`AppStorage.readJsonList` 返回 `List<dynamic>?`，迫使 `PlayerService / FavoritesService / CheckinService / CustomSceneService / AchievementService` 5 处 `load()` 各自重复 `.whereType<Map<dynamic,dynamic>>().map(...cast<String,dynamic>...)`；`StatsService.load` 另有两处 `(dynamic k, dynamic v)`。均已修正（见 10.3）。
+4. **单文件过大**：`PlayerService`（~400 行）最大，同时承载 `PlayerTrack`/`RecentItem` 模型与播放状态机；当前可独立理解、可读性尚可，**需在后续版本化拆分，本次不强行重构以免破坏 API**。
+
+### 10.3 修正项清单（Task 12）
+
+| # | 文件:行号 | 原因 | 性质 |
+|---|---|---|---|
+| A | `app_storage.dart`（新增 `readJsonListOfMaps`，lines 56-69） | 在「反序列化边界」层强类型化，消除各 service 重复的 `dynamic` 模式 | 强类型化（根因） |
+| A | `player_service.dart` `loadRecent`（120-125） | 消除 `.whereType<Map<dynamic,dynamic>>().map(...cast...)` | 强类型化 |
+| A | `favorites_service.dart` `load`（13-21） | 同上 | 强类型化 |
+| A | `checkin_service.dart` `load`（36-45） | 同上 | 强类型化 |
+| A | `custom_scene_service.dart` `load`（17-26） | 同上 | 强类型化 |
+| A | `achievement_service.dart` `load`（111-125） | 同上；迭代体改为强类型 `Map<String,dynamic>` | 强类型化 |
+| B | `stats_service.dart` `load`（129-142） | 消除两处 `(dynamic k, dynamic v)`，改 `cast<String,num>()` 强类型迭代 | 强类型化 |
+
+> 全部修正为行为等价的机械重构，未改变任何既有公开 API 签名与调用方；`readJsonList` 保留（仍为 `theme_notifier` 等使用），未破坏调用。
