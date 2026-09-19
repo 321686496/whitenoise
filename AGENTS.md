@@ -201,6 +201,7 @@ snapp/lib/
 3. **权限声明**：相机、相册等权限需在 `ohos/entry/src/main/module.json5` 中声明，与 `android/app/src/main/AndroidManifest.xml`、`ios/Runner/Info.plist` 保持一致。
 4. **构建命令**：Harmony 平台构建使用 `flutter build hap`（HAP 包）或 `flutter build app`（APP 包），开发调试使用 `flutter run -d <harmony-device>`。
 5. **ArkTS/ArkUI**：涉及 `ohos/` 内 `.ets`（ArkTS / ArkUI）代码时，以华为官方开发文档（https://developer.huawei.com/consumer/cn/doc/ ）为准，**禁止凭记忆臆造 API**。
+6. **媒体播控（media_controller 插件）**：OHOS 通知栏播放条（AVSession）与桌面音乐卡片（Form Kit 卡片，`EntryFormAbility` + `widget/pages/MusicWidget2x2/2x4`）由本地插件 `plugins/media_controller` 承载：应用级唯一 AVSession + RDB（`shengqi_media.db`）跨进程共享状态，channel `com.snapp.media`；Flutter 侧经 `lib/services/media_bridge.dart` 桥接 `PlayerService`。**EntryAbility 禁止向 AppStorage 覆盖 `'context'` 键**：just_audio_ohos 会据该键为每条音轨各建一个 AVSession（元数据恒「未知」且 dispose 不销毁），与应用级 session 冲突。
 
 ### 5.6 AI Agent Flutter 任务自检
 
@@ -216,7 +217,9 @@ snapp/lib/
 
 ### 5.7 已知待办
 
-- **Harmony 三平台构建验证**：Flutter 全功能实现（T1-T9）已完成，`flutter analyze` 零错误、`flutter test` 62 项全绿；iOS / Android / HarmonyOS 三平台构建验证需本地 OH SDK，列为后续待办（`flutter build hap`）。just_audio 0.9.37 已通过三方库适配清单校验（OpenHarmony `fluttertpc_just_audio`），音频在 Harmony 端走原生适配。
+- **Harmony 三平台构建验证**：Flutter 全功能实现（T1-T9）已完成，`flutter analyze` 零错误、`flutter test` 96 项全绿；OHOS 端 `flutter build hap` 构建验证（见下），iOS / Android 构建验证列为后续待办。just_audio 0.9.37 已通过三方库适配清单校验（OpenHarmony `fluttertpc_just_audio`），音频在 Harmony 端走原生适配。
+- **OHOS 媒体播控（2026-09-19 已实现，待真机验证）**：通知栏播放条（AVSession 应用级唯一会话）与桌面音乐卡片（Form Kit：`EntryFormAbility` + 2x2/2x4 卡片，播控走 `postCardAction call` → `EntryAbility.callee`）已随 HAP 构建落地；需真机验证通知栏元数据/播控按钮、卡片添加与状态刷新、冷启动卡片播控恢复。
+- **integration_test 跨盘约束**：SDK 在 D 盘而项目在 E 盘时，`flutter build hap` 会把 SDK 内 `integration_test/ohos`（D 盘）注入 `ohos/oh-package.json5` overrides，触发 ohpm `00618008 Cross Driver Error`。已 vendor 到仓库根 `vendor/integration_test` 并在 `snapp/pubspec.yaml` `dependency_overrides` 指向同盘 path 解决；**Harmony SDK 升级后须同步更新 vendor 拷贝**。
 
 ---
 
