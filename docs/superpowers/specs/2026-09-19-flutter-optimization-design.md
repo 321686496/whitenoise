@@ -162,3 +162,35 @@
 | B | `stats_service.dart` `load`（129-142） | 消除两处 `(dynamic k, dynamic v)`，改 `cast<String,num>()` 强类型迭代 | 强类型化 |
 
 > 全部修正为行为等价的机械重构，未改变任何既有公开 API 签名与调用方；`readJsonList` 保留（仍为 `theme_notifier` 等使用），未破坏调用。
+
+---
+
+## 11. Phase 4 Widget Preview 审计结论（Task 13）
+
+> 审计日期 2026-09-19。对象：`snapp/lib/widgets/{scene_card,sound_card,play_bar}.dart`。
+> 本 Phase 因 SDK 硬件约束收口为「审计 + 记录性交付」，不落地任何 `@Preview` 代码。
+
+### 11.1 为何暂缓（SDK 能力复核）
+
+- 当前 PATH 为 Harmony SDK `flutter 3.7.12-ohos-1.1.3`（Dart 2.19.6，`D:\flutter\flutter_harmony\flutter_flutter`）。
+- 已核对框架库 `packages/flutter/lib/src/widgets/` **不含 `widget_previews.dart`**（源码 glob 未命中）。
+- Widget Previewer（`@Preview` + `package:flutter/widget_previews.dart`）为 Flutter 3.38+ 内置能力；当前 SDK 无法解析该 import，写入即导致 `flutter analyze` error，破坏 Phase 验收。
+- 结论：**暂缓落地**，待升级到 Flutter 3.38+ 的 Harmony 适配分支后再启用。此决策不阻塞其余 Phase / Task 14。
+
+### 11.2 三组件 props 可预览性审查（只读）
+
+| 组件 | 构造 props | 原生依赖 | 是否需要 Provider 包裹 | 可预览性结论 |
+|---|---|---|---|---|
+| `SceneCard` | `name/soundCount/soundIcons/bgColor/cover/isPreset/isGrid/active/soundLabel/bottomMargin` + `onTap/onPlay/onShare` | 无；`Image.asset(sceneImageAsset(cover))` 带 `errorBuilder` 回退渐变 | 否 | ✅ 全字面量可独立构造，升级后可直加 `@Preview` |
+| `SoundCard` | `name/type/iconName/color/isActive` + `onTap` | 无（纯 `AppCard` + `AppIcon`/`Text`） | 否 | ✅ 全字面量可独立构造，升级后可直加 `@Preview` |
+| `PlayBar` | `onSaveTap`（外层仅透传） | 无 | **是**：`_PlayBarInner`/`_TimerPanel`/`_MainPlayButton`/`_TimerChip` 内部大量用 `context.select/read<PlayerService>` 订阅播放态/定时面板 | ⚠️ 需在 Preview 外层包 `ChangeNotifierProvider<PlayerService>`（预置一个 mock 状态实例），否则渲染期抛 `ProviderNotFoundException` |
+
+### 11.3 升级 Flutter 3.38+ 后落地要点（按 `flutter-add-widget-preview`）
+
+1. **工具入口**：先调用 `flutter-add-widget-preview` skill，按其配置 `previews` 基础设施（`snapp/tool/previews/` 与 `@Preview` 脚手架）。
+2. **SceneCard**：在 `scene_card.dart` 文件尾新增 `@Preview("SceneCard · grid")` / `@Preview("SceneCard · row")` 两个示例函数，填入 `name:'雨夜小屋'`、`soundCount:3`、`soundIcons:['rain','thunder']`、`bgColor`（Morandi 渐变字符串）、`isGrid:true/false`、`active:false`、`onTap/onPlay:(){}` 等字面量即可渲染。⚠️ 预览需包裹主题 `MaterialApp`（`ThemeExtension` 读取 `Theme.of(context).appColors`），缺主题装饰器会空渲染。
+3. **SoundCard**：文件尾新增一个 `@Preview`,填 `name/type/iconName/color` 字面量、`isActive:false`、`onTap:(){}`；同样需主题包裹。
+4. **PlayBar**：文件尾新增 `@Preview`；因内部依赖 Provider，示例函数须先用 `ChangeNotifierProvider<PlayerService>.value(value: PlayerService(...))` 包裹 `PlayBar`，或加隔离的视图模型桩；否则 `context.select<PlayerService,...>` 立即抛 `ProviderNotFoundException`。此为本组件与其他两者的关键差异。
+5. **验收**：`flutter analyze` 0 error/0 warning；`flutter test` 全绿；`flutter run` 打开 `previews` 面板目视三组件正常渲染。
+
+> 本阶段**未向 `snapp/lib` 写入任何 `@Preview`/`widget_previews.dart` import**，保证 analyze 保持 0 err / 0 warn（仅追加本设计文档）。
